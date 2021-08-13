@@ -72,13 +72,13 @@ func (pm *Manager) Reload(cfg Config) error {
 // SetActive sets a new active pool manager element.
 func (pm *Manager) SetActive(element *list.Element) {
 	if previous := pm.Active(); previous != nil {
-		previous.Pool().Status = resources.ReadOnlyPool
+		previous.Pool().SetStatus(resources.ReadOnlyPool)
 	}
 
 	pm.fsManagerList.MoveToFront(element)
 
 	if active := pm.Active(); active != nil {
-		active.Pool().Status = resources.ActivePool
+		active.Pool().SetStatus(resources.ActivePool)
 	}
 }
 
@@ -232,8 +232,8 @@ func (pm *Manager) examineEntries(entries []os.FileInfo) (map[string]FSManager, 
 			DataSubDir:     pm.cfg.DataSubDir,
 			SocketSubDir:   pm.cfg.SocketSubDir,
 			ObserverSubDir: pm.cfg.ObserverSubDir,
-			Status:         resources.ReadOnlyPool,
 		}
+		pool.SetStatus(resources.ReadOnlyPool)
 
 		log.Dbg("Data ", pool)
 
@@ -262,10 +262,10 @@ func (pm *Manager) examineEntries(entries []os.FileInfo) (map[string]FSManager, 
 		front := poolList.Front()
 		if front == nil || front.Value == nil || fsManagers[front.Value.(string)].Pool().DSA.Before(pool.DSA) {
 			if front != nil && front.Value != nil {
-				fsManagers[front.Value.(string)].Pool().Status = resources.ReadOnlyPool
+				fsManagers[front.Value.(string)].Pool().SetStatus(resources.ReadOnlyPool)
 			}
 
-			fsm.Pool().Status = resources.ActivePool
+			fsm.Pool().SetStatus(resources.ActivePool)
 			poolList.PushFront(fsm.Pool().Name)
 			continue
 		}

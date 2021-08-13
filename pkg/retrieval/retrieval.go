@@ -15,6 +15,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
+
 	dblabCfg "gitlab.com/postgres-ai/database-lab/v2/pkg/config"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/config/global"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
@@ -107,11 +108,11 @@ func (r *Retrieval) run(ctx context.Context, fsm pool.FSManager) (err error) {
 		return errors.Wrap(errors.Unwrap(err), "filesystem manager is not ready")
 	}
 
-	fsm.Pool().Status = resources.RefreshingPool
+	fsm.Pool().SetStatus(resources.RefreshingPool)
 
 	defer func() {
 		if err != nil {
-			fsm.Pool().Status = resources.ReadOnlyPool
+			fsm.Pool().SetStatus(resources.ReadOnlyPool)
 		}
 	}()
 
@@ -121,7 +122,7 @@ func (r *Retrieval) run(ctx context.Context, fsm pool.FSManager) (err error) {
 		}
 	}
 
-	fsm.Pool().Status = resources.ActivePool
+	fsm.Pool().SetStatus(resources.ActivePool)
 
 	return nil
 }

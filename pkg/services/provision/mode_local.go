@@ -19,6 +19,7 @@ import (
 
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
+
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/models"
 
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
@@ -339,7 +340,7 @@ func buildPoolEntry(fsm pool.FSManager) (models.PoolEntry, error) {
 		DataStateAt: dataStateAt,
 		CloneList:   listClones,
 		Disk:        disk,
-		Status:      fsm.Pool().Status,
+		Status:      fsm.Pool().Status(),
 	}
 
 	return poolEntry, nil

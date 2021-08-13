@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/models"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/resources"
 )
@@ -109,17 +110,18 @@ func (m mockFSManager) Pool() *resources.Pool {
 func TestBuildPoolEntry(t *testing.T) {
 	testCases := []struct {
 		pool          *resources.Pool
+		poolStatus    resources.PoolStatus
 		cloneList     []string
 		expectedEntry models.PoolEntry
 	}{
 		{
 			pool: &resources.Pool{
-				Name:   "TestPool",
-				Mode:   "zfs",
-				DSA:    time.Date(2021, 8, 1, 0, 0, 0, 0, time.UTC),
-				Status: resources.ActivePool,
+				Name: "TestPool",
+				Mode: "zfs",
+				DSA:  time.Date(2021, 8, 1, 0, 0, 0, 0, time.UTC),
 			},
-			cloneList: []string{"test_clone_0001", "test_clone_0002"},
+			poolStatus: resources.ActivePool,
+			cloneList:  []string{"test_clone_0001", "test_clone_0002"},
 			expectedEntry: models.PoolEntry{
 				Name:        "TestPool",
 				Mode:        "zfs",
@@ -130,11 +132,11 @@ func TestBuildPoolEntry(t *testing.T) {
 		},
 		{
 			pool: &resources.Pool{
-				Name:   "TestPoolWithoutDSA",
-				Mode:   "zfs",
-				Status: resources.ReadOnlyPool,
+				Name: "TestPoolWithoutDSA",
+				Mode: "zfs",
 			},
-			cloneList: []string{},
+			poolStatus: resources.ReadOnlyPool,
+			cloneList:  []string{},
 			expectedEntry: models.PoolEntry{
 				Name:        "TestPoolWithoutDSA",
 				Mode:        "zfs",
@@ -146,8 +148,11 @@ func TestBuildPoolEntry(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		pool := tc.pool
+		pool.SetStatus(tc.poolStatus)
+
 		testFSManager := mockFSManager{
-			pool:      tc.pool,
+			pool:      pool,
 			cloneList: tc.cloneList,
 		}
 
