@@ -137,6 +137,9 @@ func (c *baseCloning) decrementCloneNumber(snapshotID string) {
 }
 
 func (c *baseCloning) getSnapshotList() []models.Snapshot {
+	c.snapshotBox.snapshotMutex.RLock()
+	defer c.snapshotBox.snapshotMutex.RUnlock()
+
 	snapshots := make([]models.Snapshot, 0, len(c.snapshotBox.items))
 
 	if len(snapshots) == 0 {
