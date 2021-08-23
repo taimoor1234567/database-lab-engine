@@ -20,8 +20,8 @@ const (
 	ActivePool PoolStatus = "active"
 	// RefreshingPool defines the status of a pool when data retrieval in progress.
 	RefreshingPool PoolStatus = "refreshing"
-	// ReadOnlyPool defines the status of an inactive pool.
-	ReadOnlyPool PoolStatus = "read_only"
+	// EmptyPool defines the status of an inactive pool.
+	EmptyPool PoolStatus = "empty"
 )
 
 // Pool describes a storage pool.
@@ -41,7 +41,7 @@ type Pool struct {
 
 // NewPool creates a new Pool.
 func NewPool(name string) *Pool {
-	return &Pool{Name: name, status: ReadOnlyPool}
+	return &Pool{Name: name, status: EmptyPool}
 }
 
 // IsEmpty checks if Pool is empty.

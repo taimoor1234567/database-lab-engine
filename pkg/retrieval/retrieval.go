@@ -112,7 +112,7 @@ func (r *Retrieval) run(ctx context.Context, fsm pool.FSManager) (err error) {
 
 	defer func() {
 		if err != nil {
-			fsm.Pool().SetStatus(resources.ReadOnlyPool)
+			fsm.Pool().SetStatus(resources.EmptyPool)
 		}
 	}()
 
@@ -121,6 +121,8 @@ func (r *Retrieval) run(ctx context.Context, fsm pool.FSManager) (err error) {
 			return err
 		}
 	}
+
+	// TODO: move pool to front.
 
 	fsm.Pool().SetStatus(resources.ActivePool)
 
