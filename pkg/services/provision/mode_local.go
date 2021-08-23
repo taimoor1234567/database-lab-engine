@@ -160,7 +160,7 @@ func (p *Provisioner) StartSession(snapshotID string, user resources.EphemeralUs
 	}
 
 	name := util.GetCloneName(port)
-	fsm := p.pm.Active()
+	fsm := p.pm.First()
 
 	log.Dbg(fmt.Sprintf(`Starting session for port: %d.`, port))
 
@@ -284,12 +284,12 @@ func (p *Provisioner) ResetSession(session *resources.Session, snapshotID string
 
 // GetSnapshots provides a snapshot list.
 func (p *Provisioner) GetSnapshots() ([]resources.Snapshot, error) {
-	return p.pm.Active().GetSnapshots()
+	return p.pm.First().GetSnapshots()
 }
 
 // GetDiskState describes the state of the managed disk.
 func (p *Provisioner) GetDiskState() (*resources.Disk, error) {
-	return p.pm.Active().GetDiskState()
+	return p.pm.First().GetDiskState()
 }
 
 // GetSessionState describes the state of the session.
@@ -357,11 +357,11 @@ func buildPoolEntry(fsm pool.FSManager) (models.PoolEntry, error) {
 func (p *Provisioner) revertSession(name string) {
 	log.Dbg(`Reverting start of a session...`)
 
-	if runnerErr := postgres.Stop(p.runner, p.pm.Active().Pool(), name); runnerErr != nil {
+	if runnerErr := postgres.Stop(p.runner, p.pm.First().Pool(), name); runnerErr != nil {
 		log.Err(`Revert:`, runnerErr)
 	}
 
-	if runnerErr := p.pm.Active().DestroyClone(name); runnerErr != nil {
+	if runnerErr := p.pm.First().DestroyClone(name); runnerErr != nil {
 		log.Err(`Revert:`, runnerErr)
 	}
 }

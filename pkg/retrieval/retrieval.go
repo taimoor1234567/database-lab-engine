@@ -82,7 +82,7 @@ func (r *Retrieval) Run(ctx context.Context) error {
 	runCtx, cancel := context.WithCancel(ctx)
 	r.ctxCancel = cancel
 
-	if err := r.run(runCtx, r.poolManager.Active()); err != nil {
+	if err := r.run(runCtx, r.poolManager.First()); err != nil {
 		return err
 	}
 
@@ -108,6 +108,11 @@ func (r *Retrieval) run(ctx context.Context, fsm pool.FSManager) (err error) {
 		return errors.Wrap(errors.Unwrap(err), "filesystem manager is not ready")
 	}
 
+	poolByName := r.poolManager.GetPoolByName(fsm.Pool().Name)
+	if poolByName == nil {
+		return errors.Errorf("pool %s not found", fsm.Pool().Name)
+	}
+
 	fsm.Pool().SetStatus(resources.RefreshingPool)
 
 	defer func() {
@@ -122,9 +127,7 @@ func (r *Retrieval) run(ctx context.Context, fsm pool.FSManager) (err error) {
 		}
 	}
 
-	// TODO: move pool to front.
-
-	fsm.Pool().SetStatus(resources.ActivePool)
+	r.poolManager.MakeActive(poolByName)
 
 	return nil
 }
@@ -291,7 +294,7 @@ func (r *Retrieval) fullRefresh(ctx context.Context) error {
 		return err
 	}
 
-	r.poolManager.SetActive(elementToUpdate)
+	r.poolManager.MakeActive(elementToUpdate)
 
 	return nil
 }

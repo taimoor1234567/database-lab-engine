@@ -308,7 +308,7 @@ func (s *Server) startObservation(w http.ResponseWriter, r *http.Request) {
 
 	clone.DB.Username = s.Global.Database.User()
 
-	db, err := observer.InitConnection(clone, s.pm.Active().Pool().SocketDir())
+	db, err := observer.InitConnection(clone, s.pm.First().Pool().SocketDir())
 	if err != nil {
 		api.SendError(w, r, errors.Wrap(err, "cannot connect to database"))
 		return

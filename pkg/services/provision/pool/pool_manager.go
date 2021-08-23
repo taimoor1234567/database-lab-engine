@@ -70,17 +70,17 @@ func (pm *Manager) Reload(cfg Config) error {
 	return pm.ReloadPools()
 }
 
-// SetActive sets a new active pool manager element.
-func (pm *Manager) SetActive(element *list.Element) {
+// MakeActive marks element as active pool and moves it to the head of the pool list.
+func (pm *Manager) MakeActive(element *list.Element) {
 	pm.fsManagerList.MoveToFront(element)
 
-	if active := pm.Active(); active != nil {
-		active.Pool().SetStatus(resources.ActivePool)
+	if first := pm.First(); first != nil {
+		first.Pool().SetStatus(resources.ActivePool)
 	}
 }
 
-// Active returns the active storage pool manager.
-func (pm *Manager) Active() FSManager {
+// First returns the first active storage pool manager.
+func (pm *Manager) First() FSManager {
 	active := pm.fsManagerList.Front()
 
 	if active == nil || active.Value == nil {
@@ -98,7 +98,23 @@ func (pm *Manager) getFSManager(pool string) FSManager {
 	return fsm
 }
 
-// GetPoolToUpdate returns the element to update.
+// GetPoolByName returns element by pool name.
+func (pm *Manager) GetPoolByName(poolName string) *list.Element {
+	for element := pm.fsManagerList.Front(); element != nil; element = element.Next() {
+		if element.Value == nil {
+			return nil
+		}
+
+		// The active pool cannot be updated as it leads to downtime.
+		if element.Value.(string) == poolName {
+			return element
+		}
+	}
+
+	return nil
+}
+
+// GetPoolToUpdate returns element to update.
 func (pm *Manager) GetPoolToUpdate() *list.Element {
 	for element := pm.fsManagerList.Back(); element != nil; element = element.Prev() {
 		if element.Value == nil {
@@ -192,7 +208,7 @@ func (pm *Manager) ReloadPools() error {
 	pm.mu.Unlock()
 
 	log.Msg("Available storage pools: ", pm.describeAvailablePools())
-	log.Msg("Active pool: ", pm.Active().Pool().Name)
+	log.Msg("Active pool: ", pm.First().Pool().Name)
 
 	return nil
 }

@@ -203,7 +203,7 @@ func (o *Observer) maskLogs(entry []string, maskedFieldIndexes []int) {
 func (o *Observer) AddObservingClone(cloneID string, port uint, session *ObservingClone) {
 	o.sessionMu.Lock()
 	defer o.sessionMu.Unlock()
-	session.pool = o.pm.Active().Pool()
+	session.pool = o.pm.First().Pool()
 	session.cloneID = cloneID
 	session.port = port
 
