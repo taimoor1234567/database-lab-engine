@@ -5,6 +5,8 @@
 package models
 
 import (
+	"time"
+
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/resources"
 )
 
@@ -18,6 +20,7 @@ type InstanceStatus struct {
 	NumClones           uint64      `json:"numClones"`
 	Clones              []*Clone    `json:"clones"`
 	Pools               []PoolEntry `json:"pools"`
+	Refresh             Refresh     `json:"refresh"`
 }
 
 // PoolEntry represents a pool entry.
@@ -33,4 +36,10 @@ type PoolEntry struct {
 // Health represents a response for heath-check requests.
 type Health struct {
 	Version string `json:"engine_version"`
+}
+
+// Refresh represents state of refreshing subsystem.
+type Refresh struct {
+	Status string     `json:"status"`
+	Next   *time.Time `json:"next"`
 }

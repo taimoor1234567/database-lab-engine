@@ -19,13 +19,13 @@ import (
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/platform"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/pool"
-	"gitlab.com/postgres-ai/database-lab/v2/pkg/srv"
+	srvCfg "gitlab.com/postgres-ai/database-lab/v2/pkg/srv/config"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/util"
 )
 
 // Config contains a common database-lab configuration.
 type Config struct {
-	Server      srv.Config       `yaml:"server"`
+	Server      srvCfg.Config    `yaml:"server"`
 	Provision   provision.Config `yaml:"provision"`
 	Cloning     cloning.Config   `yaml:"cloning"`
 	Platform    platform.Config  `yaml:"platform"`

@@ -175,12 +175,12 @@ func main() {
 		return
 	}
 
-	obs := observer.NewObserver(dockerCLI, &cfg.Observer, platformSvc.Client, pm)
+	obs := observer.NewObserver(dockerCLI, &cfg.Observer, pm)
 	est := estimator.NewEstimator(&cfg.Estimator)
 
 	go removeObservingClones(obsCh, obs)
 
-	server := srv.NewServer(&cfg.Server, &cfg.Global, obs, cloningSvc, platformSvc, dockerCLI, est, pm)
+	server := srv.NewServer(&cfg.Server, &cfg.Global, cloningSvc, retrievalSvc, platformSvc, dockerCLI, obs, est, pm)
 
 	reloadCh := setReloadListener()
 

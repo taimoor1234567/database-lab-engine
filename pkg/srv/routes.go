@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/AlekSi/pointer"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/jackc/pgtype/pgxtype"
@@ -31,6 +32,16 @@ func (s *Server) getInstanceStatus(w http.ResponseWriter, r *http.Request) {
 		api.SendError(w, r, err)
 		return
 	}
+
+	refresh := models.Refresh{
+		Status: s.Retrieval.State.Status,
+	}
+
+	if s.Retrieval.Scheduler.Spec != nil {
+		refresh.Next = pointer.ToTimeOrNil(s.Retrieval.Scheduler.Spec.Next(time.Now()))
+	}
+
+	status.Refresh = refresh
 
 	if err = api.WriteJSON(w, http.StatusOK, status); err != nil {
 		api.SendError(w, r, err)

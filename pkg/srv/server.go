@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"github.com/docker/docker/client"
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 
@@ -18,30 +19,24 @@ import (
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/estimator"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/observer"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/cloning"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/platform"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/pool"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/validator"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/srv/api"
+	srvCfg "gitlab.com/postgres-ai/database-lab/v2/pkg/srv/config"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/srv/mw"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/util"
-
-	"github.com/gorilla/mux"
 )
-
-// Config provides configuration for an HTTP server of the Database Lab.
-type Config struct {
-	VerificationToken string `yaml:"verificationToken"`
-	Host              string `yaml:"host"`
-	Port              uint   `yaml:"port"`
-}
 
 // Server defines an HTTP server of the Database Lab.
 type Server struct {
 	validator validator.Service
 	Cloning   cloning.Cloning
-	Config    *Config
+	Config    *srvCfg.Config
 	Global    *global.Config
+	Retrieval *retrieval.Retrieval
 	Platform  *platform.Service
 	Observer  *observer.Observer
 	Estimator *estimator.Estimator
@@ -52,13 +47,14 @@ type Server struct {
 }
 
 // NewServer initializes a new Server instance with provided configuration.
-func NewServer(cfg *Config, globalCfg *global.Config, observer *observer.Observer, cloning cloning.Cloning,
-	platform *platform.Service, dockerClient *client.Client, estimator *estimator.Estimator, pm *pool.Manager) *Server {
-	// TODO(anatoly): Stop using mock data.
+func NewServer(cfg *srvCfg.Config, globalCfg *global.Config, cloning cloning.Cloning, retrievalSvc *retrieval.Retrieval,
+	platform *platform.Service, dockerClient *client.Client, observer *observer.Observer, estimator *estimator.Estimator,
+	pm *pool.Manager) *Server {
 	server := &Server{
 		Config:    cfg,
 		Global:    globalCfg,
 		Cloning:   cloning,
+		Retrieval: retrievalSvc,
 		Platform:  platform,
 		Observer:  observer,
 		Estimator: estimator,
@@ -95,7 +91,7 @@ func attachAPI(r *mux.Router) error {
 }
 
 // Reload reloads server configuration.
-func (s *Server) Reload(cfg Config) {
+func (s *Server) Reload(cfg srvCfg.Config) {
 	*s.Config = cfg
 }
 

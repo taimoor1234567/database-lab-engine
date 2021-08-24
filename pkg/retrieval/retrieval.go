@@ -32,18 +32,37 @@ import (
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/thinclones/zfs"
 )
 
+const (
+	// Refresh statuses.
+	inactiveStatus   = "inactive"
+	refreshingStatus = "refreshing"
+	finishedStatus   = "finished"
+)
+
 // Retrieval describes a data retrieval.
 type Retrieval struct {
+	Scheduler     Scheduler
+	State         State
 	cfg           *config.Config
 	global        *global.Config
 	docker        *client.Client
 	poolManager   *pool.Manager
 	runner        runners.Runner
 	jobs          []components.JobRunner
-	scheduler     *cron.Cron
 	retrieveMutex sync.Mutex
 	ctxCancel     context.CancelFunc
 	jobSpecs      map[string]config.JobSpec
+}
+
+// Scheduler defines a refresh scheduler.
+type Scheduler struct {
+	Cron *cron.Cron
+	Spec cron.Schedule
+}
+
+// State contains state of retrieval service.
+type State struct {
+	Status string
 }
 
 // New creates a new data retrieval.
@@ -55,6 +74,7 @@ func New(cfg *dblabCfg.Config, docker *client.Client, pm *pool.Manager, runner r
 		poolManager: pm,
 		runner:      runner,
 		jobSpecs:    make(map[string]config.JobSpec, len(cfg.Retrieval.Jobs)),
+		State:       State{Status: inactiveStatus},
 	}
 }
 
@@ -93,7 +113,12 @@ func (r *Retrieval) Run(ctx context.Context) error {
 
 func (r *Retrieval) run(ctx context.Context, fsm pool.FSManager) (err error) {
 	r.retrieveMutex.Lock()
-	defer r.retrieveMutex.Unlock()
+	r.State.Status = refreshingStatus
+
+	defer func() {
+		r.State.Status = finishedStatus
+		r.retrieveMutex.Unlock()
+	}()
 
 	if err := r.configure(fsm); err != nil {
 		return errors.Wrap(err, "failed to configure")
@@ -222,30 +247,22 @@ func (r *Retrieval) prepareEnvironment(fsm pool.FSManager) error {
 func (r *Retrieval) setupScheduler(ctx context.Context) {
 	r.stopScheduler()
 
-	if r.cfg.Refresh.Timetable != "" {
-		if err := r.validateRefreshSchedule(); err != nil {
-			log.Err(errors.Wrap(err, "an invalid full-refresh schedule"))
-			return
-		}
-
-		r.scheduler = cron.New()
-
-		if _, err := r.scheduler.AddFunc(r.cfg.Refresh.Timetable, r.refreshFunc(ctx)); err != nil {
-			log.Err(errors.Wrap(err, "failed to add a full-refresh func"))
-		}
-
-		r.scheduler.Start()
+	if r.cfg.Refresh.Timetable == "" {
+		return
 	}
-}
 
-func (r *Retrieval) validateRefreshSchedule() error {
 	specParser := cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
 
-	if _, err := specParser.Parse(r.cfg.Refresh.Timetable); err != nil {
-		return errors.Wrapf(err, "failed to parse schedule timetable %q", r.cfg.Refresh.Timetable)
+	spec, err := specParser.Parse(r.cfg.Refresh.Timetable)
+	if err != nil {
+		log.Err(errors.Wrapf(err, "failed to parse schedule timetable %q", r.cfg.Refresh.Timetable))
+		return
 	}
 
-	return nil
+	r.Scheduler.Cron = cron.New()
+	r.Scheduler.Spec = spec
+	r.Scheduler.Cron.Schedule(r.Scheduler.Spec, cron.FuncJob(r.refreshFunc(ctx)))
+	r.Scheduler.Cron.Start()
 }
 
 func (r *Retrieval) refreshFunc(ctx context.Context) func() {
@@ -305,8 +322,9 @@ func (r *Retrieval) Stop() {
 }
 
 func (r *Retrieval) stopScheduler() {
-	if r.scheduler != nil {
-		r.scheduler.Stop()
+	if r.Scheduler.Cron != nil {
+		r.Scheduler.Cron.Stop()
+		r.Scheduler.Spec = nil
 	}
 }
 
