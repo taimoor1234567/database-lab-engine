@@ -32,13 +32,6 @@ import (
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/thinclones/zfs"
 )
 
-const (
-	// Refresh statuses.
-	inactiveStatus   = "inactive"
-	refreshingStatus = "refreshing"
-	finishedStatus   = "finished"
-)
-
 // Retrieval describes a data retrieval.
 type Retrieval struct {
 	Scheduler     Scheduler
@@ -60,11 +53,6 @@ type Scheduler struct {
 	Spec cron.Schedule
 }
 
-// State contains state of retrieval service.
-type State struct {
-	Status string
-}
-
 // New creates a new data retrieval.
 func New(cfg *dblabCfg.Config, docker *client.Client, pm *pool.Manager, runner runners.Runner) *Retrieval {
 	return &Retrieval{
@@ -74,7 +62,10 @@ func New(cfg *dblabCfg.Config, docker *client.Client, pm *pool.Manager, runner r
 		poolManager: pm,
 		runner:      runner,
 		jobSpecs:    make(map[string]config.JobSpec, len(cfg.Retrieval.Jobs)),
-		State:       State{Status: inactiveStatus},
+		State: State{
+			Status: inactiveStatus,
+			Alerts: make(map[string]Alert),
+		},
 	}
 }
 
@@ -148,11 +139,14 @@ func (r *Retrieval) run(ctx context.Context, fsm pool.FSManager) (err error) {
 
 	for _, j := range r.jobs {
 		if err := j.Run(ctx); err != nil {
+			r.State.addAlert(refreshFailed, err.Error())
 			return err
 		}
 	}
 
 	r.poolManager.MakeActive(poolByName)
+
+	r.State.cleanAlerts()
 
 	return nil
 }
