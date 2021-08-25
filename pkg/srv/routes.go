@@ -33,15 +33,17 @@ func (s *Server) getInstanceStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	refresh := models.Refresh{
+	refresh := models.Retrieving{
+		Mode:   s.Retrieval.State.Mode,
 		Status: s.Retrieval.State.Status,
+		Alerts: s.Retrieval.State.Alerts(),
 	}
 
 	if s.Retrieval.Scheduler.Spec != nil {
-		refresh.Next = pointer.ToTimeOrNil(s.Retrieval.Scheduler.Spec.Next(time.Now()))
+		refresh.NextRefresh = pointer.ToTimeOrNil(s.Retrieval.Scheduler.Spec.Next(time.Now()))
 	}
 
-	status.Refresh = refresh
+	status.Retrieving = refresh
 
 	if err = api.WriteJSON(w, http.StatusOK, status); err != nil {
 		api.SendError(w, r, err)

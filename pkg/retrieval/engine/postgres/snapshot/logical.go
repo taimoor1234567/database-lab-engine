@@ -30,8 +30,8 @@ import (
 )
 
 const (
-	// LogicalInitialType declares a job type for preparing a logical initial snapshot.
-	LogicalInitialType = "logicalSnapshot"
+	// LogicalSnapshotType declares a job type for preparing a logical initial snapshot.
+	LogicalSnapshotType = "logicalSnapshot"
 
 	patchContainerPrefix = "dblab_patch_"
 )

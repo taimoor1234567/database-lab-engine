@@ -19,12 +19,14 @@ import (
 	dblabCfg "gitlab.com/postgres-ai/database-lab/v2/pkg/config"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/config/global"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/models"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/components"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/config"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/dbmarker"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/engine"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/engine/postgres/logical"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/engine/postgres/physical"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/engine/postgres/snapshot"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/engine/postgres/tools/cont"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/pool"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/resources"
@@ -63,8 +65,8 @@ func New(cfg *dblabCfg.Config, docker *client.Client, pm *pool.Manager, runner r
 		runner:      runner,
 		jobSpecs:    make(map[string]config.JobSpec, len(cfg.Retrieval.Jobs)),
 		State: State{
-			Status: inactiveStatus,
-			Alerts: make(map[string]Alert),
+			Status: models.Inactive,
+			alerts: make(map[models.AlertType]models.Alert),
 		},
 	}
 }
@@ -94,6 +96,7 @@ func (r *Retrieval) Run(ctx context.Context) error {
 	r.ctxCancel = cancel
 
 	if err := r.run(runCtx, r.poolManager.First()); err != nil {
+		r.State.addAlert(models.RefreshFailed, err.Error())
 		return err
 	}
 
@@ -104,10 +107,10 @@ func (r *Retrieval) Run(ctx context.Context) error {
 
 func (r *Retrieval) run(ctx context.Context, fsm pool.FSManager) (err error) {
 	r.retrieveMutex.Lock()
-	r.State.Status = refreshingStatus
+	r.State.Status = models.Refreshing
 
 	defer func() {
-		r.State.Status = finishedStatus
+		r.State.Status = models.Finished
 		r.retrieveMutex.Unlock()
 	}()
 
@@ -139,13 +142,11 @@ func (r *Retrieval) run(ctx context.Context, fsm pool.FSManager) (err error) {
 
 	for _, j := range r.jobs {
 		if err := j.Run(ctx); err != nil {
-			r.State.addAlert(refreshFailed, err.Error())
 			return err
 		}
 	}
 
 	r.poolManager.MakeActive(poolByName)
-
 	r.State.cleanAlerts()
 
 	return nil
@@ -164,6 +165,8 @@ func (r *Retrieval) configure(fsm pool.FSManager) error {
 	if err := r.validate(); err != nil {
 		return errors.Wrap(err, "invalid data retrieval configuration")
 	}
+
+	r.defineRetrievalMode()
 
 	return nil
 }
@@ -212,14 +215,57 @@ func (r *Retrieval) addJob(job components.JobRunner) {
 }
 
 func (r *Retrieval) validate() error {
-	_, hasLogicalRestore := r.jobSpecs[logical.RestoreJobType]
-	_, hasPhysicalRestore := r.jobSpecs[physical.RestoreJobType]
-
-	if hasLogicalRestore && hasPhysicalRestore {
-		return errors.New("must not contain physical and logical restore jobs simultaneously")
+	if r.hasLogicalJob() && r.hasPhysicalJob() {
+		return errors.New("must not contain physical and logical jobs simultaneously")
 	}
 
 	return nil
+}
+
+func (r *Retrieval) hasLogicalJob() bool {
+	if len(r.jobSpecs) == 0 {
+		return false
+	}
+
+	if _, hasLogicalDump := r.jobSpecs[logical.DumpJobType]; hasLogicalDump {
+		return true
+	}
+
+	if _, hasLogicalRestore := r.jobSpecs[logical.RestoreJobType]; hasLogicalRestore {
+		return true
+	}
+
+	if _, hasLogicalSnapshot := r.jobSpecs[snapshot.LogicalSnapshotType]; hasLogicalSnapshot {
+		return true
+	}
+
+	return false
+}
+
+func (r *Retrieval) hasPhysicalJob() bool {
+	if len(r.jobSpecs) == 0 {
+		return false
+	}
+
+	if _, hasPhysicalRestore := r.jobSpecs[physical.RestoreJobType]; hasPhysicalRestore {
+		return true
+	}
+
+	if _, hasPhysicalSnapshot := r.jobSpecs[snapshot.PhysicalSnapshotType]; hasPhysicalSnapshot {
+		return true
+	}
+
+	return false
+}
+
+func (r *Retrieval) defineRetrievalMode() {
+	if r.hasPhysicalJob() {
+		r.State.Mode = models.Physical
+	}
+
+	if r.hasLogicalJob() {
+		r.State.Mode = models.Logical
+	}
 }
 
 func (r *Retrieval) prepareEnvironment(fsm pool.FSManager) error {
@@ -262,6 +308,7 @@ func (r *Retrieval) setupScheduler(ctx context.Context) {
 func (r *Retrieval) refreshFunc(ctx context.Context) func() {
 	return func() {
 		if err := r.fullRefresh(ctx); err != nil {
+			r.State.addAlert(models.RefreshFailed, err.Error())
 			log.Err("Failed to run full-refresh: ", err)
 		}
 	}
@@ -279,6 +326,7 @@ func (r *Retrieval) fullRefresh(ctx context.Context) error {
 	elementToUpdate := r.poolManager.GetPoolToUpdate()
 
 	if elementToUpdate == nil || elementToUpdate.Value == nil {
+		r.State.addAlert(models.RefreshSkipped, "Pool to perform full refresh not found. Skip refreshing")
 		log.Msg("Pool to perform full refresh not found. Skip refreshing")
 		return nil
 	}
@@ -306,6 +354,7 @@ func (r *Retrieval) fullRefresh(ctx context.Context) error {
 	}
 
 	r.poolManager.MakeActive(elementToUpdate)
+	r.State.cleanAlerts()
 
 	return nil
 }
@@ -368,8 +417,8 @@ func preparePoolToRefresh(poolToUpdate pool.FSManager) error {
 		log.Msg(emptyErr.Error())
 	}
 
-	for _, snapshot := range snapshots {
-		if err := poolToUpdate.DestroySnapshot(snapshot.ID); err != nil {
+	for _, snapshotEntry := range snapshots {
+		if err := poolToUpdate.DestroySnapshot(snapshotEntry.ID); err != nil {
 			return errors.Wrap(err, "failed to destroy the existing snapshot")
 		}
 	}

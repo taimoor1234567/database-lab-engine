@@ -121,7 +121,7 @@ func (pm *Manager) GetPoolToUpdate() *list.Element {
 			return nil
 		}
 
-		// The active pool cannot be updated as it leads to downtime.
+		// The first active pool cannot be updated as it leads to downtime.
 		if element == pm.fsManagerList.Front() {
 			return nil
 		}

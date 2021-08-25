@@ -7,77 +7,54 @@ package retrieval
 import (
 	"sync"
 	"time"
-)
 
-const (
-	// Refresh statuses.
-	inactiveStatus   = "inactive"
-	refreshingStatus = "refreshing"
-	finishedStatus   = "finished"
-
-	// Alert types.
-	refreshFailed             = "refresh_failed"
-	unschedulableRefreshAhead = "unschedulable_refresh_ahead"
-
-	// Alert levels.
-	errorLevel   = "error"
-	warningLevel = "warning"
-	unknownLevel = "unknown"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/models"
 )
 
 // State contains state of retrieval service.
 type State struct {
-	Status string
+	Mode   models.RetrievalMode
+	Status models.RefreshStatus
 	mu     sync.Mutex
-	Alerts map[string]Alert
+	alerts map[models.AlertType]models.Alert
 }
 
-// Alert defines retrieval subsystem alert.
-type Alert struct {
-	Level    string
-	Message  string
-	LastSeen time.Time
-	Count    int
-}
-
-func (s *State) addAlert(alertType, message string) {
+// Alerts returns all registered retrieval alerts.
+func (s *State) Alerts() map[models.AlertType]models.Alert {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	alert, ok := s.Alerts[alertType]
+	alerts := s.alerts
+
+	return alerts
+}
+
+func (s *State) addAlert(alertType models.AlertType, message string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	alert, ok := s.alerts[alertType]
 	if ok {
 		alert.Count++
 		alert.LastSeen = time.Now()
 		alert.Message = message
+		s.alerts[alertType] = alert
 
 		return
 	}
 
-	alert = Alert{
-		Level:    getLevelByAlertType(alertType),
+	alert = models.Alert{
+		Level:    models.AlertLevelByType(alertType),
 		Message:  message,
 		LastSeen: time.Now(),
 		Count:    1,
 	}
 
-	s.Alerts[alertType] = alert
+	s.alerts[alertType] = alert
 }
 
 func (s *State) cleanAlerts() {
 	s.mu.Lock()
-	s.Alerts = make(map[string]Alert)
+	s.alerts = make(map[models.AlertType]models.Alert)
 	s.mu.Unlock()
-}
-
-func getLevelByAlertType(alertType string) string {
-	switch alertType {
-	case refreshFailed:
-		return errorLevel
-
-	case unschedulableRefreshAhead:
-		return warningLevel
-
-	default:
-		return unknownLevel
-	}
 }
