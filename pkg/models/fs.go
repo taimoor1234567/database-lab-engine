@@ -6,10 +6,11 @@ package models
 
 // FileSystem describes state of a file system.
 type FileSystem struct {
-	Size   uint64 `json:"size"`
-	SizeHR string `json:"sizeHR"`
-	Free   uint64 `json:"free"`
-	FreeHR string `json:"freeHR"`
-	Used   uint64 `json:"used"`
-	UsedHR string `json:"usedHR"`
+	Mode              string  `json:"mode"`
+	SizeHR            string  `json:"sizeHR"`
+	FreeHR            string  `json:"freeHR"`
+	UsedHR            string  `json:"usedHR"`
+	DataSizeHR        string  `json:"dataSizeHR"`
+	UsedBySnapshotsHR string  `json:"usedBySnapshotsHR"`
+	CompressRatio     float64 `json:"compressRatio"`
 }

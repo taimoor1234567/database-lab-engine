@@ -95,6 +95,17 @@ type ListEntry struct {
 	// it does include space consumed by metadata.
 	LogicalUsed uint64
 
+	// The amount of space consumed by snapshots of this dataset.
+	// In particular, it is the amount of space that would be freed
+	// if all of this dataset's snapshots were destroyed.
+	// Note that this is not simply the sum of the snapshots' used properties
+	// because space can be shared by multiple snapshots.
+	UsedBySnapshots uint64
+
+	// The amount of space used by children of this dataset,
+	// which would be freed if all the dataset's children were destroyed.
+	UsedByChildren uint64
+
 	// DB Lab custom fields.
 
 	// Data state timestamp.
@@ -444,10 +455,13 @@ func (m *Manager) GetDiskState() (*resources.Disk, error) {
 	}
 
 	disk := &resources.Disk{
-		Size:     parentPoolEntry.Available + parentPoolEntry.Used,
-		Free:     parentPoolEntry.Available,
-		Used:     parentPoolEntry.Used,
-		DataSize: poolEntry.LogicalReferenced,
+		Size:            parentPoolEntry.Available + parentPoolEntry.Used,
+		Free:            parentPoolEntry.Available,
+		Used:            parentPoolEntry.Used,
+		UsedBySnapshots: parentPoolEntry.UsedBySnapshots,
+		UsedByChildren:  parentPoolEntry.UsedByChildren,
+		DataSize:        poolEntry.LogicalReferenced,
+		CompressRatio:   parentPoolEntry.CompressRatio,
 	}
 
 	return disk, nil
@@ -497,9 +511,9 @@ func (m *Manager) listSnapshots(pool string) ([]*ListEntry, error) {
 func (m *Manager) listDetails(pool, dsType string) ([]*ListEntry, error) {
 	// TODO(anatoly): Return map.
 	// TODO(anatoly): Generalize.
-	numberFields := 12
+	numberFields := 14
 	listCmd := "zfs list -po name,used,mountpoint,compressratio,available,type," +
-		"origin,creation,referenced,logicalreferenced,logicalused," + dataStateAtLabel + " " +
+		"origin,creation,referenced,logicalreferenced,logicalused,usedbysnapshots,usedbychildren," + dataStateAtLabel + " " +
 		"-S " + dataStateAtLabel + " -S creation " + // Order DESC.
 		"-t " + dsType + " " +
 		"-r " + pool
@@ -551,7 +565,9 @@ func (m *Manager) listDetails(pool, dsType string) ([]*ListEntry, error) {
 			{field: fields[8], setFunc: zfsListEntry.setReferenced},
 			{field: fields[9], setFunc: zfsListEntry.setLogicalReferenced},
 			{field: fields[10], setFunc: zfsListEntry.setLogicalUsed},
-			{field: fields[11], setFunc: zfsListEntry.setDataStateAt},
+			{field: fields[11], setFunc: zfsListEntry.setUsedBySnapshots},
+			{field: fields[12], setFunc: zfsListEntry.setUsedByChildren},
+			{field: fields[13], setFunc: zfsListEntry.setDataStateAt},
 		}
 
 		for _, rule := range setRules {
@@ -646,6 +662,28 @@ func (z *ListEntry) setLogicalUsed(field string) error {
 	}
 
 	z.LogicalUsed = logicalUsed
+
+	return nil
+}
+
+func (z *ListEntry) setUsedBySnapshots(field string) error {
+	usedBySnapshots, err := util.ParseBytes(field)
+	if err != nil {
+		return err
+	}
+
+	z.UsedBySnapshots = usedBySnapshots
+
+	return nil
+}
+
+func (z *ListEntry) setUsedByChildren(field string) error {
+	usedByChildren, err := util.ParseBytes(field)
+	if err != nil {
+		return err
+	}
+
+	z.UsedByChildren = usedByChildren
 
 	return nil
 }

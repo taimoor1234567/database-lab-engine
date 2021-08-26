@@ -142,7 +142,7 @@ func (c *baseCloning) getSnapshotList() []models.Snapshot {
 
 	snapshots := make([]models.Snapshot, 0, len(c.snapshotBox.items))
 
-	if len(snapshots) == 0 {
+	if len(c.snapshotBox.items) == 0 {
 		return snapshots
 	}
 

@@ -146,6 +146,14 @@ func (p *Provisioner) Reload(cfg Config, dbCfg resources.DB) {
 	*p.dbCfg = dbCfg
 }
 
+// ContainerOptions returns provisioner configuration for running containers.
+func (p *Provisioner) ContainerOptions() models.ContainerOptions {
+	return models.ContainerOptions{
+		DockerImage:     p.config.DockerImage,
+		ContainerConfig: p.config.ContainerConfig,
+	}
+}
+
 // StartSession starts a new session.
 func (p *Provisioner) StartSession(snapshotID string, user resources.EphemeralUser,
 	extraConfig map[string]string) (*resources.Session, error) {

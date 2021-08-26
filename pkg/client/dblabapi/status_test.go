@@ -21,13 +21,10 @@ func TestClientStatus(t *testing.T) {
 			Message: "Instance is ready",
 		},
 		FileSystem: &models.FileSystem{
-			Size:   15489651156451,
-			SizeHR: "14 TiB",
-			Free:   15429651156451,
-			FreeHR: "14 TiB",
+			SizeHR:     "14 TiB",
+			FreeHR:     "14 TiB",
+			DataSizeHR: "2.5 GiB",
 		},
-		DataSize:            2654568125,
-		DataSizeHR:          "2.5 GiB",
 		ExpectedCloningTime: 0,
 		NumClones:           1,
 		Clones: []*models.Clone{{

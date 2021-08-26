@@ -25,10 +25,13 @@ type Session struct {
 // Disk defines disk status.
 // TODO(anatoly): Merge with disk from models?
 type Disk struct {
-	Size     uint64 `json:"size"`
-	Free     uint64 `json:"free"`
-	Used     uint64 `json:"used"`
-	DataSize uint64 `json:"dataSize"`
+	Size            uint64  `json:"size"`
+	Free            uint64  `json:"free"`
+	Used            uint64  `json:"used"`
+	UsedBySnapshots uint64  `json:"usedBySnapshots"`
+	UsedByChildren  uint64  `json:"usedByChildren"`
+	DataSize        uint64  `json:"dataSize"`
+	CompressRatio   float64 `json:"compressRatio"`
 }
 
 // EphemeralUser describes an ephemeral database user defined by Database Lab users.

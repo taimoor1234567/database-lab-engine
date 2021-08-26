@@ -57,8 +57,10 @@ func NewBaseCloning(cfg *Config, provision *provision.Provisioner, observingCh c
 				Code:    models.StatusOK,
 				Message: models.InstanceMessageOK,
 			},
-			FileSystem: &models.FileSystem{},
-			Clones:     make([]*models.Clone, 0),
+			FileSystem:  &models.FileSystem{},
+			Clones:      make([]*models.Clone, 0),
+			StartedAt:   time.Now().Truncate(time.Second),
+			Provisioner: provision.ContainerOptions(),
 		},
 		provision:   provision,
 		observingCh: observingCh,
@@ -70,6 +72,7 @@ func NewBaseCloning(cfg *Config, provision *provision.Provisioner, observingCh c
 
 func (c *baseCloning) Reload(cfg Config) {
 	*c.config = cfg
+	c.instanceStatus.Provisioner = c.provision.ContainerOptions()
 }
 
 // Initialize and run cloning component.
@@ -406,20 +409,22 @@ func (c *baseCloning) GetInstanceState() (*models.InstanceStatus, error) {
 	}
 
 	c.instanceStatus.FileSystem = &models.FileSystem{
-		Size:   disk.Size,
-		SizeHR: humanize.BigIBytes(big.NewInt(int64(disk.Size))),
-		Free:   disk.Free,
-		FreeHR: humanize.BigIBytes(big.NewInt(int64(disk.Free))),
-		Used:   disk.Used,
-		UsedHR: humanize.BigIBytes(big.NewInt(int64(disk.Used))),
+		SizeHR:            humanize.BigIBytes(big.NewInt(int64(disk.Size))),
+		FreeHR:            humanize.BigIBytes(big.NewInt(int64(disk.Free))),
+		UsedHR:            humanize.BigIBytes(big.NewInt(int64(disk.Used))),
+		DataSizeHR:        humanize.BigIBytes(big.NewInt(int64(disk.DataSize))),
+		UsedBySnapshotsHR: humanize.BigIBytes(big.NewInt(int64(disk.UsedBySnapshots))),
+		CompressRatio:     disk.CompressRatio,
 	}
 
-	c.instanceStatus.DataSize = disk.DataSize
-	c.instanceStatus.DataSizeHR = humanize.BigIBytes(big.NewInt(int64(disk.DataSize)))
 	c.instanceStatus.ExpectedCloningTime = c.getExpectedCloningTime()
 	c.instanceStatus.Clones = c.GetClones()
 	c.instanceStatus.NumClones = uint64(len(c.instanceStatus.Clones))
 	c.instanceStatus.Pools = c.provision.GetPoolEntryList()
+
+	if len(c.instanceStatus.Pools) > 0 {
+		c.instanceStatus.FileSystem.Mode = c.instanceStatus.Pools[0].Mode
+	}
 
 	return c.instanceStatus, nil
 }
