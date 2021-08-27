@@ -12,5 +12,6 @@ type FileSystem struct {
 	UsedHR            string  `json:"usedHR"`
 	DataSizeHR        string  `json:"dataSizeHR"`
 	UsedBySnapshotsHR string  `json:"usedBySnapshotsHR"`
+	UsedByClonesHR    string  `json:"usedByClonesHR"`
 	CompressRatio     float64 `json:"compressRatio"`
 }

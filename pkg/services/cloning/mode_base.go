@@ -408,19 +408,25 @@ func (c *baseCloning) GetInstanceState() (*models.InstanceStatus, error) {
 		return nil, errors.Wrap(err, "failed to get a disk state")
 	}
 
+	c.instanceStatus.ExpectedCloningTime = c.getExpectedCloningTime()
+	c.instanceStatus.Clones = c.GetClones()
+	c.instanceStatus.NumClones = uint64(len(c.instanceStatus.Clones))
+	c.instanceStatus.Pools = c.provision.GetPoolEntryList()
+
+	var usedByClones uint64
+	for i := range c.instanceStatus.Clones {
+		usedByClones += c.instanceStatus.Clones[i].Metadata.CloneDiffSize
+	}
+
 	c.instanceStatus.FileSystem = &models.FileSystem{
 		SizeHR:            humanize.BigIBytes(big.NewInt(int64(disk.Size))),
 		FreeHR:            humanize.BigIBytes(big.NewInt(int64(disk.Free))),
 		UsedHR:            humanize.BigIBytes(big.NewInt(int64(disk.Used))),
 		DataSizeHR:        humanize.BigIBytes(big.NewInt(int64(disk.DataSize))),
 		UsedBySnapshotsHR: humanize.BigIBytes(big.NewInt(int64(disk.UsedBySnapshots))),
+		UsedByClonesHR:    humanize.BigIBytes(big.NewInt(int64(usedByClones))),
 		CompressRatio:     disk.CompressRatio,
 	}
-
-	c.instanceStatus.ExpectedCloningTime = c.getExpectedCloningTime()
-	c.instanceStatus.Clones = c.GetClones()
-	c.instanceStatus.NumClones = uint64(len(c.instanceStatus.Clones))
-	c.instanceStatus.Pools = c.provision.GetPoolEntryList()
 
 	if len(c.instanceStatus.Pools) > 0 {
 		c.instanceStatus.FileSystem.Mode = c.instanceStatus.Pools[0].Mode
