@@ -350,13 +350,21 @@ func (p *Provisioner) initPortPool() error {
 		return err
 	}
 
+	availablePorts := 0
 	for port := portOpts.From; port < portOpts.To; port++ {
 		if err := p.portChecker.checkPortAvailability(host, port); err != nil {
-			return errors.Wrapf(err, "port %d is not available", port)
+			log.Msg(fmt.Printf("port %d is not available, marking as busy", port))
+
+			if err := p.setPortStatus(port, true); err != nil {
+				return errors.Wrapf(err, "port %d is not available", port)
+			}
+
+			continue
 		}
+		availablePorts++
 	}
 
-	log.Msg("all ports are available")
+	log.Msg(availablePorts, " ports are available")
 
 	return nil
 }
