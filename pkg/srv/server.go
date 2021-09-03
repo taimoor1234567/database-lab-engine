@@ -33,7 +33,7 @@ import (
 // Server defines an HTTP server of the Database Lab.
 type Server struct {
 	validator validator.Service
-	Cloning   cloning.Cloning
+	Cloning   *cloning.Base
 	Config    *srvCfg.Config
 	Global    *global.Config
 	Retrieval *retrieval.Retrieval
@@ -47,7 +47,7 @@ type Server struct {
 }
 
 // NewServer initializes a new Server instance with provided configuration.
-func NewServer(cfg *srvCfg.Config, globalCfg *global.Config, cloning cloning.Cloning, retrievalSvc *retrieval.Retrieval,
+func NewServer(cfg *srvCfg.Config, globalCfg *global.Config, cloning *cloning.Base, retrievalSvc *retrieval.Retrieval,
 	platform *platform.Service, dockerClient *client.Client, observer *observer.Observer, estimator *estimator.Estimator,
 	pm *pool.Manager) *Server {
 	server := &Server{

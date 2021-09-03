@@ -81,7 +81,7 @@ func (s *BaseCloningSuite) TestSnapshotByID() {
 }
 
 func TestCloneCounter(t *testing.T) {
-	c := &baseCloning{}
+	c := &Base{}
 	c.snapshotBox.items = make(map[string]*models.Snapshot)
 	snapshot := &models.Snapshot{
 		ID:        "testSnapshotID",

@@ -24,7 +24,7 @@ type SnapshotBox struct {
 	latestSnapshot *models.Snapshot
 }
 
-func (c *baseCloning) fetchSnapshots() error {
+func (c *Base) fetchSnapshots() error {
 	entries, err := c.provision.GetSnapshots()
 	if err != nil {
 		return errors.Wrap(err, "failed to get snapshots")
@@ -58,7 +58,7 @@ func (c *baseCloning) fetchSnapshots() error {
 
 	return nil
 }
-func (c *baseCloning) resetSnapshots(snapshotMap map[string]*models.Snapshot) {
+func (c *Base) resetSnapshots(snapshotMap map[string]*models.Snapshot) {
 	c.snapshotBox.snapshotMutex.Lock()
 
 	c.snapshotBox.latestSnapshot = nil
@@ -67,7 +67,7 @@ func (c *baseCloning) resetSnapshots(snapshotMap map[string]*models.Snapshot) {
 	c.snapshotBox.snapshotMutex.Unlock()
 }
 
-func (c *baseCloning) addSnapshot(snapshot *models.Snapshot) {
+func (c *Base) addSnapshot(snapshot *models.Snapshot) {
 	c.snapshotBox.snapshotMutex.Lock()
 
 	c.snapshotBox.items[snapshot.ID] = snapshot
@@ -81,7 +81,7 @@ func (c *baseCloning) addSnapshot(snapshot *models.Snapshot) {
 }
 
 // getLatestSnapshot returns the latest snapshot.
-func (c *baseCloning) getLatestSnapshot() (*models.Snapshot, error) {
+func (c *Base) getLatestSnapshot() (*models.Snapshot, error) {
 	c.snapshotBox.snapshotMutex.RLock()
 	defer c.snapshotBox.snapshotMutex.RUnlock()
 
@@ -93,7 +93,7 @@ func (c *baseCloning) getLatestSnapshot() (*models.Snapshot, error) {
 }
 
 // getSnapshotByID returns the snapshot by ID.
-func (c *baseCloning) getSnapshotByID(snapshotID string) (*models.Snapshot, error) {
+func (c *Base) getSnapshotByID(snapshotID string) (*models.Snapshot, error) {
 	c.snapshotBox.snapshotMutex.RLock()
 	defer c.snapshotBox.snapshotMutex.RUnlock()
 
@@ -105,7 +105,7 @@ func (c *baseCloning) getSnapshotByID(snapshotID string) (*models.Snapshot, erro
 	return snapshot, nil
 }
 
-func (c *baseCloning) incrementCloneNumber(snapshotID string) {
+func (c *Base) incrementCloneNumber(snapshotID string) {
 	c.snapshotBox.snapshotMutex.Lock()
 	defer c.snapshotBox.snapshotMutex.Unlock()
 
@@ -118,7 +118,7 @@ func (c *baseCloning) incrementCloneNumber(snapshotID string) {
 	snapshot.NumClones++
 }
 
-func (c *baseCloning) decrementCloneNumber(snapshotID string) {
+func (c *Base) decrementCloneNumber(snapshotID string) {
 	c.snapshotBox.snapshotMutex.Lock()
 	defer c.snapshotBox.snapshotMutex.Unlock()
 
@@ -136,7 +136,7 @@ func (c *baseCloning) decrementCloneNumber(snapshotID string) {
 	snapshot.NumClones--
 }
 
-func (c *baseCloning) getSnapshotList() []models.Snapshot {
+func (c *Base) getSnapshotList() []models.Snapshot {
 	c.snapshotBox.snapshotMutex.RLock()
 	defer c.snapshotBox.snapshotMutex.RUnlock()
 
