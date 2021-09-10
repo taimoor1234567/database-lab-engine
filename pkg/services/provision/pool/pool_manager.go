@@ -169,6 +169,23 @@ func (pm *Manager) GetFSManagerList() []FSManager {
 	return fs
 }
 
+// GetActiveFSManagers returns a list of active filesystem managers.
+func (pm *Manager) GetActiveFSManagers() []FSManager {
+	fs := []FSManager{}
+
+	pm.mu.Lock()
+
+	for _, fsManager := range pm.fsManagerPool {
+		if pool := fsManager.Pool(); pool != nil && pool.Status() == resources.ActivePool {
+			fs = append(fs, fsManager)
+		}
+	}
+
+	pm.mu.Unlock()
+
+	return fs
+}
+
 // GetFSManagerOrderedList returns a filesystem manager list in the order of the queue.
 func (pm *Manager) GetFSManagerOrderedList() []FSManager {
 	fs := []FSManager{}
@@ -259,6 +276,7 @@ func (pm *Manager) examineEntries(entries []os.DirEntry) (map[string]FSManager, 
 
 		if dataStateAt != nil {
 			pool.DSA = *dataStateAt
+			pool.SetStatus(resources.ActivePool)
 			log.Msg(pool.DSA.String())
 		}
 
@@ -290,10 +308,6 @@ func (pm *Manager) examineEntries(entries []os.DirEntry) (map[string]FSManager, 
 
 		front := poolList.Front()
 		if front == nil || front.Value == nil || fsManagers[front.Value.(string)].Pool().DSA.Before(pool.DSA) {
-			if front != nil && front.Value != nil {
-				fsManagers[front.Value.(string)].Pool().SetStatus(resources.EmptyPool)
-			}
-
 			fsm.Pool().SetStatus(resources.ActivePool)
 			poolList.PushFront(fsm.Pool().Name)
 			continue

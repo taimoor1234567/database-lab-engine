@@ -409,8 +409,8 @@ func preparePoolToRefresh(poolToUpdate pool.FSManager) error {
 
 	snapshots, err := poolToUpdate.GetSnapshots()
 	if err != nil {
-		emptyErr, ok := errors.Cause(err).(*zfs.EmptyPoolError)
-		if !ok {
+		var emptyErr *zfs.EmptyPoolError
+		if !errors.As(err, &emptyErr) {
 			return errors.Wrap(err, "failed to check existing snapshots")
 		}
 

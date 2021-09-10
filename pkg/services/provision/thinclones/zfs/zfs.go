@@ -121,12 +121,12 @@ type setTuple struct {
 
 // EmptyPoolError defines an error when storage pool has no available elements.
 type EmptyPoolError struct {
-	dsType string
+	dsType dsType
 	pool   string
 }
 
 // NewEmptyPoolError creates a new EmptyPoolError.
-func NewEmptyPoolError(dsType string, pool string) *EmptyPoolError {
+func NewEmptyPoolError(dsType dsType, pool string) *EmptyPoolError {
 	return &EmptyPoolError{dsType: dsType, pool: pool}
 }
 
@@ -471,7 +471,7 @@ func (m *Manager) GetDiskState() (*resources.Disk, error) {
 func (m *Manager) GetSnapshots() ([]resources.Snapshot, error) {
 	entries, err := m.listSnapshots(m.config.Pool.Name)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to list snapshots")
+		return nil, fmt.Errorf("failed to list snapshots: %w", err)
 	}
 
 	snapshots := make([]resources.Snapshot, 0, len(entries))
@@ -499,26 +499,33 @@ func (m *Manager) GetSnapshots() ([]resources.Snapshot, error) {
 
 // ListFilesystems lists ZFS file systems (clones, pools).
 func (m *Manager) listFilesystems(pool string) ([]*ListEntry, error) {
-	return m.listDetails(pool, "filesystem")
+	filter := snapshotFilter{
+		fields:  defaultFields,
+		sorting: defaultSorting,
+		pool:    pool,
+		dsType:  fileSystemType,
+	}
+
+	return m.listDetails(filter)
 }
 
 // ListSnapshots lists ZFS snapshots.
 func (m *Manager) listSnapshots(pool string) ([]*ListEntry, error) {
-	return m.listDetails(pool, "snapshot")
+	filter := snapshotFilter{
+		fields:  defaultFields,
+		sorting: defaultSorting,
+		pool:    pool,
+		dsType:  snapshotType,
+	}
+
+	return m.listDetails(filter)
 }
 
 // listDetails lists all ZFS types.
-func (m *Manager) listDetails(pool, dsType string) ([]*ListEntry, error) {
+func (m *Manager) listDetails(filter snapshotFilter) ([]*ListEntry, error) {
 	// TODO(anatoly): Return map.
 	// TODO(anatoly): Generalize.
-	numberFields := 14
-	listCmd := "zfs list -po name,used,mountpoint,compressratio,available,type," +
-		"origin,creation,referenced,logicalreferenced,logicalused,usedbysnapshots,usedbychildren," + dataStateAtLabel + " " +
-		"-S " + dataStateAtLabel + " -S creation " + // Order DESC.
-		"-t " + dsType + " " +
-		"-r " + pool
-
-	out, err := m.runner.Run(listCmd, false)
+	out, err := m.runner.Run(buildListCommand(filter), false)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to list details")
 	}
@@ -527,9 +534,10 @@ func (m *Manager) listDetails(pool, dsType string) ([]*ListEntry, error) {
 
 	// First line is header.
 	if len(lines) <= headerOffset {
-		return nil, NewEmptyPoolError(dsType, pool)
+		return nil, NewEmptyPoolError(filter.dsType, filter.pool)
 	}
 
+	numberFields := len([]string(filter.fields)) // 14
 	entries := make([]*ListEntry, len(lines)-headerOffset)
 
 	for i := headerOffset; i < len(lines); i++ {
@@ -577,7 +585,7 @@ func (m *Manager) listDetails(pool, dsType string) ([]*ListEntry, error) {
 
 			if err := rule.setFunc(rule.field); err != nil {
 				return nil, errors.Errorf("ZFS error: cannot parse output.\nCommand: %s.\nOutput: %s\nErr: %v",
-					listCmd, out, err)
+					buildListCommand(filter), out, err)
 			}
 		}
 

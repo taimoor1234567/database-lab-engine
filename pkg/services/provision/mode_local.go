@@ -27,6 +27,7 @@ import (
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/pool"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/resources"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/runners"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/thinclones/zfs"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/util"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/util/pglog"
 )
@@ -290,9 +291,26 @@ func (p *Provisioner) ResetSession(session *resources.Session, snapshotID string
 	return snapshotModel, nil
 }
 
-// GetSnapshots provides a snapshot list.
+// GetSnapshots provides a snapshot list from active pools.
 func (p *Provisioner) GetSnapshots() ([]resources.Snapshot, error) {
-	return p.pm.First().GetSnapshots()
+	snapshots := []resources.Snapshot{}
+
+	for _, activeFSManager := range p.pm.GetActiveFSManagers() {
+		poolSnapshots, err := activeFSManager.GetSnapshots()
+		if err != nil {
+			var emptyErr *zfs.EmptyPoolError
+			if errors.As(err, &emptyErr) {
+				log.Msg(emptyErr.Error())
+				continue
+			}
+
+			log.Err(fmt.Errorf("failed to get snapshots for pool %s: %w", activeFSManager.Pool().Name, err))
+		}
+
+		snapshots = append(snapshots, poolSnapshots...)
+	}
+
+	return snapshots, nil
 }
 
 // GetDiskState describes the state of the managed disk.
