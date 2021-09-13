@@ -30,7 +30,7 @@ type PoolEntry struct {
 	DataStateAt string               `json:"dataStateAt"`
 	Status      resources.PoolStatus `json:"status"`
 	CloneList   []string             `json:"cloneList"`
-	Disk        *resources.Disk      `json:"disk"`
+	FileSystem  FileSystem           `json:"fileSystem"`
 }
 
 // ContainerOptions describes options for running containers.
@@ -42,4 +42,18 @@ type ContainerOptions struct {
 // Health represents a response for heath-check requests.
 type Health struct {
 	Version string `json:"engine_version"`
+}
+
+// InstanceStatusView represents view of a Database Lab Engine instance status.
+type InstanceStatusView struct {
+	*InstanceStatus
+	FileSystem *FileSystemView `json:"fileSystem"`
+	Pools      []PoolEntryView `json:"pools"`
+	Clones     []*CloneView    `json:"clones"`
+}
+
+// PoolEntryView represents a pool entry view.
+type PoolEntryView struct {
+	*PoolEntry
+	FileSystem FileSystemView `json:"fileSystem"`
 }

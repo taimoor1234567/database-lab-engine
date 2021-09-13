@@ -33,12 +33,23 @@ func list() func(*cli.Context) error {
 			return err
 		}
 
-		list, err := dblabClient.ListClones(cliCtx.Context)
+		cloneList, err := dblabClient.ListClones(cliCtx.Context)
 		if err != nil {
 			return err
 		}
 
-		commandResponse, err := json.MarshalIndent(list, "", "    ")
+		//
+		data, err := json.Marshal(cloneList)
+		if err != nil {
+			return err
+		}
+
+		var viewCloneList []*models.CloneView
+		if err = json.Unmarshal(data, &viewCloneList); err != nil {
+			return err
+		}
+
+		commandResponse, err := json.MarshalIndent(viewCloneList, "", "    ")
 		if err != nil {
 			return err
 		}
@@ -85,7 +96,12 @@ func create(cliCtx *cli.Context) error {
 		return err
 	}
 
-	commandResponse, err := json.MarshalIndent(clone, "", "    ")
+	viewClone, err := convertCloneView(clone)
+	if err != nil {
+		return err
+	}
+
+	commandResponse, err := json.MarshalIndent(viewClone, "", "    ")
 	if err != nil {
 		return err
 	}
@@ -108,7 +124,12 @@ func status() func(*cli.Context) error {
 			return err
 		}
 
-		commandResponse, err := json.MarshalIndent(clone, "", "    ")
+		viewClone, err := convertCloneView(clone)
+		if err != nil {
+			return err
+		}
+
+		commandResponse, err := json.MarshalIndent(viewClone, "", "    ")
 		if err != nil {
 			return err
 		}
@@ -138,7 +159,12 @@ func update() func(*cli.Context) error {
 			return err
 		}
 
-		commandResponse, err := json.MarshalIndent(clone, "", "    ")
+		viewClone, err := convertCloneView(clone)
+		if err != nil {
+			return err
+		}
+
+		commandResponse, err := json.MarshalIndent(viewClone, "", "    ")
 		if err != nil {
 			return err
 		}
@@ -147,6 +173,20 @@ func update() func(*cli.Context) error {
 
 		return err
 	}
+}
+
+func convertCloneView(clone *models.Clone) (*models.CloneView, error) {
+	data, err := json.Marshal(clone)
+	if err != nil {
+		return nil, err
+	}
+
+	var viewClone *models.CloneView
+	if err = json.Unmarshal(data, &viewClone); err != nil {
+		return nil, err
+	}
+
+	return viewClone, nil
 }
 
 // reset runs a request to reset clone.

@@ -317,9 +317,9 @@ func (p *Provisioner) GetSnapshots() ([]resources.Snapshot, error) {
 	return snapshots, nil
 }
 
-// GetDiskState describes the state of the managed disk.
-func (p *Provisioner) GetDiskState() (*resources.Disk, error) {
-	return p.pm.First().GetDiskState()
+// GetFilesystemState describes the state of the managed disk.
+func (p *Provisioner) GetFilesystemState() (models.FileSystem, error) {
+	return p.pm.First().GetFilesystemState()
 }
 
 // GetSessionState describes the state of the session.
@@ -361,7 +361,7 @@ func buildPoolEntry(fsm pool.FSManager) (models.PoolEntry, error) {
 		log.Err(fmt.Sprintf("failed to get clone list related to the pool %s", fsmPool.Name))
 	}
 
-	disk, err := fsm.GetDiskState()
+	fileSystem, err := fsm.GetFilesystemState()
 	if err != nil {
 		log.Err(fmt.Sprintf("failed to get disk stats for the pool %s", fsmPool.Name))
 	}
@@ -371,12 +371,14 @@ func buildPoolEntry(fsm pool.FSManager) (models.PoolEntry, error) {
 		dataStateAt = fsmPool.DSA.String()
 	}
 
+	fileSystem.Mode = fsmPool.Mode
+
 	poolEntry := models.PoolEntry{
 		Name:        fsmPool.Name,
 		Mode:        fsmPool.Mode,
 		DataStateAt: dataStateAt,
 		CloneList:   listClones,
-		Disk:        disk,
+		FileSystem:  fileSystem,
 		Status:      fsm.Pool().Status(),
 	}
 
@@ -569,7 +571,7 @@ func (p *Provisioner) getAppConfig(pool *resources.Pool, name string, port uint)
 		Host:          pool.SocketCloneDir(name),
 		Port:          port,
 		DB:            p.dbCfg,
-		Pool:          *pool,
+		Pool:          pool, // TODO: check copying: it must be read-only struct.
 		ContainerConf: p.config.ContainerConfig,
 		NetworkID:     p.networkID,
 	}

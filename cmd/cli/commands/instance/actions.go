@@ -12,6 +12,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"gitlab.com/postgres-ai/database-lab/v2/cmd/cli/commands"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/models"
 )
 
 // status runs a request to get status of the instance.
@@ -21,12 +22,22 @@ func status(cliCtx *cli.Context) error {
 		return err
 	}
 
-	list, err := dblabClient.Status(cliCtx.Context)
+	instanceStatus, err := dblabClient.Status(cliCtx.Context)
 	if err != nil {
 		return err
 	}
 
-	commandResponse, err := json.MarshalIndent(list, "", "    ")
+	data, err := json.Marshal(instanceStatus)
+	if err != nil {
+		return err
+	}
+
+	var instanceStatusView *models.InstanceStatusView
+	if err = json.Unmarshal(data, &instanceStatusView); err != nil {
+		return err
+	}
+
+	commandResponse, err := json.MarshalIndent(instanceStatusView, "", "    ")
 	if err != nil {
 		return err
 	}

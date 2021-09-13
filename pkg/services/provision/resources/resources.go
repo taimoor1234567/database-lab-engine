@@ -22,18 +22,6 @@ type Session struct {
 	ExtraConfig   map[string]string
 }
 
-// Disk defines disk status.
-// TODO(anatoly): Merge with disk from models?
-type Disk struct {
-	Size            uint64  `json:"size"`
-	Free            uint64  `json:"free"`
-	Used            uint64  `json:"used"`
-	UsedBySnapshots uint64  `json:"usedBySnapshots"`
-	UsedByChildren  uint64  `json:"usedByChildren"`
-	DataSize        uint64  `json:"dataSize"`
-	CompressRatio   float64 `json:"compressRatio"`
-}
-
 // EphemeralUser describes an ephemeral database user defined by Database Lab users.
 type EphemeralUser struct {
 	// TODO(anatoly): Were private fields. How to keep them private?

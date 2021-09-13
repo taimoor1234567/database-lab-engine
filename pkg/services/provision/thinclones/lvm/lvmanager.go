@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/models"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/resources"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/runners"
 )
@@ -125,7 +126,7 @@ func (m *LVManager) GetSessionState(_ string) (*resources.SessionState, error) {
 }
 
 // GetDiskState is not implemented.
-func (m *LVManager) GetDiskState() (*resources.Disk, error) {
+func (m *LVManager) GetFilesystemState() (models.FileSystem, error) {
 	// TODO(anatoly): Implement.
-	return &resources.Disk{}, nil
+	return models.FileSystem{}, nil
 }

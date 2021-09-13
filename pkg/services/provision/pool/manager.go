@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/models"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/resources"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/runners"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/thinclones/lvm"
@@ -36,7 +37,7 @@ type Cloner interface {
 // StateReporter describes methods of state reporting.
 type StateReporter interface {
 	GetSessionState(name string) (*resources.SessionState, error)
-	GetDiskState() (*resources.Disk, error)
+	GetFilesystemState() (models.FileSystem, error)
 }
 
 // Snapshotter describes methods of snapshot management.

@@ -16,6 +16,7 @@ import (
 	"github.com/pkg/errors"
 
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/models"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/resources"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/runners"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/util"
@@ -420,18 +421,18 @@ func (m *Manager) GetSessionState(name string) (*resources.SessionState, error) 
 	return state, nil
 }
 
-// GetDiskState returns a disk state.
-func (m *Manager) GetDiskState() (*resources.Disk, error) {
+// GetFilesystemState returns a disk state.
+func (m *Manager) GetFilesystemState() (models.FileSystem, error) {
 	parts := strings.SplitN(m.config.Pool.Name, "/", 2)
 	if len(parts) == 0 {
-		return nil, errors.New("failed to get a storage pool name")
+		return models.FileSystem{}, errors.New("failed to get a storage pool name")
 	}
 
 	parentPool := parts[0]
 
 	entries, err := m.listFilesystems(parentPool)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to list filesystems")
+		return models.FileSystem{}, errors.Wrap(err, "failed to list filesystems")
 	}
 
 	var parentPoolEntry, poolEntry *ListEntry
@@ -451,20 +452,20 @@ func (m *Manager) GetDiskState() (*resources.Disk, error) {
 	}
 
 	if parentPoolEntry == nil || poolEntry == nil {
-		return nil, errors.New("cannot get disk state: pool entries not found")
+		return models.FileSystem{}, errors.New("cannot get disk state: pool entries not found")
 	}
 
-	disk := &resources.Disk{
+	fileSystem := models.FileSystem{
 		Size:            parentPoolEntry.Available + parentPoolEntry.Used,
 		Free:            parentPoolEntry.Available,
 		Used:            parentPoolEntry.Used,
 		UsedBySnapshots: parentPoolEntry.UsedBySnapshots,
-		UsedByChildren:  parentPoolEntry.UsedByChildren,
+		UsedByClones:    parentPoolEntry.UsedByChildren,
 		DataSize:        poolEntry.LogicalReferenced,
 		CompressRatio:   parentPoolEntry.CompressRatio,
 	}
 
-	return disk, nil
+	return fileSystem, nil
 }
 
 // GetSnapshots returns a snapshot list.

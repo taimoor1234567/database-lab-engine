@@ -12,6 +12,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"gitlab.com/postgres-ai/database-lab/v2/cmd/cli/commands"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/models"
 )
 
 // list runs a request to list snapshots of an instance.
@@ -22,12 +23,22 @@ func list() func(*cli.Context) error {
 			return err
 		}
 
-		list, err := dblabClient.ListSnapshots(cliCtx.Context)
+		snapshotList, err := dblabClient.ListSnapshots(cliCtx.Context)
 		if err != nil {
 			return err
 		}
 
-		commandResponse, err := json.MarshalIndent(list, "", "    ")
+		data, err := json.Marshal(snapshotList)
+		if err != nil {
+			return err
+		}
+
+		var snapshotListView []*models.SnapshotView
+		if err = json.Unmarshal(data, &snapshotListView); err != nil {
+			return err
+		}
+
+		commandResponse, err := json.MarshalIndent(snapshotListView, "", "    ")
 		if err != nil {
 			return err
 		}

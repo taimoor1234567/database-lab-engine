@@ -99,8 +99,8 @@ func (m mockFSManager) GetSessionState(name string) (*resources.SessionState, er
 	return nil, nil
 }
 
-func (m mockFSManager) GetDiskState() (*resources.Disk, error) {
-	return nil, nil
+func (m mockFSManager) GetFilesystemState() (models.FileSystem, error) {
+	return models.FileSystem{}, nil
 }
 
 func (m mockFSManager) Pool() *resources.Pool {
@@ -128,6 +128,7 @@ func TestBuildPoolEntry(t *testing.T) {
 				DataStateAt: "2021-08-01 00:00:00 +0000 UTC",
 				Status:      resources.ActivePool,
 				CloneList:   []string{"test_clone_0001", "test_clone_0002"},
+				FileSystem:  models.FileSystem{Mode: "zfs"},
 			},
 		},
 		{
@@ -143,6 +144,7 @@ func TestBuildPoolEntry(t *testing.T) {
 				DataStateAt: "",
 				Status:      resources.EmptyPool,
 				CloneList:   []string{},
+				FileSystem:  models.FileSystem{Mode: "zfs"},
 			},
 		},
 	}

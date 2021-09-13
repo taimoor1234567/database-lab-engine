@@ -8,14 +8,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"math/big"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/dustin/go-humanize"
 	"github.com/jackc/pgtype/pgxtype"
 	"github.com/jackc/pgx/v4"
 	_ "github.com/lib/pq" // Register Postgres database driver.
@@ -309,9 +307,7 @@ func (c *Base) GetClone(id string) (*models.Clone, error) {
 	}
 
 	w.clone.Metadata.CloneDiffSize = sessionState.CloneDiffSize
-	w.clone.Metadata.CloneDiffSizeHR = humanize.BigIBytes(big.NewInt(int64(sessionState.CloneDiffSize)))
 	w.clone.Metadata.LogicalSize = sessionState.LogicalReferenced
-	w.clone.Metadata.LogicalSizeHR = humanize.BigIBytes(big.NewInt(int64(sessionState.LogicalReferenced)))
 
 	return w.clone, nil
 }
@@ -417,7 +413,7 @@ func (c *Base) ResetClone(cloneID string, resetOptions types.ResetCloneRequest) 
 
 // GetInstanceState returns the current state of instance.
 func (c *Base) GetInstanceState() (*models.InstanceStatus, error) {
-	disk, err := c.provision.GetDiskState()
+	fileSystem, err := c.provision.GetFilesystemState()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get a disk state")
 	}
@@ -426,21 +422,14 @@ func (c *Base) GetInstanceState() (*models.InstanceStatus, error) {
 	c.instanceStatus.Clones = c.GetClones()
 	c.instanceStatus.NumClones = uint64(len(c.instanceStatus.Clones))
 	c.instanceStatus.Pools = c.provision.GetPoolEntryList()
+	c.instanceStatus.FileSystem = &fileSystem
 
 	var usedByClones uint64
 	for i := range c.instanceStatus.Clones {
 		usedByClones += c.instanceStatus.Clones[i].Metadata.CloneDiffSize
 	}
 
-	c.instanceStatus.FileSystem = &models.FileSystem{
-		SizeHR:            humanize.BigIBytes(big.NewInt(int64(disk.Size))),
-		FreeHR:            humanize.BigIBytes(big.NewInt(int64(disk.Free))),
-		UsedHR:            humanize.BigIBytes(big.NewInt(int64(disk.Used))),
-		DataSizeHR:        humanize.BigIBytes(big.NewInt(int64(disk.DataSize))),
-		UsedBySnapshotsHR: humanize.BigIBytes(big.NewInt(int64(disk.UsedBySnapshots))),
-		UsedByClonesHR:    humanize.BigIBytes(big.NewInt(int64(usedByClones))),
-		CompressRatio:     disk.CompressRatio,
-	}
+	c.instanceStatus.FileSystem.UsedByClones = usedByClones
 
 	if len(c.instanceStatus.Pools) > 0 {
 		c.instanceStatus.FileSystem.Mode = c.instanceStatus.Pools[0].Mode

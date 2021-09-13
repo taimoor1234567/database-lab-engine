@@ -5,11 +5,9 @@
 package cloning
 
 import (
-	"math/big"
 	"sort"
 	"sync"
 
-	"github.com/dustin/go-humanize"
 	"github.com/pkg/errors"
 
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
@@ -45,8 +43,8 @@ func (c *Base) fetchSnapshots() error {
 			ID:           entry.ID,
 			CreatedAt:    util.FormatTime(entry.CreatedAt),
 			DataStateAt:  util.FormatTime(entry.DataStateAt),
-			PhysicalSize: humanize.BigIBytes(big.NewInt(int64(entry.Used))),
-			LogicalSize:  humanize.BigIBytes(big.NewInt(int64(entry.LogicalReferenced))),
+			PhysicalSize: entry.Used,
+			LogicalSize:  entry.LogicalReferenced,
 			Pool:         entry.Pool,
 			NumClones:    numClones,
 		}
