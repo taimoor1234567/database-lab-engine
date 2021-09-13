@@ -148,7 +148,7 @@ func (pm *Manager) GetFSManager(name string) (FSManager, error) {
 	pm.mu.Unlock()
 
 	if !ok {
-		return nil, errors.New("clone manager not found")
+		return nil, errors.New("pool manager not found")
 	}
 
 	return fsm, nil

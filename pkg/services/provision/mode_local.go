@@ -169,7 +169,11 @@ func (p *Provisioner) StartSession(snapshotID string, user resources.EphemeralUs
 	}
 
 	name := util.GetCloneName(port)
-	fsm := p.pm.First()
+
+	fsm, err := p.pm.GetFSManager(snapshot.Pool)
+	if err != nil {
+		return nil, fmt.Errorf("cannot work with pool %s: %w", snapshot.Pool, err)
+	}
 
 	log.Dbg(fmt.Sprintf(`Starting session for port: %d.`, port))
 
