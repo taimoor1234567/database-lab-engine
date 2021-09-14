@@ -44,6 +44,16 @@ type Health struct {
 	Version string `json:"engine_version"`
 }
 
+// CloneList represents a list of clones.
+type CloneList struct {
+	Clones []*Clone `json:"clones"`
+}
+
+// CloneListView represents a list of clone views.
+type CloneListView struct {
+	Clones []*CloneView `json:"clones"`
+}
+
 // InstanceStatusView represents view of a Database Lab Engine instance status.
 type InstanceStatusView struct {
 	*InstanceStatus

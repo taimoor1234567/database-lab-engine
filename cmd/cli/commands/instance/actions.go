@@ -22,18 +22,16 @@ func status(cliCtx *cli.Context) error {
 		return err
 	}
 
-	instanceStatus, err := dblabClient.Status(cliCtx.Context)
+	body, err := dblabClient.StatusRaw(cliCtx.Context)
 	if err != nil {
 		return err
 	}
 
-	data, err := json.Marshal(instanceStatus)
-	if err != nil {
-		return err
-	}
+	defer func() { _ = body.Close() }()
 
 	var instanceStatusView *models.InstanceStatusView
-	if err = json.Unmarshal(data, &instanceStatusView); err != nil {
+
+	if err := json.NewDecoder(body).Decode(&instanceStatusView); err != nil {
 		return err
 	}
 
