@@ -128,5 +128,5 @@ func (m *LVManager) GetSessionState(_ string) (*resources.SessionState, error) {
 // GetDiskState is not implemented.
 func (m *LVManager) GetFilesystemState() (models.FileSystem, error) {
 	// TODO(anatoly): Implement.
-	return models.FileSystem{}, nil
+	return models.FileSystem{Mode: PoolMode}, nil
 }

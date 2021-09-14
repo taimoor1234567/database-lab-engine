@@ -67,7 +67,7 @@ func NewManager(runner runners.Runner, config ManagerConfig) (FSManager, error) 
 	)
 
 	switch config.Pool.Mode {
-	case ZFS:
+	case zfs.PoolMode:
 		osUser, err := user.Current()
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get current user")
@@ -79,7 +79,7 @@ func NewManager(runner runners.Runner, config ManagerConfig) (FSManager, error) 
 			OSUsername:        osUser.Username,
 		})
 
-	case LVM:
+	case lvm.PoolMode:
 		if manager, err = lvm.NewFSManager(runner, config.Pool); err != nil {
 			return nil, errors.Wrap(err, "failed to initialize LVM thin-clone manager")
 		}

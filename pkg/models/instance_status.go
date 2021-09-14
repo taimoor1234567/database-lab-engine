@@ -13,7 +13,6 @@ import (
 // InstanceStatus represents status of a Database Lab Engine instance.
 type InstanceStatus struct {
 	Status              *Status          `json:"status"`
-	FileSystem          *FileSystem      `json:"fileSystem"`
 	ExpectedCloningTime float64          `json:"expectedCloningTime"`
 	NumClones           uint64           `json:"numClones"`
 	Clones              []*Clone         `json:"clones"`
@@ -57,9 +56,8 @@ type CloneListView struct {
 // InstanceStatusView represents view of a Database Lab Engine instance status.
 type InstanceStatusView struct {
 	*InstanceStatus
-	FileSystem *FileSystemView `json:"fileSystem"`
-	Pools      []PoolEntryView `json:"pools"`
-	Clones     []*CloneView    `json:"clones"`
+	Pools  []PoolEntryView `json:"pools"`
+	Clones []*CloneView    `json:"clones"`
 }
 
 // PoolEntryView represents a pool entry view.

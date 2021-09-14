@@ -317,11 +317,6 @@ func (p *Provisioner) GetSnapshots() ([]resources.Snapshot, error) {
 	return snapshots, nil
 }
 
-// GetFilesystemState describes the state of the managed disk.
-func (p *Provisioner) GetFilesystemState() (models.FileSystem, error) {
-	return p.pm.First().GetFilesystemState()
-}
-
 // GetSessionState describes the state of the session.
 func (p *Provisioner) GetSessionState(s *resources.Session) (*resources.SessionState, error) {
 	fsm, err := p.pm.GetFSManager(s.Pool)
@@ -370,8 +365,6 @@ func buildPoolEntry(fsm pool.FSManager) (models.PoolEntry, error) {
 	if !fsmPool.DSA.IsZero() {
 		dataStateAt = fsmPool.DSA.String()
 	}
-
-	fileSystem.Mode = fsmPool.Mode
 
 	poolEntry := models.PoolEntry{
 		Name:        fsmPool.Name,

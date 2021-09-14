@@ -62,7 +62,6 @@ func NewBase(cfg *Config, provision *provision.Provisioner, observingCh chan str
 				Code:    models.StatusOK,
 				Message: models.InstanceMessageOK,
 			},
-			FileSystem:  &models.FileSystem{},
 			Clones:      make([]*models.Clone, 0),
 			StartedAt:   time.Now().Truncate(time.Second),
 			Provisioner: provision.ContainerOptions(),
@@ -413,27 +412,10 @@ func (c *Base) ResetClone(cloneID string, resetOptions types.ResetCloneRequest) 
 
 // GetInstanceState returns the current state of instance.
 func (c *Base) GetInstanceState() (*models.InstanceStatus, error) {
-	fileSystem, err := c.provision.GetFilesystemState()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get a disk state")
-	}
-
 	c.instanceStatus.ExpectedCloningTime = c.getExpectedCloningTime()
 	c.instanceStatus.Clones = c.GetClones()
 	c.instanceStatus.NumClones = uint64(len(c.instanceStatus.Clones))
 	c.instanceStatus.Pools = c.provision.GetPoolEntryList()
-	c.instanceStatus.FileSystem = &fileSystem
-
-	var usedByClones uint64
-	for i := range c.instanceStatus.Clones {
-		usedByClones += c.instanceStatus.Clones[i].Metadata.CloneDiffSize
-	}
-
-	c.instanceStatus.FileSystem.UsedByClones = usedByClones
-
-	if len(c.instanceStatus.Pools) > 0 {
-		c.instanceStatus.FileSystem.Mode = c.instanceStatus.Pools[0].Mode
-	}
 
 	return c.instanceStatus, nil
 }

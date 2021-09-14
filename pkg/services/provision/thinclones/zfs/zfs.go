@@ -26,6 +26,9 @@ const (
 	headerOffset        = 1
 	dataStateAtLabel    = "dblab:datastateat"
 	isRoughStateAtLabel = "dblab:isroughdsa"
+
+	// PoolMode defines the zfs filesystem name.
+	PoolMode = "zfs"
 )
 
 // ListEntry defines entry of ZFS list command.
@@ -456,6 +459,7 @@ func (m *Manager) GetFilesystemState() (models.FileSystem, error) {
 	}
 
 	fileSystem := models.FileSystem{
+		Mode:            PoolMode,
 		Size:            parentPoolEntry.Available + parentPoolEntry.Used,
 		Free:            parentPoolEntry.Available,
 		Used:            parentPoolEntry.Used,

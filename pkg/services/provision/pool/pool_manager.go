@@ -18,14 +18,11 @@ import (
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/engine/postgres/tools"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/resources"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/runners"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/thinclones/lvm"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/thinclones/zfs"
 )
 
 const (
-	// ZFS defines the zfs filesystem name.
-	ZFS = "zfs"
-	// LVM defines the lvm filesystem name.
-	LVM = "lvm"
 	// ext4 defines the ext4 filesystem name.
 	ext4 = "ext4"
 )
@@ -250,7 +247,7 @@ func (pm *Manager) examineEntries(entries []os.DirEntry) (map[string]FSManager, 
 			continue
 		}
 
-		if fsType != ZFS && fsType != LVM {
+		if fsType != zfs.PoolMode && fsType != lvm.PoolMode {
 			log.Msg("Unsupported filesystem: ", fsType, entry.Name())
 			continue
 		}
@@ -281,7 +278,7 @@ func (pm *Manager) examineEntries(entries []os.DirEntry) (map[string]FSManager, 
 		}
 
 		// A custom pool name is not available for LVM.
-		if fsType == ZFS {
+		if fsType == zfs.PoolMode {
 			if len(poolMappings) == 0 {
 				poolMappings, err = zfs.PoolMappings(pm.runner, pm.cfg.MountDir, pm.cfg.PreSnapshotSuffix)
 				if err != nil {

@@ -100,7 +100,7 @@ func (m mockFSManager) GetSessionState(name string) (*resources.SessionState, er
 }
 
 func (m mockFSManager) GetFilesystemState() (models.FileSystem, error) {
-	return models.FileSystem{}, nil
+	return models.FileSystem{Mode: "zfs"}, nil
 }
 
 func (m mockFSManager) Pool() *resources.Pool {
