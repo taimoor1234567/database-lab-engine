@@ -142,8 +142,6 @@ func (c *Base) CreateClone(cloneRequest *types.CloneCreateRequest) (*models.Clon
 
 	w := NewCloneWrapper(clone)
 
-	w.username = clone.DB.Username
-	w.password = clone.DB.Password
 	w.timeCreatedAt = createdAt
 	w.snapshot = snapshot
 
@@ -153,8 +151,8 @@ func (c *Base) CreateClone(cloneRequest *types.CloneCreateRequest) (*models.Clon
 	c.setWrapper(clone.ID, w)
 
 	ephemeralUser := resources.EphemeralUser{
-		Name:        w.username,
-		Password:    w.password,
+		Name:        clone.DB.Username,
+		Password:    clone.DB.Password,
 		Restricted:  cloneRequest.DB.Restricted,
 		AvailableDB: cloneRequest.DB.DBName,
 	}

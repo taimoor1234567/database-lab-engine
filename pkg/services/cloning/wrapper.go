@@ -20,9 +20,6 @@ type CloneWrapper struct {
 	timeCreatedAt time.Time
 	timeStartedAt time.Time
 
-	username string
-	password string
-
 	snapshot models.Snapshot
 }
 
