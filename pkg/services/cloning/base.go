@@ -45,29 +45,20 @@ type Config struct {
 
 // Base provides cloning service.
 type Base struct {
-	config         *Config
-	cloneMutex     sync.RWMutex
-	clones         map[string]*CloneWrapper
-	instanceStatus *models.InstanceStatus
-	snapshotMutex  sync.RWMutex
-	snapshots      []models.Snapshot
-	provision      *provision.Provisioner
-	observingCh    chan string
+	config        *Config
+	cloneMutex    sync.RWMutex
+	clones        map[string]*CloneWrapper
+	snapshotMutex sync.RWMutex
+	snapshots     []models.Snapshot
+	provision     *provision.Provisioner
+	observingCh   chan string
 }
 
 // NewBase instances a new Base service.
 func NewBase(cfg *Config, provision *provision.Provisioner, observingCh chan string) *Base {
 	return &Base{
-		config: cfg,
-		clones: make(map[string]*CloneWrapper),
-		instanceStatus: &models.InstanceStatus{
-			Status: &models.Status{
-				Code:    models.StatusOK,
-				Message: models.InstanceMessageOK,
-			},
-			FileSystem: &models.FileSystem{},
-			Clones:     make([]*models.Clone, 0),
-		},
+		config:      cfg,
+		clones:      make(map[string]*CloneWrapper),
 		provision:   provision,
 		observingCh: observingCh,
 	}
@@ -409,19 +400,27 @@ func (c *Base) GetInstanceState() (*models.InstanceStatus, error) {
 		return nil, errors.Wrap(err, "failed to get a disk state")
 	}
 
-	c.instanceStatus.FileSystem.Size = disk.Size
-	c.instanceStatus.FileSystem.Free = disk.Free
-	c.instanceStatus.FileSystem.Used = disk.Used
-	c.instanceStatus.DataSize = disk.DataSize
-	c.instanceStatus.FileSystem.SizeHR = humanize.BigIBytes(big.NewInt(int64(disk.Size)))
-	c.instanceStatus.FileSystem.FreeHR = humanize.BigIBytes(big.NewInt(int64(disk.Free)))
-	c.instanceStatus.FileSystem.UsedHR = humanize.BigIBytes(big.NewInt(int64(disk.Used)))
-	c.instanceStatus.DataSizeHR = humanize.BigIBytes(big.NewInt(int64(disk.DataSize)))
-	c.instanceStatus.ExpectedCloningTime = c.getExpectedCloningTime()
-	c.instanceStatus.Clones = c.GetClones()
-	c.instanceStatus.NumClones = uint64(len(c.instanceStatus.Clones))
+	instanceStatus := &models.InstanceStatus{
+		FileSystem: &models.FileSystem{},
+	}
 
-	return c.instanceStatus, nil
+	instanceStatus.FileSystem.Size = disk.Size
+	instanceStatus.FileSystem.Free = disk.Free
+	instanceStatus.FileSystem.Used = disk.Used
+	instanceStatus.DataSize = disk.DataSize
+	instanceStatus.FileSystem.SizeHR = humanize.BigIBytes(big.NewInt(int64(disk.Size)))
+	instanceStatus.FileSystem.FreeHR = humanize.BigIBytes(big.NewInt(int64(disk.Free)))
+	instanceStatus.FileSystem.UsedHR = humanize.BigIBytes(big.NewInt(int64(disk.Used)))
+	instanceStatus.DataSizeHR = humanize.BigIBytes(big.NewInt(int64(disk.DataSize)))
+	instanceStatus.ExpectedCloningTime = c.getExpectedCloningTime()
+	instanceStatus.Clones = c.GetClones()
+	instanceStatus.NumClones = uint64(len(instanceStatus.Clones))
+	instanceStatus.Status = &models.Status{
+		Code:    models.StatusOK,
+		Message: models.InstanceMessageOK,
+	}
+
+	return instanceStatus, nil
 }
 
 // GetSnapshots returns all available snapshots.
