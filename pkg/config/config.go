@@ -60,20 +60,22 @@ func LoadConfiguration() (*Config, error) {
 
 // loadInstanceID tries to make instance ID persistent across runs and load its value after restart
 func (cfg *Config) loadInstanceID() error {
-	idfilepath := filepath.Join(cfg.PoolManager.MountDir, instanceIDFile)
-	data, err := os.ReadFile(idfilepath)
+	idFilepath := filepath.Join(cfg.PoolManager.MountDir, instanceIDFile)
 
-	if os.IsNotExist(err) {
-		cfg.Global.InstanceID = xid.New().String()
-		log.Dbg("no instance_id file was found, generate new instance id", cfg.Global.InstanceID)
-		return os.WriteFile(idfilepath, []byte(cfg.Global.InstanceID), 0544)
-	}
-
+	data, err := os.ReadFile(idFilepath)
 	if err != nil {
+		if os.IsNotExist(err) {
+			cfg.Global.InstanceID = xid.New().String()
+			log.Dbg("no instance_id file was found, generate new instance ID", cfg.Global.InstanceID)
+
+			return os.WriteFile(idFilepath, []byte(cfg.Global.InstanceID), 0544)
+		}
+
 		return fmt.Errorf("failed to load instanceid, %w", err)
 	}
 
 	cfg.Global.InstanceID = string(data)
+
 	return nil
 }
 

@@ -131,7 +131,7 @@ func main() {
 	server := srv.NewServer(&cfg.Server, &cfg.Global, obs, cloningSvc, platformSvc, dockerCLI, est, pm)
 	shutdownCh := setShutdownListener()
 
-	go setReloadListener(ctx, cfg.Global.InstanceID, provisionSvc, retrievalSvc, pm, cloningSvc, platformSvc, est, server)
+	go setReloadListener(ctx, provisionSvc, retrievalSvc, pm, cloningSvc, platformSvc, est, server)
 
 	server.InitHandlers()
 
@@ -194,7 +194,7 @@ func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, retr
 	return nil
 }
 
-func setReloadListener(ctx context.Context, instanceID string, provisionSvc *provision.Provisioner, retrievalSvc *retrieval.Retrieval,
+func setReloadListener(ctx context.Context, provisionSvc *provision.Provisioner, retrievalSvc *retrieval.Retrieval,
 	pm *pool.Manager, cloningSvc *cloning.Base, platformSvc *platform.Service, est *estimator.Estimator, server *srv.Server) {
 	reloadCh := make(chan os.Signal, 1)
 	signal.Notify(reloadCh, syscall.SIGHUP)
