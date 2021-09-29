@@ -19,13 +19,8 @@ test:
 
 lint:
   stage: test
-  before_script:
-    - export COMMIT_TAG="v1.2.5"
   script:
     - make lint
-    # test
-    - export CLEAN_TAG=$(echo ${COMMIT_TAG#"v"})
-    - echo $CLEAN_TAG
 
 
 .only_var_template: &only_tag_release
