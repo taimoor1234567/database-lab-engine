@@ -5,7 +5,6 @@
 // TODO(anatoly):
 // - Validate configs in all components.
 // - Tests.
-// - Don't kill clones on shutdown/start.
 
 package main
 
@@ -83,26 +82,6 @@ func main() {
 		return
 	}
 
-	emergencyShutdown := func() {
-		cancel()
-
-		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), shutdownTimeout)
-		defer shutdownCancel()
-
-		shutdownDatabaseLabEngine(shutdownCtx, dockerCLI, cfg.Global, pm.Active().Pool())
-	}
-
-	// Create a new retrieval service to prepare a data directory and start snapshotting.
-	retrievalSvc := retrieval.New(cfg, dockerCLI, pm, runner)
-
-	if err := retrievalSvc.Run(ctx); err != nil {
-		log.Err("Failed to run the data retrieval service:", err)
-		emergencyShutdown()
-		return
-	}
-
-	defer retrievalSvc.Stop()
-
 	dbCfg := &resources.DB{
 		Username: cfg.Global.Database.User(),
 		DBName:   cfg.Global.Database.Name(),
@@ -114,19 +93,42 @@ func main() {
 		log.Errf(errors.WithMessage(err, `error in the "provision" section of the config`).Error())
 	}
 
-	obsCh := make(chan string, 1)
+	observingChan := make(chan string, 1)
 
-	cloningSvc := cloning.NewBase(&cfg.Cloning, provisionSvc, obsCh)
+	cloningSvc := cloning.NewBase(&cfg.Cloning, provisionSvc, observingChan)
+
+	emergencyShutdown := func() {
+		cancel()
+
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer shutdownCancel()
+
+		shutdownDatabaseLabEngine(shutdownCtx, dockerCLI, cfg.Global, pm.Active().Pool(), cloningSvc)
+	}
+
+	// Create a new retrieval service to prepare a data directory and start snapshotting.
+	retrievalSvc := retrieval.New(cfg, dockerCLI, pm, runner)
+
+	if err := retrievalSvc.Run(ctx); err != nil {
+		log.Err("Failed to run the data retrieval service:", err)
+		emergencyShutdown()
+
+		return
+	}
+
+	defer retrievalSvc.Stop()
+
 	if err = cloningSvc.Run(ctx); err != nil {
 		log.Err(err)
 		emergencyShutdown()
+
 		return
 	}
 
 	obs := observer.NewObserver(dockerCLI, &cfg.Observer, platformSvc.Client, pm)
 	est := estimator.NewEstimator(&cfg.Estimator)
 
-	go removeObservingClones(obsCh, obs)
+	go removeObservingClones(observingChan, obs)
 
 	server := srv.NewServer(&cfg.Server, &cfg.Global, obs, cloningSvc, platformSvc, dockerCLI, est, pm)
 	shutdownCh := setShutdownListener()
@@ -152,7 +154,7 @@ func main() {
 		log.Msg(err)
 	}
 
-	shutdownDatabaseLabEngine(shutdownCtx, dockerCLI, cfg.Global, pm.Active().Pool())
+	shutdownDatabaseLabEngine(shutdownCtx, dockerCLI, cfg.Global, pm.Active().Pool(), cloningSvc)
 }
 
 func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, retrievalSvc *retrieval.Retrieval,
@@ -217,7 +219,8 @@ func setShutdownListener() chan os.Signal {
 	return c
 }
 
-func shutdownDatabaseLabEngine(ctx context.Context, dockerCLI *client.Client, global global.Config, fsp *resources.Pool) {
+func shutdownDatabaseLabEngine(ctx context.Context, dockerCLI *client.Client, global global.Config, fsp *resources.Pool,
+	cloningSvc *cloning.Base) {
 	log.Msg("Stopping control containers")
 
 	if err := cont.StopControlContainers(ctx, dockerCLI, global.InstanceID, fsp.DataDir()); err != nil {
@@ -225,6 +228,12 @@ func shutdownDatabaseLabEngine(ctx context.Context, dockerCLI *client.Client, gl
 	}
 
 	log.Msg("Control containers have been stopped")
+
+	log.Msg("Saving running sessions")
+
+	if err := cloningSvc.Save(); err != nil {
+		log.Err("Failed to save running sessions", err)
+	}
 }
 
 func removeObservingClones(obsCh chan string, obs *observer.Observer) {

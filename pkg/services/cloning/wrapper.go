@@ -14,19 +14,18 @@ import (
 
 // CloneWrapper represents a cloning service wrapper.
 type CloneWrapper struct {
-	clone   *models.Clone
-	session *resources.Session
+	Clone   *models.Clone
+	Session *resources.Session
 
-	timeCreatedAt time.Time
-	timeStartedAt time.Time
-
-	snapshot models.Snapshot
+	TimeCreatedAt time.Time
+	TimeStartedAt time.Time
 }
 
 // NewCloneWrapper constructs a new CloneWrapper.
-func NewCloneWrapper(clone *models.Clone) *CloneWrapper {
+func NewCloneWrapper(clone *models.Clone, createdAt time.Time) *CloneWrapper {
 	w := &CloneWrapper{
-		clone: clone,
+		Clone:         clone,
+		TimeCreatedAt: createdAt,
 	}
 
 	return w
@@ -34,5 +33,5 @@ func NewCloneWrapper(clone *models.Clone) *CloneWrapper {
 
 // IsProtected checks if clone is protected.
 func (cw CloneWrapper) IsProtected() bool {
-	return cw.clone != nil && cw.clone.Protected
+	return cw.Clone != nil && cw.Clone.Protected
 }

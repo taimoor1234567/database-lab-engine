@@ -113,13 +113,7 @@ func isValidConfigModeLocal(config Config) error {
 
 // Init inits provision.
 func (p *Provisioner) Init() error {
-	err := p.stopAllSessions()
-	if err != nil {
-		return errors.Wrap(err, "failed to stop all session")
-	}
-
-	err = p.initPortPool()
-	if err != nil {
+	if err := p.initPortPool(); err != nil {
 		return errors.Wrap(err, "failed to init port pool")
 	}
 
@@ -353,7 +347,7 @@ func (p *Provisioner) initPortPool() error {
 	availablePorts := 0
 	for port := portOpts.From; port < portOpts.To; port++ {
 		if err := p.portChecker.checkPortAvailability(host, port); err != nil {
-			log.Msg(fmt.Printf("port %d is not available, marking as busy", port))
+			log.Msg(fmt.Sprintf("port %d is not available, marking as busy", port))
 
 			if err := p.setPortStatus(port, true); err != nil {
 				return errors.Wrapf(err, "port %d is not available", port)
