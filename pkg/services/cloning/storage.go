@@ -10,13 +10,14 @@ import (
 	"io/ioutil"
 	"os"
 
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/util"
 )
 
 const sessionsFilename = "sessions.json"
 
-// Load reads sessions data from disk.
-func (c *Base) Load() error {
+// LoadSessionState reads sessions data from disk.
+func (c *Base) LoadSessionState() error {
 	c.cloneMutex.Lock()
 	defer c.cloneMutex.Unlock()
 
@@ -40,14 +41,17 @@ func (c *Base) Load() error {
 	return json.Unmarshal(data, &c.clones)
 }
 
-// Save writes sessions data to disk.
-func (c *Base) Save() error {
+// SaveClonesState writes clones state to disk.
+func (c *Base) SaveClonesState() {
+	if err := c.saveClonesState(); err != nil {
+		log.Err("Failed to save the state of running clones", err)
+	}
+}
+
+// saveClonesState tries to write clones state to disk and returns an error on failure.
+func (c *Base) saveClonesState() error {
 	c.cloneMutex.Lock()
 	defer c.cloneMutex.Unlock()
-
-	if len(c.clones) == 0 {
-		return nil
-	}
 
 	sessionsPath, err := util.GetMetaPath(sessionsFilename)
 	if err != nil {

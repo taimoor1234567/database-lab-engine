@@ -79,7 +79,7 @@ func (c *Base) Run(ctx context.Context) error {
 		log.Err("No available snapshots: ", err)
 	}
 
-	if err := c.Load(); err != nil {
+	if err := c.LoadSessionState(); err != nil {
 		return fmt.Errorf("failed to load sessions: %w", err)
 	}
 
@@ -162,41 +162,46 @@ func (c *Base) CreateClone(cloneRequest *types.CloneCreateRequest) (*models.Clon
 			return
 		}
 
-		c.cloneMutex.Lock()
-		defer c.cloneMutex.Unlock()
-
-		w, ok := c.clones[cloneID]
-		if !ok {
-			log.Errf("Clone %q not found", cloneID)
-			return
-		}
-
-		w.Session = session
-		w.TimeStartedAt = time.Now()
-
-		clone := w.Clone
-		clone.Status = models.Status{
-			Code:    models.StatusOK,
-			Message: models.CloneMessageOK,
-		}
-
-		dbName := clone.DB.DBName
-		if dbName == "" {
-			dbName = defaultDatabaseName
-		}
-
-		clone.DB.Port = strconv.FormatUint(uint64(session.Port), 10)
-		clone.DB.Host = c.config.AccessHost
-		clone.DB.ConnStr = fmt.Sprintf("host=%s port=%s user=%s dbname=%s",
-			clone.DB.Host, clone.DB.Port, clone.DB.Username, dbName)
-
-		clone.Metadata = models.CloneMetadata{
-			CloningTime:    w.TimeStartedAt.Sub(w.TimeCreatedAt).Seconds(),
-			MaxIdleMinutes: c.config.MaxIdleMinutes,
-		}
+		c.fillCloneSession(cloneID, session)
+		c.SaveClonesState()
 	}()
 
 	return clone, nil
+}
+
+func (c *Base) fillCloneSession(cloneID string, session *resources.Session) {
+	c.cloneMutex.Lock()
+	defer c.cloneMutex.Unlock()
+
+	w, ok := c.clones[cloneID]
+	if !ok {
+		log.Errf("Clone %q not found", cloneID)
+		return
+	}
+
+	w.Session = session
+	w.TimeStartedAt = time.Now()
+
+	clone := w.Clone
+	clone.Status = models.Status{
+		Code:    models.StatusOK,
+		Message: models.CloneMessageOK,
+	}
+
+	dbName := clone.DB.DBName
+	if dbName == "" {
+		dbName = defaultDatabaseName
+	}
+
+	clone.DB.Port = strconv.FormatUint(uint64(session.Port), 10)
+	clone.DB.Host = c.config.AccessHost
+	clone.DB.ConnStr = fmt.Sprintf("host=%s port=%s user=%s dbname=%s",
+		clone.DB.Host, clone.DB.Port, clone.DB.Username, dbName)
+
+	clone.Metadata = models.CloneMetadata{
+		CloningTime:    w.TimeStartedAt.Sub(w.TimeCreatedAt).Seconds(),
+		MaxIdleMinutes: c.config.MaxIdleMinutes,
+	}
 }
 
 // ConnectToClone connects to clone by cloneID.
@@ -262,6 +267,8 @@ func (c *Base) DestroyClone(cloneID string) error {
 
 		c.deleteClone(cloneID)
 		c.observingCh <- cloneID
+
+		c.SaveClonesState()
 	}()
 
 	return nil
@@ -307,6 +314,8 @@ func (c *Base) UpdateClone(id string, patch types.CloneUpdateRequest) (*models.C
 	w.Clone.Protected = patch.Protected
 	clone = w.Clone
 	c.cloneMutex.Unlock()
+
+	c.SaveClonesState()
 
 	return clone, nil
 }
@@ -385,6 +394,8 @@ func (c *Base) ResetClone(cloneID string, resetOptions types.ResetCloneRequest) 
 		}); err != nil {
 			log.Errf("failed to update clone status: %v", err)
 		}
+
+		c.SaveClonesState()
 	}()
 
 	return nil
@@ -568,6 +579,7 @@ func (c *Base) runIdleCheck(ctx context.Context) {
 		case <-idleTimer.C:
 			c.destroyIdleClones(ctx)
 			idleTimer.Reset(idleCheckDuration)
+			c.SaveClonesState()
 
 		case <-ctx.Done():
 			idleTimer.Stop()

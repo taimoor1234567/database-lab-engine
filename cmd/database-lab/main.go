@@ -229,11 +229,9 @@ func shutdownDatabaseLabEngine(ctx context.Context, dockerCLI *client.Client, gl
 
 	log.Msg("Control containers have been stopped")
 
-	log.Msg("Saving running sessions")
+	log.Msg("Saving state of running clones")
 
-	if err := cloningSvc.Save(); err != nil {
-		log.Err("Failed to save running sessions", err)
-	}
+	cloningSvc.SaveClonesState()
 }
 
 func removeObservingClones(obsCh chan string, obs *observer.Observer) {
