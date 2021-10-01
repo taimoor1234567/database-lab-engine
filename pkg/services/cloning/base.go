@@ -79,11 +79,11 @@ func (c *Base) Run(ctx context.Context) error {
 		log.Err("No available snapshots: ", err)
 	}
 
-	if err := c.LoadSessionState(); err != nil {
+	if err := c.RestoreClonesState(); err != nil {
 		return fmt.Errorf("failed to load sessions: %w", err)
 	}
 
-	c.filterRunningClones()
+	c.filterRunningClones(ctx)
 
 	go c.runIdleCheck(ctx)
 

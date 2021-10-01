@@ -14,11 +14,11 @@ import (
 
 // CloneWrapper represents a cloning service wrapper.
 type CloneWrapper struct {
-	Clone   *models.Clone
-	Session *resources.Session
+	Clone   *models.Clone      `json:"clone"`
+	Session *resources.Session `json:"session"`
 
-	TimeCreatedAt time.Time
-	TimeStartedAt time.Time
+	TimeCreatedAt time.Time `json:"time_created_at"`
+	TimeStartedAt time.Time `json:"time_started_at"`
 }
 
 // NewCloneWrapper constructs a new CloneWrapper.

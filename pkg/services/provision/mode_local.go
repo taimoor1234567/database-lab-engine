@@ -162,7 +162,7 @@ func (p *Provisioner) StartSession(snapshotID string, user resources.EphemeralUs
 		if err != nil {
 			p.revertSession(name)
 
-			if portErr := p.freePort(port); portErr != nil {
+			if portErr := p.FreePort(port); portErr != nil {
 				log.Err(portErr)
 			}
 		}
@@ -215,7 +215,7 @@ func (p *Provisioner) StopSession(session *resources.Session) error {
 		return errors.Wrap(err, "failed to destroy a clone")
 	}
 
-	if err := p.freePort(session.Port); err != nil {
+	if err := p.FreePort(session.Port); err != nil {
 		return errors.Wrap(err, "failed to unbind a port")
 	}
 
@@ -358,6 +358,10 @@ func (p *Provisioner) initPortPool() error {
 		availablePorts++
 	}
 
+	if availablePorts == 0 {
+		return NewNoRoomError("no available ports")
+	}
+
 	log.Msg(availablePorts, " ports are available")
 
 	return nil
@@ -416,8 +420,8 @@ func externalIP() (string, error) {
 	return string(bytes.TrimSpace(res)), nil
 }
 
-// freePort marks the port as free.
-func (p *Provisioner) freePort(port uint) error {
+// FreePort marks the port as free.
+func (p *Provisioner) FreePort(port uint) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -425,7 +429,7 @@ func (p *Provisioner) freePort(port uint) error {
 }
 
 // setPortStatus updates the port status.
-// It's not safe to invoke without ports mutex locking. Use allocatePort and freePort methods.
+// It's not safe to invoke without ports mutex locking. Use allocatePort and FreePort methods.
 func (p *Provisioner) setPortStatus(port uint, bind bool) error {
 	portOpts := p.config.PortPool
 
@@ -599,4 +603,14 @@ func (p *Provisioner) prepareDB(pgConf *resources.AppConfig, user resources.Ephe
 	}
 
 	return nil
+}
+
+// IsCloneRunning checks if clone is running.
+func (p *Provisioner) IsCloneRunning(ctx context.Context, cloneName string) bool {
+	isRunning, err := docker.IsContainerExist(ctx, p.dockerClient, cloneName)
+	if err != nil {
+		log.Err(err)
+	}
+
+	return isRunning
 }
