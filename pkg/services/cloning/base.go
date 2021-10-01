@@ -83,6 +83,8 @@ func (c *Base) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to load sessions: %w", err)
 	}
 
+	c.filterRunningClones()
+
 	go c.runIdleCheck(ctx)
 
 	return nil

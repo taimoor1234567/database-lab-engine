@@ -41,6 +41,33 @@ func (c *Base) LoadSessionState() error {
 	return json.Unmarshal(data, &c.clones)
 }
 
+func (c *Base) filterRunningClones() {
+	c.cloneMutex.Lock()
+	defer c.cloneMutex.Unlock()
+
+	clones := make(map[string]*CloneWrapper, len(c.clones))
+	snapshotCache := make(map[string]struct{})
+
+	for _, wrapper := range c.clones {
+		if wrapper.Clone == nil {
+			continue
+		}
+
+		if _, ok := snapshotCache[wrapper.Clone.Snapshot.ID]; !ok {
+			snapshot, err := c.getSnapshotByID(wrapper.Clone.Snapshot.ID)
+			if err != nil {
+				continue
+			}
+
+			snapshotCache[snapshot.ID] = struct{}{}
+		}
+
+		clones[wrapper.Clone.ID] = wrapper
+	}
+
+	c.clones = clones
+}
+
 // SaveClonesState writes clones state to disk.
 func (c *Base) SaveClonesState() {
 	if err := c.saveClonesState(); err != nil {
