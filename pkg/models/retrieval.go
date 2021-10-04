@@ -57,6 +57,7 @@ const (
 type Retrieving struct {
 	Mode        RetrievalMode       `json:"mode"`
 	Status      RefreshStatus       `json:"status"`
+	LastRefresh *time.Time          `json:"lastRefresh"`
 	NextRefresh *time.Time          `json:"nextRefresh"`
 	Alerts      map[AlertType]Alert `json:"alerts"`
 }

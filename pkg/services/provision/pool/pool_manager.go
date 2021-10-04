@@ -117,11 +117,6 @@ func (pm *Manager) GetPoolToUpdate() *list.Element {
 			return nil
 		}
 
-		// The first active pool cannot be updated as it leads to downtime.
-		if element == pm.fsManagerList.Front() {
-			return nil
-		}
-
 		fsm := pm.getFSManager(element.Value.(string))
 
 		clones, err := fsm.ListClonesNames()

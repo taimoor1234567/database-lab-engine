@@ -13,10 +13,11 @@ import (
 
 // State contains state of retrieval service.
 type State struct {
-	Mode   models.RetrievalMode
-	Status models.RefreshStatus
-	mu     sync.Mutex
-	alerts map[models.AlertType]models.Alert
+	Mode        models.RetrievalMode
+	Status      models.RefreshStatus
+	LastRefresh *time.Time
+	mu          sync.Mutex
+	alerts      map[models.AlertType]models.Alert
 }
 
 // Alerts returns all registered retrieval alerts.
