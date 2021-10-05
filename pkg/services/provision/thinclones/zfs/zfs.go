@@ -19,6 +19,7 @@ import (
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/models"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/resources"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/runners"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/thinclones"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/util"
 )
 
@@ -272,6 +273,21 @@ func (m *Manager) CreateSnapshot(poolSuffix, dataStateAt string) (string, error)
 	}
 
 	snapshotName := getSnapshotName(poolName, dataStateAt)
+
+	snapshotList, err := m.listSnapshots(poolName)
+	if err != nil {
+		var emptyErr *EmptyPoolError
+		if !errors.As(err, &emptyErr) {
+			return "", fmt.Errorf("failed to get a snapshot list: %w", err)
+		}
+	}
+
+	for _, entry := range snapshotList {
+		if entry.Name == snapshotName {
+			return "", thinclones.NewSnapshotExistsError(snapshotName)
+		}
+	}
+
 	cmd := fmt.Sprintf("zfs snapshot -r %s", snapshotName)
 
 	if _, err := m.runner.Run(cmd, true); err != nil {

@@ -7,6 +7,7 @@ package retrieval
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -97,7 +98,16 @@ func (r *Retrieval) Run(ctx context.Context) error {
 	runCtx, cancel := context.WithCancel(ctx)
 	r.ctxCancel = cancel
 
-	if err := r.run(runCtx, r.poolManager.First()); err != nil {
+	fsManager, err := r.getPoolToDataRefresh()
+	if err != nil {
+		r.State.addAlert(models.RefreshFailed, "pool to perform data refresh not found")
+
+		return fmt.Errorf("failed to choose pool to refresh: %w", err)
+	}
+
+	log.Msg("Pool to perform a full refresh: ", fsManager.Pool().Name)
+
+	if err := r.run(runCtx, fsManager); err != nil {
 		r.State.addAlert(models.RefreshFailed, err.Error())
 		return err
 	}
@@ -105,6 +115,30 @@ func (r *Retrieval) Run(ctx context.Context) error {
 	r.setupScheduler(ctx)
 
 	return nil
+}
+
+func (r *Retrieval) getPoolToDataRefresh() (pool.FSManager, error) {
+	firstPool := r.poolManager.First()
+	if firstPool == nil {
+		return nil, errors.New("no available pools")
+	}
+
+	if firstPool.Pool().Status() == resources.EmptyPool {
+		return firstPool, nil
+	}
+
+	elementToRefresh := r.poolManager.GetPoolToUpdate()
+
+	if elementToRefresh == nil || elementToRefresh.Value == nil {
+		return nil, errors.New("pool to perform data refresh not found")
+	}
+
+	poolToRefresh, err := r.poolManager.GetFSManager(elementToRefresh.Value.(string))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get FSManager: %w", err)
+	}
+
+	return poolToRefresh, nil
 }
 
 func (r *Retrieval) run(ctx context.Context, fsm pool.FSManager) (err error) {
