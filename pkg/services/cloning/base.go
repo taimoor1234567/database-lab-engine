@@ -97,9 +97,13 @@ func (c *Base) Run(ctx context.Context) error {
 func (c *Base) cleanupInvalidClones() error {
 	keepClones := make(map[string]struct{})
 
+	c.cloneMutex.Lock()
+
 	for _, clone := range c.clones {
 		keepClones[util.GetCloneName(clone.Session.Port)] = struct{}{}
 	}
+
+	c.cloneMutex.Unlock()
 
 	log.Dbg("Cleaning up invalid clone instances.\nKeep clones:", keepClones)
 
