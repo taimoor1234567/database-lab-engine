@@ -85,7 +85,27 @@ func (c *Base) Run(ctx context.Context) error {
 
 	c.filterRunningClones(ctx)
 
+	if err := c.cleanupInvalidClones(); err != nil {
+		return fmt.Errorf("failed to cleanup invalid clones: %w", err)
+	}
+
 	go c.runIdleCheck(ctx)
+
+	return nil
+}
+
+func (c *Base) cleanupInvalidClones() error {
+	keepClones := make(map[string]struct{})
+
+	for _, clone := range c.clones {
+		keepClones[util.GetCloneName(clone.Session.Port)] = struct{}{}
+	}
+
+	log.Dbg("Cleaning up invalid clone instances.\nKeep clones:", keepClones)
+
+	if err := c.provision.StopAllSessions(keepClones); err != nil {
+		return fmt.Errorf("failed to stop invalid sessions: %w", err)
+	}
 
 	return nil
 }

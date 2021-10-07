@@ -443,9 +443,10 @@ func (p *Provisioner) setPortStatus(port uint, bind bool) error {
 	return nil
 }
 
-func (p *Provisioner) stopAllSessions() error {
+// StopAllSessions stops all running clone containers.
+func (p *Provisioner) StopAllSessions(exceptClones map[string]struct{}) error {
 	for _, fsm := range p.pm.GetFSManagerList() {
-		if err := p.stopPoolSessions(fsm); err != nil {
+		if err := p.stopPoolSessions(fsm, exceptClones); err != nil {
 			return err
 		}
 	}
@@ -453,7 +454,7 @@ func (p *Provisioner) stopAllSessions() error {
 	return nil
 }
 
-func (p *Provisioner) stopPoolSessions(fsm pool.FSManager) error {
+func (p *Provisioner) stopPoolSessions(fsm pool.FSManager, exceptClones map[string]struct{}) error {
 	fsPool := fsm.Pool()
 
 	instances, err := postgres.List(p.runner, fsPool.Name)
@@ -464,6 +465,10 @@ func (p *Provisioner) stopPoolSessions(fsm pool.FSManager) error {
 	log.Dbg("Containers running:", instances)
 
 	for _, instance := range instances {
+		if _, ok := exceptClones[instance]; ok {
+			continue
+		}
+
 		log.Dbg("Stopping container:", instance)
 
 		if err = postgres.Stop(p.runner, fsPool, instance); err != nil {
@@ -479,6 +484,10 @@ func (p *Provisioner) stopPoolSessions(fsm pool.FSManager) error {
 	log.Dbg("Clone list:", clones)
 
 	for _, clone := range clones {
+		if _, ok := exceptClones[clone]; ok {
+			continue
+		}
+
 		if err := fsm.DestroyClone(clone); err != nil {
 			return err
 		}

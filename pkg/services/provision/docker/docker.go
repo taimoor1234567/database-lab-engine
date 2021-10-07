@@ -186,9 +186,9 @@ func RemoveContainer(r runners.Runner, cloneName string) (string, error) {
 	return r.Run(dockerRemoveCmd, false)
 }
 
-// ListContainers lists containers.
+// ListContainers lists container names.
 func ListContainers(r runners.Runner, clonePool string) ([]string, error) {
-	dockerListCmd := fmt.Sprintf(`docker container ls --filter "label=%s" --filter "label=%s" --all --quiet`,
+	dockerListCmd := fmt.Sprintf(`docker container ls --filter "label=%s" --filter "label=%s" --all --format '{{.Names}}'`,
 		labelClone, clonePool)
 
 	out, err := r.Run(dockerListCmd, false)
