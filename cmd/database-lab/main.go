@@ -67,13 +67,13 @@ func main() {
 		log.Err("hostname is empty")
 	}
 
-	internalNetwork, err := networks.Setup(ctx, dockerCLI, cfg.Global.InstanceID, hostname)
+	internalNetworkID, err := networks.Setup(ctx, dockerCLI, cfg.Global.InstanceID, hostname)
 	if err != nil {
 		log.Errf(err.Error())
 		return
 	}
 
-	defer networks.Stop(dockerCLI, internalNetwork.ID)
+	defer networks.Stop(dockerCLI, internalNetworkID, hostname)
 
 	// Create a platform service to make requests to Platform.
 	platformSvc, err := platform.New(ctx, cfg.Platform)
@@ -109,7 +109,7 @@ func main() {
 	defer retrievalSvc.Stop()
 
 	// Create a cloning service to provision new clones.
-	provisionSvc, err := provision.New(ctx, &cfg.Provision, dbCfg, dockerCLI, pm, internalNetwork.ID)
+	provisionSvc, err := provision.New(ctx, &cfg.Provision, dbCfg, dockerCLI, pm, internalNetworkID)
 	if err != nil {
 		log.Errf(errors.WithMessage(err, `error in the "provision" section of the config`).Error())
 	}
