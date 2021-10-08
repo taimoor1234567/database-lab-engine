@@ -90,7 +90,37 @@ func (c *Base) Run(ctx context.Context) error {
 		log.Err("No available snapshots: ", err)
 	}
 
+	if err := c.RestoreClonesState(); err != nil {
+		return fmt.Errorf("failed to load sessions: %w", err)
+	}
+
+	c.filterRunningClones(ctx)
+
+	if err := c.cleanupInvalidClones(); err != nil {
+		return fmt.Errorf("failed to cleanup invalid clones: %w", err)
+	}
+
 	go c.runIdleCheck(ctx)
+
+	return nil
+}
+
+func (c *Base) cleanupInvalidClones() error {
+	keepClones := make(map[string]struct{})
+
+	c.cloneMutex.Lock()
+
+	for _, clone := range c.clones {
+		keepClones[util.GetCloneName(clone.Session.Port)] = struct{}{}
+	}
+
+	c.cloneMutex.Unlock()
+
+	log.Dbg("Cleaning up invalid clone instances.\nKeep clones:", keepClones)
+
+	if err := c.provision.StopAllSessions(keepClones); err != nil {
+		return fmt.Errorf("failed to stop invalid sessions: %w", err)
+	}
 
 	return nil
 }
@@ -137,32 +167,24 @@ func (c *Base) CreateClone(cloneRequest *types.CloneCreateRequest) (*models.Clon
 		},
 		DB: models.Database{
 			Username: cloneRequest.DB.Username,
-			Password: cloneRequest.DB.Password,
 			DBName:   cloneRequest.DB.DBName,
 		},
 	}
 
-	w := NewCloneWrapper(clone)
-
-	w.username = clone.DB.Username
-	w.password = clone.DB.Password
-	w.timeCreatedAt = createdAt
-	w.snapshot = *snapshot
-
-	clone.DB.Password = ""
+	w := NewCloneWrapper(clone, createdAt)
 	cloneID := clone.ID
 
 	c.setWrapper(clone.ID, w)
 
 	ephemeralUser := resources.EphemeralUser{
-		Name:        w.username,
-		Password:    w.password,
+		Name:        cloneRequest.DB.Username,
+		Password:    cloneRequest.DB.Password,
 		Restricted:  cloneRequest.DB.Restricted,
 		AvailableDB: cloneRequest.DB.DBName,
 	}
 
 	go func() {
-		session, err := c.provision.StartSession(w.snapshot.ID, ephemeralUser, cloneRequest.ExtraConf)
+		session, err := c.provision.StartSession(clone.Snapshot.ID, ephemeralUser, cloneRequest.ExtraConf)
 		if err != nil {
 			// TODO(anatoly): Empty room case.
 			log.Errf("Failed to start session: %v.", err)
@@ -177,42 +199,47 @@ func (c *Base) CreateClone(cloneRequest *types.CloneCreateRequest) (*models.Clon
 			return
 		}
 
-		c.cloneMutex.Lock()
-		defer c.cloneMutex.Unlock()
-
-		w, ok := c.clones[cloneID]
-		if !ok {
-			log.Errf("Clone %q not found", cloneID)
-			return
-		}
-
-		w.session = session
-		w.timeStartedAt = time.Now()
-		c.incrementCloneNumber(w.snapshot.ID)
-
-		clone := w.clone
-		clone.Status = models.Status{
-			Code:    models.StatusOK,
-			Message: models.CloneMessageOK,
-		}
-
-		dbName := clone.DB.DBName
-		if dbName == "" {
-			dbName = defaultDatabaseName
-		}
-
-		clone.DB.Port = strconv.FormatUint(uint64(session.Port), 10)
-		clone.DB.Host = c.config.AccessHost
-		clone.DB.ConnStr = fmt.Sprintf("host=%s port=%s user=%s dbname=%s",
-			clone.DB.Host, clone.DB.Port, clone.DB.Username, dbName)
-
-		clone.Metadata = models.CloneMetadata{
-			CloningTime:    w.timeStartedAt.Sub(w.timeCreatedAt).Seconds(),
-			MaxIdleMinutes: c.config.MaxIdleMinutes,
-		}
+		c.fillCloneSession(cloneID, session)
+		c.SaveClonesState()
 	}()
 
 	return clone, nil
+}
+
+func (c *Base) fillCloneSession(cloneID string, session *resources.Session) {
+	c.cloneMutex.Lock()
+	defer c.cloneMutex.Unlock()
+
+	w, ok := c.clones[cloneID]
+	if !ok {
+		log.Errf("Clone %q not found", cloneID)
+		return
+	}
+
+	w.Session = session
+	w.TimeStartedAt = time.Now()
+	c.incrementCloneNumber(w.Clone.Snapshot.ID)
+
+	clone := w.Clone
+	clone.Status = models.Status{
+		Code:    models.StatusOK,
+		Message: models.CloneMessageOK,
+	}
+
+	dbName := clone.DB.DBName
+	if dbName == "" {
+		dbName = defaultDatabaseName
+	}
+
+	clone.DB.Port = strconv.FormatUint(uint64(session.Port), 10)
+	clone.DB.Host = c.config.AccessHost
+	clone.DB.ConnStr = fmt.Sprintf("host=%s port=%s user=%s dbname=%s",
+		clone.DB.Host, clone.DB.Port, clone.DB.Username, dbName)
+
+	clone.Metadata = models.CloneMetadata{
+		CloningTime:    w.TimeStartedAt.Sub(w.TimeCreatedAt).Seconds(),
+		MaxIdleMinutes: c.config.MaxIdleMinutes,
+	}
 }
 
 // ConnectToClone connects to clone by cloneID.
@@ -223,7 +250,7 @@ func (c *Base) ConnectToClone(ctx context.Context, cloneID string) (pgxtype.Quer
 	}
 
 	connStr := connectionString(
-		w.session.SocketHost, strconv.FormatUint(uint64(w.session.Port), 10), w.session.User, w.clone.DB.DBName)
+		w.Session.SocketHost, strconv.FormatUint(uint64(w.Session.Port), 10), w.Session.User, w.Clone.DB.DBName)
 
 	db, err := pgx.Connect(ctx, connStr)
 	if err != nil {
@@ -245,7 +272,7 @@ func (c *Base) DestroyClone(cloneID string) error {
 		return models.New(models.ErrCodeNotFound, "clone not found")
 	}
 
-	if w.clone.Protected && w.clone.Status.Code != models.StatusFatal {
+	if w.Clone.Protected && w.Clone.Status.Code != models.StatusFatal {
 		return models.New(models.ErrCodeBadRequest, "clone is protected")
 	}
 
@@ -256,15 +283,15 @@ func (c *Base) DestroyClone(cloneID string) error {
 		return errors.Wrap(err, "failed to update clone status")
 	}
 
-	if w.session == nil {
+	if w.Session == nil {
 		c.deleteClone(cloneID)
-		c.decrementCloneNumber(w.snapshot.ID)
+		c.decrementCloneNumber(w.Clone.Snapshot.ID)
 
 		return nil
 	}
 
 	go func() {
-		if err := c.provision.StopSession(w.session); err != nil {
+		if err := c.provision.StopSession(w.Session); err != nil {
 			log.Errf("Failed to delete a clone: %+v.", err)
 
 			if updateErr := c.UpdateCloneStatus(cloneID, models.Status{
@@ -278,8 +305,10 @@ func (c *Base) DestroyClone(cloneID string) error {
 		}
 
 		c.deleteClone(cloneID)
-		c.decrementCloneNumber(w.snapshot.ID)
+		c.decrementCloneNumber(w.Clone.Snapshot.ID)
 		c.observingCh <- cloneID
+
+		c.SaveClonesState()
 	}()
 
 	return nil
@@ -292,23 +321,23 @@ func (c *Base) GetClone(id string) (*models.Clone, error) {
 		return nil, errors.New("clone not found")
 	}
 
-	if w.session == nil {
+	if w.Session == nil {
 		// Not started yet.
-		return w.clone, nil
+		return w.Clone, nil
 	}
 
-	sessionState, err := c.provision.GetSessionState(w.session)
+	sessionState, err := c.provision.GetSessionState(w.Session)
 	if err != nil {
 		// Session not ready yet.
 		log.Err(errors.Wrap(err, "failed to get a session state"))
 
-		return w.clone, nil
+		return w.Clone, nil
 	}
 
-	w.clone.Metadata.CloneDiffSize = sessionState.CloneDiffSize
-	w.clone.Metadata.LogicalSize = sessionState.LogicalReferenced
+	w.Clone.Metadata.CloneDiffSize = sessionState.CloneDiffSize
+	w.Clone.Metadata.LogicalSize = sessionState.LogicalReferenced
 
-	return w.clone, nil
+	return w.Clone, nil
 }
 
 // UpdateClone updates clone.
@@ -322,10 +351,11 @@ func (c *Base) UpdateClone(id string, patch types.CloneUpdateRequest) (*models.C
 
 	// Set fields.
 	c.cloneMutex.Lock()
-	w.clone.Protected = patch.Protected
-
-	clone = w.clone
+	w.Clone.Protected = patch.Protected
+	clone = w.Clone
 	c.cloneMutex.Unlock()
+
+	c.SaveClonesState()
 
 	return clone, nil
 }
@@ -340,7 +370,7 @@ func (c *Base) UpdateCloneStatus(cloneID string, status models.Status) error {
 		return errors.Errorf("clone %q not found", cloneID)
 	}
 
-	w.clone.Status = status
+	w.Clone.Status = status
 
 	return nil
 }
@@ -352,7 +382,7 @@ func (c *Base) ResetClone(cloneID string, resetOptions types.ResetCloneRequest) 
 		return models.New(models.ErrCodeNotFound, "the clone not found")
 	}
 
-	if w.session == nil {
+	if w.Session == nil || w.Clone == nil {
 		return models.New(models.ErrCodeNotFound, "clone is not started yet")
 	}
 
@@ -369,7 +399,7 @@ func (c *Base) ResetClone(cloneID string, resetOptions types.ResetCloneRequest) 
 
 	// If the snapshotID variable is empty, the latest snapshot will be chosen.
 	if snapshotID == "" && !resetOptions.Latest {
-		snapshotID = w.snapshot.ID
+		snapshotID = w.Clone.Snapshot.ID
 	}
 
 	if err := c.UpdateCloneStatus(cloneID, models.Status{
@@ -381,7 +411,7 @@ func (c *Base) ResetClone(cloneID string, resetOptions types.ResetCloneRequest) 
 
 	go func() {
 		// TODO(akartasov): adjust clone counter for the snapshot after clone resetting
-		snapshot, err := c.provision.ResetSession(w.session, snapshotID)
+		snapshot, err := c.provision.ResetSession(w.Session, snapshotID)
 		if err != nil {
 			log.Errf("Failed to reset clone: %+v.", err)
 
@@ -396,7 +426,7 @@ func (c *Base) ResetClone(cloneID string, resetOptions types.ResetCloneRequest) 
 		}
 
 		c.cloneMutex.Lock()
-		w.clone.Snapshot = snapshot
+		w.Clone.Snapshot = snapshot
 		c.cloneMutex.Unlock()
 
 		if err := c.UpdateCloneStatus(cloneID, models.Status{
@@ -405,6 +435,8 @@ func (c *Base) ResetClone(cloneID string, resetOptions types.ResetCloneRequest) 
 		}); err != nil {
 			log.Errf("failed to update clone status: %v", err)
 		}
+
+		c.SaveClonesState()
 	}()
 
 	return nil
@@ -434,18 +466,20 @@ func (c *Base) GetSnapshots() ([]models.Snapshot, error) {
 func (c *Base) GetClones() []*models.Clone {
 	clones := make([]*models.Clone, 0, c.lenClones())
 
+	c.cloneMutex.RLock()
 	for _, cloneWrapper := range c.clones {
-		if cloneWrapper.clone.Snapshot != nil {
-			snapshot, err := c.getSnapshotByID(cloneWrapper.clone.Snapshot.ID)
+		if cloneWrapper.Clone.Snapshot != nil {
+			snapshot, err := c.getSnapshotByID(cloneWrapper.Clone.Snapshot.ID)
 			if err != nil {
-				log.Err("Snapshot not found: ", cloneWrapper.clone.Snapshot.ID)
+				log.Err("Snapshot not found: ", cloneWrapper.Clone.Snapshot.ID)
 			}
 
-			cloneWrapper.clone.Snapshot = snapshot
+			cloneWrapper.Clone.Snapshot = snapshot
 		}
 
-		clones = append(clones, cloneWrapper.clone)
+		clones = append(clones, cloneWrapper.Clone)
 	}
+	c.cloneMutex.RUnlock()
 
 	sort.Slice(clones, func(i, j int) bool {
 		return clones[i].CreatedAt > clones[j].CreatedAt
@@ -497,7 +531,7 @@ func (c *Base) getExpectedCloningTime() float64 {
 
 	c.cloneMutex.RLock()
 	for _, cloneWrapper := range c.clones {
-		sum += cloneWrapper.clone.Metadata.CloningTime
+		sum += cloneWrapper.Clone.Metadata.CloningTime
 	}
 	c.cloneMutex.RUnlock()
 
@@ -516,6 +550,7 @@ func (c *Base) runIdleCheck(ctx context.Context) {
 		case <-idleTimer.C:
 			c.destroyIdleClones(ctx)
 			idleTimer.Reset(idleCheckDuration)
+			c.SaveClonesState()
 
 		case <-ctx.Done():
 			idleTimer.Stop()
@@ -532,14 +567,14 @@ func (c *Base) destroyIdleClones(ctx context.Context) {
 		default:
 			isIdleClone, err := c.isIdleClone(cloneWrapper)
 			if err != nil {
-				log.Errf("Failed to check the idleness of clone %s: %v.", cloneWrapper.clone.ID, err)
+				log.Errf("Failed to check the idleness of clone %s: %v.", cloneWrapper.Clone.ID, err)
 				continue
 			}
 
 			if isIdleClone {
-				log.Msg(fmt.Sprintf("Idle clone %q is going to be removed.", cloneWrapper.clone.ID))
+				log.Msg(fmt.Sprintf("Idle clone %q is going to be removed.", cloneWrapper.Clone.ID))
 
-				if err = c.DestroyClone(cloneWrapper.clone.ID); err != nil {
+				if err = c.DestroyClone(cloneWrapper.Clone.ID); err != nil {
 					log.Errf("Failed to destroy clone: %+v.", err)
 					continue
 				}
@@ -555,11 +590,11 @@ func (c *Base) isIdleClone(wrapper *CloneWrapper) (bool, error) {
 	idleDuration := time.Duration(c.config.MaxIdleMinutes) * time.Minute
 	minimumTime := currentTime.Add(-idleDuration)
 
-	if wrapper.clone.Protected || wrapper.clone.Status.Code == models.StatusExporting || wrapper.timeStartedAt.After(minimumTime) {
+	if wrapper.Clone.Protected || wrapper.Clone.Status.Code == models.StatusExporting || wrapper.TimeStartedAt.After(minimumTime) {
 		return false, nil
 	}
 
-	session := wrapper.session
+	session := wrapper.Session
 
 	// TODO(akartasov): Remove wrappers without session.
 	if session == nil {

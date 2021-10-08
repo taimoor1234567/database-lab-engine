@@ -34,7 +34,7 @@ func (c *Base) fetchSnapshots() error {
 		numClones := 0
 
 		for cloneName := range c.clones {
-			if c.clones[cloneName] != nil && c.clones[cloneName].snapshot.ID == entry.ID {
+			if c.clones[cloneName] != nil && c.clones[cloneName].Clone.Snapshot.ID == entry.ID {
 				numClones++
 			}
 		}
