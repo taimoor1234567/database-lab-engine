@@ -89,6 +89,10 @@ func (c *Base) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to cleanup invalid clones: %w", err)
 	}
 
+	if err := c.provision.RevisePortPool(); err != nil {
+		return fmt.Errorf("failed to revise port pool: %w", err)
+	}
+
 	go c.runIdleCheck(ctx)
 
 	return nil
