@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/docker/docker/client"
 	"github.com/gorilla/mux"
@@ -44,6 +45,7 @@ type Server struct {
 	httpSrv   *http.Server
 	docker    *client.Client
 	pm        *pool.Manager
+	startedAt time.Time
 }
 
 // NewServer initializes a new Server instance with provided configuration.
@@ -61,6 +63,7 @@ func NewServer(cfg *srvCfg.Config, globalCfg *global.Config, cloning *cloning.Ba
 		upgrader:  websocket.Upgrader{},
 		docker:    dockerClient,
 		pm:        pm,
+		startedAt: time.Now().Truncate(time.Second),
 	}
 
 	return server

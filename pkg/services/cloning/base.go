@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/AlekSi/pointer"
 	"github.com/jackc/pgtype/pgxtype"
 	"github.com/jackc/pgx/v4"
 	_ "github.com/lib/pq" // Register Postgres database driver.
@@ -27,6 +28,7 @@ import (
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/resources"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/util"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/util/pglog"
+	"gitlab.com/postgres-ai/database-lab/v2/version"
 )
 
 const (
@@ -62,8 +64,11 @@ func NewBase(cfg *Config, provision *provision.Provisioner, observingCh chan str
 				Code:    models.StatusOK,
 				Message: models.InstanceMessageOK,
 			},
+			Engine: models.Engine{
+				Version:   version.GetVersion(),
+				StartedAt: pointer.ToTimeOrNil(time.Now().Truncate(time.Second)),
+			},
 			Clones:      make([]*models.Clone, 0),
-			StartedAt:   time.Now().Truncate(time.Second),
 			Provisioner: provision.ContainerOptions(),
 		},
 		provision:   provision,

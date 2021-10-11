@@ -51,7 +51,7 @@ func (c *Client) StatusRaw(ctx context.Context) (io.ReadCloser, error) {
 }
 
 // Health provides instance health info.
-func (c *Client) Health(ctx context.Context) (*models.Health, error) {
+func (c *Client) Health(ctx context.Context) (*models.Engine, error) {
 	request, err := http.NewRequest(http.MethodGet, c.URL("/healthz").String(), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to make a request")
@@ -64,11 +64,11 @@ func (c *Client) Health(ctx context.Context) (*models.Health, error) {
 
 	defer func() { _ = response.Body.Close() }()
 
-	var health models.Health
+	var engine models.Engine
 
-	if err := json.NewDecoder(response.Body).Decode(&health); err != nil {
+	if err := json.NewDecoder(response.Body).Decode(&engine); err != nil {
 		return nil, errors.Wrap(err, "failed to get response")
 	}
 
-	return &health, nil
+	return &engine, nil
 }
