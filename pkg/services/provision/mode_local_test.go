@@ -28,8 +28,6 @@ func TestPortAllocation(t *testing.T) {
 	}
 
 	p, err := New(context.Background(), cfg, &resources.DB{}, &client.Client{}, &pool.Manager{}, "networkID")
-
-	// Initialize port pool.
 	require.NoError(t, err)
 
 	// Allocate a new port.
