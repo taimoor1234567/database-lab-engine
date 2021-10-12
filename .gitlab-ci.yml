@@ -112,7 +112,6 @@ build-binary-client-rc:
       - bin
   services:
     - name: docker:dind
-      command: ["--mtu=1400"] # TODO: remove
   script:
     - apk update && apk upgrade && apk add --no-cache bash # TODO(anatoly): Remove dependency.
     - bash ./scripts/ci_docker_build_push.sh
