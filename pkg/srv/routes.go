@@ -36,7 +36,6 @@ func (s *Server) getInstanceStatus(w http.ResponseWriter, r *http.Request) {
 	refresh := models.Retrieving{
 		Mode:        s.Retrieval.State.Mode,
 		Status:      s.Retrieval.State.Status,
-		Alerts:      s.Retrieval.State.Alerts(),
 		LastRefresh: s.Retrieval.State.LastRefresh,
 	}
 
