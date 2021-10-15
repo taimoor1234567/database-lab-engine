@@ -75,5 +75,15 @@ func ParseUnixTime(str string) (time.Time, error) {
 
 // ParseCustomTime returns time parsed from string in defined format.
 func ParseCustomTime(str string) (time.Time, error) {
-	return time.Parse("20060102150405", str)
+	return time.Parse(DataStateAtFormat, str)
+}
+
+// GetDataFreshness returns the time elapsed since the specified date.
+func GetDataFreshness(dataStateAt string) float64 {
+	parsedTime, err := ParseCustomTime(dataStateAt)
+	if err != nil {
+		return -1
+	}
+
+	return time.Since(parsedTime).Seconds()
 }

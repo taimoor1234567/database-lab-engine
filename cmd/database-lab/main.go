@@ -32,7 +32,9 @@ import (
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/resources"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/runners"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/srv"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/telemetry"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/util/networks"
+	"gitlab.com/postgres-ai/database-lab/v2/version"
 )
 
 const (
@@ -82,6 +84,8 @@ func main() {
 		return
 	}
 
+	tm := telemetry.New(cfg.Global.InstanceID, platformSvc.Client)
+
 	dbCfg := &resources.DB{
 		Username: cfg.Global.Database.User(),
 		DBName:   cfg.Global.Database.Name(),
@@ -97,7 +101,7 @@ func main() {
 	}
 
 	// Create a new retrieval service to prepare a data directory and start snapshotting.
-	retrievalSvc := retrieval.New(cfg, dockerCLI, pm, runner)
+	retrievalSvc := retrieval.New(cfg, dockerCLI, pm, tm, runner)
 
 	if err := retrievalSvc.Run(ctx); err != nil {
 		log.Err("Failed to run the data retrieval service:", err)
@@ -116,7 +120,7 @@ func main() {
 
 	observingChan := make(chan string, 1)
 
-	cloningSvc := cloning.NewBase(&cfg.Cloning, provisionSvc, observingChan)
+	cloningSvc := cloning.NewBase(&cfg.Cloning, provisionSvc, tm, observingChan)
 	if err = cloningSvc.Run(ctx); err != nil {
 		log.Err(err)
 		emergencyShutdown()
@@ -129,7 +133,14 @@ func main() {
 
 	go removeObservingClones(observingChan, obs)
 
-	server := srv.NewServer(&cfg.Server, &cfg.Global, cloningSvc, retrievalSvc, platformSvc, dockerCLI, obs, est, pm)
+	tm.SendEvent(ctx, telemetry.EngineStartedEvent, telemetry.EngineStarted{
+		EngineVersion: version.GetVersion(),
+		DBVersion:     provisionSvc.DetectDBVersion(),
+		Pools:         pm.CollectPoolStat(),
+		Restore:       retrievalSvc.CollectRestoreTelemetry(),
+	})
+
+	server := srv.NewServer(&cfg.Server, &cfg.Global, cloningSvc, retrievalSvc, platformSvc, dockerCLI, obs, est, pm, tm)
 	shutdownCh := setShutdownListener()
 
 	go setReloadListener(ctx, provisionSvc, retrievalSvc, pm, cloningSvc, platformSvc, est, server)
@@ -155,6 +166,7 @@ func main() {
 
 	shutdownDatabaseLabEngine(shutdownCtx, dockerCLI, cfg.Global, pm.First().Pool())
 	cloningSvc.SaveClonesState()
+	tm.SendEvent(ctx, telemetry.EngineStoppedEvent, telemetry.EngineStopped{})
 }
 
 func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, retrievalSvc *retrieval.Retrieval,

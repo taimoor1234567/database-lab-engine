@@ -699,3 +699,10 @@ func (p *Provisioner) IsCloneRunning(ctx context.Context, cloneName string) bool
 
 	return isRunning
 }
+
+// DetectDBVersion detects version of the database.
+func (p *Provisioner) DetectDBVersion() string {
+	// TODO: extract version.
+	// tools.DetectPGVersion(p.pm.First().Pool().DataDir())
+	return p.config.DockerImage
+}
