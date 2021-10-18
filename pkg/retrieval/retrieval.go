@@ -102,6 +102,14 @@ func (r *Retrieval) Run(ctx context.Context) error {
 
 	fsManager, err := r.getPoolToDataRefresh()
 	if err != nil {
+		var skipError *SkipRefreshingError
+		if errors.As(err, &skipError) {
+			log.Msg("Continue without performing a full refresh:", skipError.Error())
+			r.setupScheduler(ctx)
+
+			return nil
+		}
+
 		r.tm.SendEvent(ctx, telemetry.AlertEvent, telemetry.Alert{
 			Level:   models.RefreshFailed,
 			Message: "Pool to perform data refresh not found",
@@ -135,6 +143,10 @@ func (r *Retrieval) getPoolToDataRefresh() (pool.FSManager, error) {
 	elementToRefresh := r.poolManager.GetPoolToUpdate()
 
 	if elementToRefresh == nil || elementToRefresh.Value == nil {
+		if firstPool.Pool().Status() == resources.ActivePool {
+			return nil, NewSkipRefreshingError("pool to refresh not found, but the current pool is active")
+		}
+
 		return nil, errors.New("pool to perform data refresh not found")
 	}
 

@@ -84,7 +84,7 @@ func main() {
 		return
 	}
 
-	tm := telemetry.New(cfg.Global.InstanceID, platformSvc.Client)
+	tm := telemetry.New(cfg.Global, platformSvc.Client)
 
 	dbCfg := &resources.DB{
 		Username: cfg.Global.Database.User(),
@@ -143,7 +143,7 @@ func main() {
 	server := srv.NewServer(&cfg.Server, &cfg.Global, cloningSvc, retrievalSvc, platformSvc, dockerCLI, obs, est, pm, tm)
 	shutdownCh := setShutdownListener()
 
-	go setReloadListener(ctx, provisionSvc, retrievalSvc, pm, cloningSvc, platformSvc, est, server)
+	go setReloadListener(ctx, provisionSvc, tm, retrievalSvc, pm, cloningSvc, platformSvc, est, server)
 
 	server.InitHandlers()
 
@@ -166,10 +166,10 @@ func main() {
 
 	shutdownDatabaseLabEngine(shutdownCtx, dockerCLI, cfg.Global, pm.First().Pool())
 	cloningSvc.SaveClonesState()
-	tm.SendEvent(ctx, telemetry.EngineStoppedEvent, telemetry.EngineStopped{})
+	tm.SendEvent(ctx, telemetry.EngineStoppedEvent, telemetry.EngineStopped{Uptime: server.Uptime()})
 }
 
-func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, retrievalSvc *retrieval.Retrieval,
+func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, tm *telemetry.Agent, retrievalSvc *retrieval.Retrieval,
 	pm *pool.Manager, cloningSvc *cloning.Base, platformSvc *platform.Service, est *estimator.Estimator, server *srv.Server) error {
 	cfg, err := config.LoadConfiguration()
 	if err != nil {
@@ -199,6 +199,7 @@ func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, retr
 	}
 
 	provisionSvc.Reload(cfg.Provision, dbCfg)
+	tm.Reload(cfg.Global)
 	retrievalSvc.Reload(ctx, cfg)
 	cloningSvc.Reload(cfg.Cloning)
 	platformSvc.Reload(newPlatformSvc)
@@ -208,7 +209,7 @@ func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, retr
 	return nil
 }
 
-func setReloadListener(ctx context.Context, provisionSvc *provision.Provisioner, retrievalSvc *retrieval.Retrieval,
+func setReloadListener(ctx context.Context, provisionSvc *provision.Provisioner, tm *telemetry.Agent, retrievalSvc *retrieval.Retrieval,
 	pm *pool.Manager, cloningSvc *cloning.Base, platformSvc *platform.Service, est *estimator.Estimator, server *srv.Server) {
 	reloadCh := make(chan os.Signal, 1)
 	signal.Notify(reloadCh, syscall.SIGHUP)
@@ -216,7 +217,7 @@ func setReloadListener(ctx context.Context, provisionSvc *provision.Provisioner,
 	for range reloadCh {
 		log.Msg("Reloading configuration")
 
-		if err := reloadConfig(ctx, provisionSvc, retrievalSvc, pm, cloningSvc, platformSvc, est, server); err != nil {
+		if err := reloadConfig(ctx, provisionSvc, tm, retrievalSvc, pm, cloningSvc, platformSvc, est, server); err != nil {
 			log.Err("Failed to reload configuration", err)
 		}
 

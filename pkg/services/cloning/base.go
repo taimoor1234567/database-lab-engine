@@ -69,6 +69,7 @@ func NewBase(cfg *Config, provision *provision.Provisioner, tm *telemetry.Agent,
 			Engine: models.Engine{
 				Version:   version.GetVersion(),
 				StartedAt: pointer.ToTimeOrNil(time.Now().Truncate(time.Second)),
+				Telemetry: pointer.ToBool(tm.IsEnabled()),
 			},
 			Cloning: models.Cloning{
 				Clones: make([]*models.Clone, 0),
@@ -467,6 +468,7 @@ func (c *Base) GetInstanceState() (*models.InstanceStatus, error) {
 		NumClones:           uint64(len(clones)),
 	}
 	c.instanceStatus.Pools = c.provision.GetPoolEntryList()
+	c.instanceStatus.Engine.Telemetry = pointer.ToBool(c.tm.IsEnabled())
 
 	return c.instanceStatus, nil
 }

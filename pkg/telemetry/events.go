@@ -6,6 +6,8 @@
 package telemetry
 
 import (
+	"time"
+
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/models"
 )
 
@@ -33,7 +35,9 @@ type Restore struct {
 }
 
 // EngineStopped describes the engine stop event.
-type EngineStopped struct{}
+type EngineStopped struct {
+	Uptime time.Duration `json:"uptime"`
+}
 
 // SnapshotCreated describes a snapshot creation event.
 type SnapshotCreated struct{}

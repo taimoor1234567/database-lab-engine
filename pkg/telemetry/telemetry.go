@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/client/platform"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/config/global"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
 )
 
@@ -39,16 +40,35 @@ const (
 // Agent represent a telemetry agent to collect engine data.
 type Agent struct {
 	instanceID string
+	cfg        global.Telemetry
 	platform   *platform.Client
 }
 
 // New creates a new agent.
-func New(instanceID string, platform *platform.Client) *Agent {
-	return &Agent{instanceID: instanceID, platform: platform}
+func New(cfg global.Config, platform *platform.Client) *Agent {
+	return &Agent{
+		instanceID: cfg.InstanceID,
+		cfg:        cfg.Telemetry,
+		platform:   platform,
+	}
+}
+
+// Reload reloads configuration of the telemetry agent.
+func (a *Agent) Reload(cfg global.Config) {
+	a.cfg = cfg.Telemetry
+}
+
+// IsEnabled checks if telemetry is enabled.
+func (a *Agent) IsEnabled() bool {
+	return a.cfg.Enabled
 }
 
 // SendEvent sends a telemetry event.
 func (a *Agent) SendEvent(ctx context.Context, eventType string, payload interface{}) {
+	if !a.IsEnabled() {
+		return
+	}
+
 	_, err := a.platform.SendTelemetryEvent(ctx, platform.TelemetryEvent{
 		InstanceID: a.instanceID,
 		EventType:  eventType,

@@ -151,3 +151,8 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	log.Msg("Server shutting down...")
 	return s.httpSrv.Shutdown(ctx)
 }
+
+// Uptime returns the server uptime.
+func (s *Server) Uptime() time.Duration {
+	return time.Since(s.startedAt)
+}

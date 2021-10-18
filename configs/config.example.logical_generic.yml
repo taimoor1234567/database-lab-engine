@@ -42,6 +42,11 @@ global:
     # Default database name.
     dbname: postgres
 
+  # Telemetry configuration options.
+  telemetry:
+    # Enable collecting of telemetry indicators.
+    enabled: true
+
 # Manages filesystem pools (in the case of ZFS) or volume groups.
 poolManager:
   # The full path which contains the pool mount directories. mountDir can contain multiple pool directories.
