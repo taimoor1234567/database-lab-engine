@@ -441,10 +441,6 @@ func (p *Provisioner) RevisePortPool() error {
 		availablePorts++
 	}
 
-	if availablePorts == 0 {
-		return NewNoRoomError("no available ports")
-	}
-
 	log.Msg(availablePorts, " ports are available")
 
 	return nil
