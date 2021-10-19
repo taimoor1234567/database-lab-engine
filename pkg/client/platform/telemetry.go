@@ -27,7 +27,7 @@ func (p *Client) SendTelemetryEvent(ctx context.Context, request TelemetryEvent)
 
 	log.Dbg("Send telemetry event", request)
 
-	if err := p.doPost(ctx, "/rpc/send_telemetry_event", request, &respData); err != nil {
+	if err := p.doPost(ctx, "/rpc/telemetry_event", request, &respData); err != nil {
 		return respData, fmt.Errorf("failed to post request: %w", err)
 	}
 
