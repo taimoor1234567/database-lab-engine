@@ -10,6 +10,8 @@ import (
 	"math"
 	"strconv"
 	"time"
+
+	"github.com/AlekSi/pointer"
 )
 
 // TODO (akartasov): Check if functions are being used.
@@ -79,11 +81,11 @@ func ParseCustomTime(str string) (time.Time, error) {
 }
 
 // GetDataFreshness returns the time elapsed since the specified date.
-func GetDataFreshness(dataStateAt string) float64 {
+func GetDataFreshness(dataStateAt string) *float64 {
 	parsedTime, err := ParseCustomTime(dataStateAt)
 	if err != nil {
-		return -1
+		return nil
 	}
 
-	return time.Since(parsedTime).Seconds()
+	return pointer.ToFloat64(time.Since(parsedTime).Seconds())
 }

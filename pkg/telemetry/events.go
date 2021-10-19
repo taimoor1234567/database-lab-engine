@@ -44,9 +44,9 @@ type SnapshotCreated struct{}
 
 // CloneCreated describes the clone creation and clone reset events.
 type CloneCreated struct {
-	ID          string  `json:"id"`
-	CloningTime float64 `json:"cloning_time"`
-	DSADiff     float64 `json:"dsa_diff"`
+	ID          string   `json:"id"`
+	CloningTime float64  `json:"cloning_time"`
+	DSADiff     *float64 `json:"dsa_diff,omitempty"`
 }
 
 // CloneDestroyed describes a clone destruction event.
