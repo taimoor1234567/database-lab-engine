@@ -84,8 +84,6 @@ func main() {
 		return
 	}
 
-	tm := telemetry.New(cfg.Global, platformSvc.Client)
-
 	dbCfg := &resources.DB{
 		Username: cfg.Global.Database.User(),
 		DBName:   cfg.Global.Database.Name(),
@@ -98,6 +96,12 @@ func main() {
 		defer shutdownCancel()
 
 		shutdownDatabaseLabEngine(shutdownCtx, dockerCLI, cfg.Global, pm.First().Pool())
+	}
+
+	tm, err := telemetry.New(cfg.Global)
+	if err != nil {
+		log.Errf(errors.WithMessage(err, "failed to initialize a telemetry service").Error())
+		return
 	}
 
 	// Create a new retrieval service to prepare a data directory and start snapshotting.

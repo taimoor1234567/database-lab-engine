@@ -44,8 +44,9 @@ global:
 
   # Telemetry configuration options.
   telemetry:
-    # Enable collecting of telemetry indicators.
     enabled: true
+    # Telemetry API URL. To send anonymous telemetry, keep it default ("https://postgres.ai/api/general").
+    url: "https://postgres.ai/api/general"
 
 # Manages filesystem pools (in the case of ZFS) or volume groups.
 poolManager:

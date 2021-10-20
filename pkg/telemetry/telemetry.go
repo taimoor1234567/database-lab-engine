@@ -7,6 +7,7 @@ package telemetry
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/client/platform"
@@ -45,12 +46,20 @@ type Agent struct {
 }
 
 // New creates a new agent.
-func New(cfg global.Config, platform *platform.Client) *Agent {
+func New(cfg global.Config) (*Agent, error) {
+	platformClient, err := platform.NewClient(platform.ClientConfig{
+		URL:         cfg.Telemetry.URL,
+		AccessToken: cfg.InstanceID, // Use the instance ID as a token to keep events anonymous and protect API from random bots.
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create a new telemetry client: %w", err)
+	}
+
 	return &Agent{
 		instanceID: cfg.InstanceID,
 		cfg:        cfg.Telemetry,
-		platform:   platform,
-	}
+		platform:   platformClient,
+	}, nil
 }
 
 // Reload reloads configuration of the telemetry agent.

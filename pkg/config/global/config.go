@@ -44,5 +44,6 @@ func (d *Database) Name() string {
 
 // Telemetry contains configuration of Database Lab Engine telemetry.
 type Telemetry struct {
-	Enabled bool `yaml:"enabled"`
+	Enabled bool   `yaml:"enabled"`
+	URL     string `yaml:"url"`
 }
