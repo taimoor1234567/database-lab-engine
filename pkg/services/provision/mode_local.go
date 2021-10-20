@@ -260,6 +260,7 @@ func (p *Provisioner) ResetSession(session *resources.Session, snapshotID string
 		}
 
 		session.Pool = snapshot.Pool
+		session.SocketHost = newFSManager.Pool().SocketCloneDir(name)
 	}
 
 	defer func() {
