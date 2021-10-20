@@ -42,7 +42,11 @@ global:
     # Default database name.
     dbname: postgres
 
-  # Telemetry configuration options.
+    # Telemetry: anonymous statistics sent to Postgres.ai.
+    # Used to analyze DLE usage, it helps the DLE maintainers
+    # make decisions on product development. Please leave it enabled
+    # if possible – this will contribute to DLE development.
+    # The full list of data points being collected: <TODO: documentation link>
   telemetry:
     # Enable collecting of telemetry indicators.
     enabled: true
