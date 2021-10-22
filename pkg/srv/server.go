@@ -153,6 +153,6 @@ func (s *Server) Shutdown(ctx context.Context) error {
 }
 
 // Uptime returns the server uptime.
-func (s *Server) Uptime() time.Duration {
-	return time.Since(s.startedAt)
+func (s *Server) Uptime() float64 {
+	return time.Since(s.startedAt).Truncate(time.Second).Seconds()
 }
