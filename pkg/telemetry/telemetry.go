@@ -8,7 +8,6 @@ package telemetry
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/client/platform"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/config/global"
@@ -81,7 +80,6 @@ func (a *Agent) SendEvent(ctx context.Context, eventType string, payload interfa
 	_, err := a.platform.SendTelemetryEvent(ctx, platform.TelemetryEvent{
 		InstanceID: a.instanceID,
 		EventType:  eventType,
-		Timestamp:  time.Now(),
 		Payload:    payload,
 	})
 

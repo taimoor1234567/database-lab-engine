@@ -8,7 +8,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
 )
@@ -17,7 +16,6 @@ import (
 type TelemetryEvent struct {
 	InstanceID string      `json:"instance_id"`
 	EventType  string      `json:"event_type"`
-	Timestamp  time.Time   `json:"timestamp"`
 	Payload    interface{} `json:"payload"`
 }
 
