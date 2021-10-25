@@ -320,7 +320,8 @@ build-image-swagger-latest:
     - export LATEST_TAG=$(echo ${CLEAN_TAG%.*}-latest)
     - export TAGS="${DOCKER_NAME}:${LATEST_TAG}"
 
-bash-test:
+
+.bash-test: &bash_test
   <<: *only_feature
   stage: integration-test
   variables:
@@ -332,6 +333,16 @@ bash-test:
     - bash test/_cleanup.sh
   tags:
     - dle-test
+
+bash-test-9-6:
+  <<: *bash_test
+  variables:
+    POSTGRES_VERSION: "9.6"
+
+bash-test-14:
+  <<: *bash_test
+  variables:
+    POSTGRES_VERSION: 14
 
 integration-test:
   services:
