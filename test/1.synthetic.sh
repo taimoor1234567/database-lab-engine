@@ -28,21 +28,21 @@ sleep 5
 
 for i in {1..300}; do
   # debug print
-  sudo docker exec -it dblab_pg_initdb psql -U postgres -c 'select' >> '/tmp/out'
+  sudo docker exec dblab_pg_initdb psql -U postgres -c 'select' >> '/tmp/out'
   echo $?
 
-  sudo docker exec -it dblab_pg_initdb psql -U postgres -c 'select' > /dev/null 2>&1  && break || echo "test database is not ready yet"
+  sudo docker exec dblab_pg_initdb psql -U postgres -c 'select' > /dev/null 2>&1  && break || echo "test database is not ready yet"
   echo $?
 
   sleep 1
 done
 
 # Create the test database
-sudo docker exec -it dblab_pg_initdb psql -U postgres -c 'create database test'
+sudo docker exec dblab_pg_initdb psql -U postgres -c 'create database test'
 
 # Generate data in the test database using pgbench
 # 1,000,000 accounts, ~0.14 GiB of data.
-sudo docker exec -it dblab_pg_initdb pgbench -U postgres -i -s 10 test
+sudo docker exec dblab_pg_initdb pgbench -U postgres -i -s 10 test
 
 # Stop and remove the container
 sudo docker stop dblab_pg_initdb
