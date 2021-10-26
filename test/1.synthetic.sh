@@ -24,16 +24,9 @@ sudo docker run \
   --detach \
   postgres:"${POSTGRES_VERSION}"-alpine
 
-sleep 5
 
 for i in {1..300}; do
-  # debug print
-  sudo docker exec dblab_pg_initdb psql -U postgres -c 'select' >> '/tmp/out'
-  echo $?
-
   sudo docker exec dblab_pg_initdb psql -U postgres -c 'select' > /dev/null 2>&1  && break || echo "test database is not ready yet"
-  echo $?
-
   sleep 1
 done
 
@@ -59,11 +52,16 @@ curl https://gitlab.com/postgres-ai/database-lab/-/raw/"${TAG}"/configs/config.e
 
 # Edit the following options
 sed -ri 's/^(\s*)(debug:.*$)/\1debug: true/' "${configDir}/server.yml"
-sed -ri 's/^(\s*)(debug:.*$)/\1debug: true/' "${configDir}/server.yml"
 sed -ri 's/^(\s*)(- logicalDump$)/\1/' "${configDir}/server.yml"
 sed -ri 's/^(\s*)(- logicalRestore$)/\1/' "${configDir}/server.yml"
 # replace postgres version
 sed -ri "s/:13/:${POSTGRES_VERSION}/g"  "${configDir}/server.yml"
+
+
+# logerrors is not supported in PostgreSQL 9.6
+if [ "${POSTGRES_VERSION}" = "9.6" ]; then
+  sed -ri 's/^(\s*)(shared_preload_libraries:.*$)/\1shared_preload_libraries: "pg_stat_statements, auto_explain"/' "${configDir}/server.yml"
+fi
 
 ## Launch Database Lab server
 sudo docker run \
@@ -84,7 +82,7 @@ sudo docker run \
   "${IMAGE2TEST}"
 
 # Check the Database Lab Engine logs
-sudo docker logs dblab_server -f 2>&1 | awk '{print "[CONTAINER dblab_server]: "$0}' &
+# sudo docker logs dblab_server -f 2>&1 | awk '{print "[CONTAINER dblab_server]: "$0}' &
 
 ### Waiting for the Database Lab Engine initialization.
 for i in {1..300}; do
