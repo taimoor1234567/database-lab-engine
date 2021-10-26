@@ -28,7 +28,8 @@ sleep 5
 
 for i in {1..300}; do
   # debug print
-  sudo docker exec -it dblab_pg_initdb psql -U postgres -c 'select'
+  sudo docker exec -it dblab_pg_initdb psql -U postgres -c 'select' >> '/tmp/out'
+  echo $?
 
   sudo docker exec -it dblab_pg_initdb psql -U postgres -c 'select' > /dev/null 2>&1  && break || echo "test database is not ready yet"
   echo $?
