@@ -49,6 +49,10 @@ func main() {
 
 	log.Msg("Database Lab Instance ID:", cfg.Global.InstanceID)
 
+	if cfg.Server.VerificationToken == "" {
+		log.Warn("Verification Token is empty. Database Lab Engine is insecure")
+	}
+
 	runner := runners.NewLocalRunner(cfg.Provision.UseSudo)
 
 	pm := pool.NewPoolManager(&cfg.PoolManager, runner)
