@@ -35,7 +35,5 @@ func (p *Client) SendTelemetryEvent(ctx context.Context, request TelemetryEvent)
 		return respData, errors.New(respData.Details)
 	}
 
-	log.Dbg("Send telemetry response", respData)
-
 	return respData, nil
 }
