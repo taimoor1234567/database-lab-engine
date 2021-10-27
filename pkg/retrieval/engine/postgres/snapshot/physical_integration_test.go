@@ -20,8 +20,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
-
-	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
 )
 
 const (
