@@ -21,6 +21,7 @@ import (
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/config"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/config/global"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/estimator"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/localui"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/observer"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval"
@@ -161,6 +162,19 @@ func main() {
 			log.Msg(err)
 		}
 	}()
+
+	if cfg.LocalUI.Enabled {
+		uiManager := localui.New(&cfg.LocalUI, runner, dockerCLI)
+
+		go func() {
+			if err := uiManager.RunUI(ctx, cfg.Global.InstanceID); err != nil {
+				log.Err("Failed to start local UI container:", err.Error())
+				return
+			}
+
+			log.Msg("Local UI has started successfully")
+		}()
+	}
 
 	<-shutdownCh
 	cancel()

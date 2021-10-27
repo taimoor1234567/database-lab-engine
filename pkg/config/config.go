@@ -16,6 +16,7 @@ import (
 
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/config/global"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/estimator"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/localui"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/observer"
 	retConfig "gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/config"
@@ -43,6 +44,7 @@ type Config struct {
 	Observer    observer.Config  `yaml:"observer"`
 	Estimator   estimator.Config `yaml:"estimator"`
 	PoolManager pool.Config      `yaml:"poolManager"`
+	LocalUI     localui.Config   `yaml:"localUI"`
 }
 
 // LoadConfiguration instances a new application configuration.
