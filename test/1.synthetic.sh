@@ -24,9 +24,16 @@ sudo docker run \
   --detach \
   postgres:"${POSTGRES_VERSION}"-alpine
 
-
 for i in {1..300}; do
   sudo docker exec dblab_pg_initdb psql -U postgres -c 'select' > /dev/null 2>&1  && break || echo "test database is not ready yet"
+  sleep 1
+done
+
+## Restart container after initdb.
+sudo docker restart dblab_pg_initdb
+
+for i in {1..300}; do
+  sudo docker exec -it dblab_pg_initdb psql -U postgres -c 'select' > /dev/null 2>&1  && break || echo "test database is not ready yet"
   sleep 1
 done
 
