@@ -16,9 +16,11 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/engine/postgres/tools"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/engine/postgres/tools/cont"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/docker"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/runners"
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/util/networks"
 )
 
 // Config defines configs for a local UI container.
@@ -32,17 +34,44 @@ type Config struct {
 type UIManager struct {
 	runner runners.Runner
 	docker *client.Client
-	cfg    *Config
+	cfg    Config
 }
 
 // New creates a new UI Manager.
-func New(cfg *Config, runner runners.Runner, docker *client.Client) *UIManager {
+func New(cfg Config, runner runners.Runner, docker *client.Client) *UIManager {
 	return &UIManager{runner: runner, docker: docker, cfg: cfg}
 }
 
-// RunUI runs local UI container.
-func (ui *UIManager) RunUI(ctx context.Context, instanceID string) error {
-	if err := PrepareImage(ui.runner, ui.cfg.DockerImage); err != nil {
+// Reload reloads configuration of UI manager and adjusts a UI container according to it.
+func (ui *UIManager) Reload(ctx context.Context, cfg Config, instanceID string) error {
+	originalConfig := ui.cfg
+	ui.cfg = cfg
+
+	if !ui.isConfigChanged(originalConfig) {
+		return nil
+	}
+
+	if !cfg.Enabled {
+		ui.Stop(ctx, instanceID)
+		return nil
+	}
+
+	if !originalConfig.Enabled {
+		return ui.Run(ctx, instanceID)
+	}
+
+	return ui.Restart(ctx, instanceID)
+}
+
+func (ui *UIManager) isConfigChanged(cfg Config) bool {
+	return ui.cfg.Enabled != cfg.Enabled ||
+		ui.cfg.DockerImage != cfg.DockerImage ||
+		ui.cfg.Port != cfg.Port
+}
+
+// Run creates a new local UI container.
+func (ui *UIManager) Run(ctx context.Context, instanceID string) error {
+	if err := docker.PrepareImage(ui.runner, ui.cfg.DockerImage); err != nil {
 		return fmt.Errorf("failed to prepare Docker image: %w", err)
 	}
 
@@ -57,7 +86,8 @@ func (ui *UIManager) RunUI(ctx context.Context, instanceID string) error {
 		},
 		&container.HostConfig{},
 		&network.NetworkingConfig{},
-		"dblab_local_ui")
+		getLocalUIName(instanceID),
+	)
 
 	if err != nil {
 		return fmt.Errorf("failed to prepare Docker image for LocalUI: %w", err)
@@ -67,23 +97,29 @@ func (ui *UIManager) RunUI(ctx context.Context, instanceID string) error {
 		return fmt.Errorf("failed to start container %q: %w", localUI.ID, err)
 	}
 
+	if err := networks.Connect(ctx, ui.docker, instanceID, localUI.ID); err != nil {
+		return fmt.Errorf("failed to connect UI container to the internal Docker network: %w", err)
+	}
+
 	return nil
 }
 
-// PrepareImage prepares a Docker image to use.
-func PrepareImage(runner runners.Runner, dockerImage string) error {
-	imageExists, err := docker.ImageExists(runner, dockerImage)
-	if err != nil {
-		return fmt.Errorf("cannot check docker image existence: %w", err)
-	}
+// Restart destroys and creates a new local UI container.
+func (ui *UIManager) Restart(ctx context.Context, instanceID string) error {
+	ui.Stop(ctx, instanceID)
 
-	if imageExists {
-		return nil
-	}
-
-	if err := docker.PullImage(runner, dockerImage); err != nil {
-		return fmt.Errorf("cannot pull docker image: %w", err)
+	if err := ui.Run(ctx, instanceID); err != nil {
+		return fmt.Errorf("failed to start UI container: %w", err)
 	}
 
 	return nil
+}
+
+// Stop removes a local UI container.
+func (ui *UIManager) Stop(ctx context.Context, instanceID string) {
+	tools.RemoveContainer(ctx, ui.docker, getLocalUIName(instanceID), cont.StopTimeout)
+}
+
+func getLocalUIName(instanceID string) string {
+	return cont.DBLabLocalUILabel + "_" + instanceID
 }

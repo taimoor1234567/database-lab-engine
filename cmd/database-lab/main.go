@@ -149,10 +149,11 @@ func main() {
 		Restore:       retrievalSvc.CollectRestoreTelemetry(),
 	})
 
+	localUI := localui.New(cfg.LocalUI, runner, dockerCLI)
 	server := srv.NewServer(&cfg.Server, &cfg.Global, cloningSvc, retrievalSvc, platformSvc, dockerCLI, obs, est, pm, tm)
 	shutdownCh := setShutdownListener()
 
-	go setReloadListener(ctx, provisionSvc, tm, retrievalSvc, pm, cloningSvc, platformSvc, est, server)
+	go setReloadListener(ctx, provisionSvc, tm, retrievalSvc, pm, cloningSvc, platformSvc, est, localUI, server)
 
 	server.InitHandlers()
 
@@ -164,10 +165,8 @@ func main() {
 	}()
 
 	if cfg.LocalUI.Enabled {
-		uiManager := localui.New(&cfg.LocalUI, runner, dockerCLI)
-
 		go func() {
-			if err := uiManager.RunUI(ctx, cfg.Global.InstanceID); err != nil {
+			if err := localUI.Run(ctx, cfg.Global.InstanceID); err != nil {
 				log.Err("Failed to start local UI container:", err.Error())
 				return
 			}
@@ -192,7 +191,8 @@ func main() {
 }
 
 func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, tm *telemetry.Agent, retrievalSvc *retrieval.Retrieval,
-	pm *pool.Manager, cloningSvc *cloning.Base, platformSvc *platform.Service, est *estimator.Estimator, server *srv.Server) error {
+	pm *pool.Manager, cloningSvc *cloning.Base, platformSvc *platform.Service, est *estimator.Estimator, localUI *localui.UIManager,
+	server *srv.Server) error {
 	cfg, err := config.LoadConfiguration()
 	if err != nil {
 		return err
@@ -215,6 +215,10 @@ func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, tm *
 		return err
 	}
 
+	if err := localUI.Reload(ctx, cfg.LocalUI, cfg.Global.InstanceID); err != nil {
+		return err
+	}
+
 	dbCfg := resources.DB{
 		Username: cfg.Global.Database.User(),
 		DBName:   cfg.Global.Database.Name(),
@@ -232,14 +236,15 @@ func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, tm *
 }
 
 func setReloadListener(ctx context.Context, provisionSvc *provision.Provisioner, tm *telemetry.Agent, retrievalSvc *retrieval.Retrieval,
-	pm *pool.Manager, cloningSvc *cloning.Base, platformSvc *platform.Service, est *estimator.Estimator, server *srv.Server) {
+	pm *pool.Manager, cloningSvc *cloning.Base, platformSvc *platform.Service, est *estimator.Estimator, localUI *localui.UIManager,
+	server *srv.Server) {
 	reloadCh := make(chan os.Signal, 1)
 	signal.Notify(reloadCh, syscall.SIGHUP)
 
 	for range reloadCh {
 		log.Msg("Reloading configuration")
 
-		if err := reloadConfig(ctx, provisionSvc, tm, retrievalSvc, pm, cloningSvc, platformSvc, est, server); err != nil {
+		if err := reloadConfig(ctx, provisionSvc, tm, retrievalSvc, pm, cloningSvc, platformSvc, est, localUI, server); err != nil {
 			log.Err("Failed to reload configuration", err)
 		}
 
