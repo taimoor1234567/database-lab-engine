@@ -1,31 +1,26 @@
 image: golang:1.16
 
-# TODO: fix
-# include:
-#  - template: Security/SAST.gitlab-ci.yml
+include:
+  - template: Security/SAST.gitlab-ci.yml
 
 variables:
   SAST_EXCLUDED_ANALYZERS: "semgrep-sast"
 
 stages:
-# TODO: DEBUG
-  - integration-test
   - test
   - build-binary
   - build-image
+  - integration-test
 
 test:
   stage: test
   script:
     - make test
-  when: manual # TODO: remove
 
 lint:
   stage: test
   script:
     - make lint
-  when: manual # TODO: remove
-
 
 .only_var_template: &only_tag_release
   only:
@@ -62,7 +57,6 @@ build-binary-alpine:
   script:
     - apk add --update --no-cache make git
     - make build
-  when: manual # TODO: remove
 
 build-binary-client-linux:
   <<: *only_feature

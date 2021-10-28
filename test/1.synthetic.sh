@@ -5,8 +5,6 @@ TAG=${TAG:-${CI_COMMIT_REF_SLUG}}
 IMAGE2TEST="registry.gitlab.com/postgres-ai/database-lab/dblab-server:${TAG}"
 POSTGRES_VERSION="${POSTGRES_VERSION:-13}"
 
-echo $TAG
-
 DIR=${0%/*}
 
 ### Step 1. Prepare a machine with disk, Docker, and ZFS
