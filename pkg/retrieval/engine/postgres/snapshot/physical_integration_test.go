@@ -13,12 +13,15 @@ import (
 	"os"
 	"testing"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
+
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/engine/postgres/tools"
 )
 
 const (
@@ -200,13 +203,13 @@ func testWALParsing(t *testing.T, dockerCLI *client.Client, pgVersion float64, i
 	code, err = postgresContainer.Exec(ctx, []string{"cp", "-R", walDir(originalPGData, pgVersion), dir})
 	require.Nil(t, err)
 	assert.Equal(t, 0, code)
-	
+
 	code, err = postgresContainer.Exec(ctx, []string{"chmod", "777", "-R", tmpWaldir})
 	require.Nil(t, err)
 	assert.Equal(t, 0, code)
 
 	out, err := tools.ExecCommandWithOutput(ctx, dockerCLI, postgresContainer.GetContainerID(), types.ExecConfig{
-		Cmd: []string{"ls", "-la", walDir(originalPGData, pgVersion), dir+ "/pg_xlog"},
+		Cmd: []string{"ls", "-la", walDir(originalPGData, pgVersion), dir + "/pg_xlog"},
 	})
 	t.Log("out err:", err)
 	t.Log(out)
