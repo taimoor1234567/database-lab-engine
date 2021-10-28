@@ -62,6 +62,7 @@ build-binary-alpine:
   script:
     - apk add --update --no-cache make git
     - make build
+  when: manual # TODO: remove
 
 build-binary-client-linux:
   <<: *only_feature
@@ -380,7 +381,5 @@ integration-test:
     DOCKER_TLS_CERTDIR: ""
     # Improve performance with overlayfs.
     DOCKER_DRIVER: overlay2
-  before_script:
-    - apt-get update && apt-get install -y sudo
   script:
     - make test-ci-integration

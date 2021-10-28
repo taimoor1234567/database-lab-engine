@@ -9,6 +9,7 @@ package snapshot
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"testing"
 	"time"
@@ -134,7 +135,7 @@ func testWALParsing(t *testing.T, dockerCLI *client.Client, pgVersion float64, i
 		WaitingFor: wait.ForAll(
 			logStrategyForAcceptingConnections,
 			wait.ForLog("PostgreSQL init process complete; ready for start up."),
-			wait.ForSQL(nat.Port(port), "postgres", dbURL).Timeout(30*time.Second),
+			wait.ForSQL(nat.Port(port), "postgres", dbURL).Timeout(10*time.Second),
 		),
 		BindMounts: map[string]string{
 			"/tmp": "/tmp", // To provide local access to the container temporary directory.
@@ -149,7 +150,21 @@ func testWALParsing(t *testing.T, dockerCLI *client.Client, pgVersion float64, i
 		ContainerRequest: req,
 		Started:          true,
 	})
-	require.Nil(t, err)
+	//require.Nil(t, err)
+	if err != nil {
+		t.Log("Start err:", err.Error())
+	}
+
+	r, err := postgresContainer.Logs(ctx)
+	if err != nil {
+		t.Log("Reader err:", err.Error())
+	}
+
+	all, err := io.ReadAll(r)
+	if err != nil {
+		t.Log("all err", err.Error())
+	}
+	t.Log("Container logs", string(all))
 
 	defer func() { _ = postgresContainer.Terminate(ctx) }()
 
