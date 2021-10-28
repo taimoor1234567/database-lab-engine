@@ -11,10 +11,8 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/docker/docker/client"
-	"github.com/docker/go-connections/nat"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -125,11 +123,6 @@ func testWALParsing(t *testing.T, dockerCLI *client.Client, pgVersion float64, i
 	logStrategyForAcceptingConnections := wait.NewLogStrategy("database system is ready to accept connections")
 	logStrategyForAcceptingConnections.Occurrence = 2
 
-	dbURL := func(port nat.Port) string {
-		return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-			"localhost", port.Port(), user, testPassword, dbname)
-	}
-
 	req := testcontainers.ContainerRequest{
 		Name:         "pg_test_" + pgVersionString,
 		Image:        "postgres:" + pgVersionString,
@@ -137,7 +130,6 @@ func testWALParsing(t *testing.T, dockerCLI *client.Client, pgVersion float64, i
 		WaitingFor: wait.ForAll(
 			logStrategyForAcceptingConnections,
 			wait.ForLog("PostgreSQL init process complete; ready for start up."),
-			wait.ForSQL(nat.Port(port), "postgres", dbURL).Timeout(10*time.Second),
 		),
 		Env: map[string]string{
 			"POSTGRES_PASSWORD": testPassword,
