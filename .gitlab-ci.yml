@@ -1,7 +1,8 @@
 image: golang:1.16
 
-include:
-  - template: Security/SAST.gitlab-ci.yml
+# TODO: fix
+# include:
+#  - template: Security/SAST.gitlab-ci.yml
 
 variables:
   SAST_EXCLUDED_ANALYZERS: "semgrep-sast"
@@ -9,19 +10,21 @@ variables:
 stages:
 # TODO: DEBUG
   - integration-test
-#  - test
-#  - build-binary
-#  - build-image
+  - test
+  - build-binary
+  - build-image
 
 test:
   stage: test
   script:
     - make test
+  when: manual # TODO: remove
 
 lint:
   stage: test
   script:
     - make lint
+  when: manual # TODO: remove
 
 
 .only_var_template: &only_tag_release
@@ -327,7 +330,6 @@ build-image-swagger-latest:
   stage: integration-test
   variables:
     IMAGE_TAG: "${CI_COMMIT_REF_SLUG}"
-    TAG: "check-dle-for-all-postrges-versions"
   script:
     - zfs list
     - bash test/1.synthetic.sh

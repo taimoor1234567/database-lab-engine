@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-TAG="${TAG:-"master"}"
+TAG="${TAG:-"check-dle-for-all-postrges-versions"}"
 IMAGE2TEST="registry.gitlab.com/postgres-ai/database-lab/dblab-server:${TAG}"
 POSTGRES_VERSION="${POSTGRES_VERSION:-13}"
 
