@@ -134,7 +134,7 @@ func testWALParsing(t *testing.T, dockerCLI *client.Client, pgVersion float64, i
 		WaitingFor: wait.ForAll(
 			logStrategyForAcceptingConnections,
 			wait.ForLog("PostgreSQL init process complete; ready for start up."),
-			wait.ForSQL(nat.Port(port), "postgres", dbURL).Timeout(10*time.Second),
+			wait.ForSQL(nat.Port(port), "postgres", dbURL).Timeout(30*time.Second),
 		),
 		BindMounts: map[string]string{
 			"/tmp": "/tmp", // To provide local access to the container temporary directory.
@@ -142,6 +142,7 @@ func testWALParsing(t *testing.T, dockerCLI *client.Client, pgVersion float64, i
 		Env: map[string]string{
 			"POSTGRES_PASSWORD": testPassword,
 		},
+
 	}
 
 	postgresContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
