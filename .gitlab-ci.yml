@@ -371,7 +371,8 @@ bash-test-14:
 
 integration-test:
   services:
-    - docker:dind
+    - name: docker:dind
+      command: ["--tls=false"]
   <<: *only_feature
   stage: integration-test
   variables:
