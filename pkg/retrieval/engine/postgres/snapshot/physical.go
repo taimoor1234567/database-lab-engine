@@ -651,11 +651,6 @@ func (p *PhysicalInitial) getDSAFromWAL(ctx context.Context, pgVersion float64, 
 
 	walDirectory := walDir(cloneDir, pgVersion)
 
-	//infos, err := os.ReadDir(walDirectory)
-	//if err != nil {
-	//	return "", errors.Wrap(err, "failed to read the pg_wal dir")
-	//}
-
 	output, err := tools.ExecCommandWithOutput(ctx, p.dockerClient, containerID, types.ExecConfig{
 		Cmd: []string{"ls", "-t", walDirectory},
 	})
@@ -663,11 +658,11 @@ func (p *PhysicalInitial) getDSAFromWAL(ctx context.Context, pgVersion float64, 
 		return "", errors.Wrap(err, "failed to read the wal directory")
 	}
 
-	infos := strings.Fields(output)
+	walFileList := strings.Fields(output)
 
 	// Walk in the reverse order.
-	for i := len(infos) - 1; i >= 0; i-- {
-		fileName := infos[i]
+	for i := len(walFileList) - 1; i >= 0; i-- {
+		fileName := walFileList[i]
 		walFilePath := path.Join(walDirectory, fileName)
 
 		log.Dbg("Look up into file: ", walFilePath)
