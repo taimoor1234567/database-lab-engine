@@ -1,10 +1,11 @@
 #!/bin/bash
 set -euxo pipefail
 
-TAG="${TAG:-"check-dle-for-all-postrges-versions"}"
+TAG=${TAG:-${CI_COMMIT_REF_SLUG}}
 IMAGE2TEST="registry.gitlab.com/postgres-ai/database-lab/dblab-server:${TAG}"
 POSTGRES_VERSION="${POSTGRES_VERSION:-13}"
-echo ${IMAGE_TAG}
+
+echo $TAG
 
 DIR=${0%/*}
 

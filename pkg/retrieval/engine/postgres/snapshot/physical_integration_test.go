@@ -94,8 +94,6 @@ func TestParsingWAL96(t *testing.T) {
 }
 
 func TestParsingWAL(t *testing.T) {
-	//TODO: remove
-	t.Skip()
 	dockerCLI, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		t.Fatal("Failed to create a Docker client:", err)
@@ -153,25 +151,6 @@ func testWALParsing(t *testing.T, dockerCLI *client.Client, pgVersion float64, i
 	p := &PhysicalInitial{
 		dockerClient: dockerCLI,
 	}
-
-	// Prepare local copies of WAL files
-	// since it's impossible to have access in the original PGDATA because permissions denied.
-	/*
-		tmpWaldir := walDir(dir, pgVersion)
-
-		code, err = postgresContainer.Exec(ctx, []string{"mkdir", "-p", tmpWaldir})
-		require.Nil(t, err)
-		assert.Equal(t, 0, code)
-
-		originalPGData := "/var/lib/postgresql/data/"
-		code, err = postgresContainer.Exec(ctx, []string{"cp", "-R", walDir(originalPGData, pgVersion), dir})
-		require.Nil(t, err)
-		assert.Equal(t, 0, code)
-
-		code, err = postgresContainer.Exec(ctx, []string{"chmod", "777", "-R", tmpWaldir})
-		require.Nil(t, err)
-		assert.Equal(t, 0, code)
-	*/
 
 	// Check WAL parsing.
 	dsa, err := p.getDSAFromWAL(ctx, pgVersion, postgresContainer.GetContainerID(), pgdata)
