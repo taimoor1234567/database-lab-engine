@@ -79,7 +79,7 @@ func (ui *UIManager) Run(ctx context.Context, instanceID string) error {
 		&container.Config{
 			ExposedPorts: nat.PortSet{nat.Port(strconv.Itoa(ui.cfg.Port)) + "/tcp": struct{}{}},
 			Labels: map[string]string{
-				cont.DBLabControlLabel:    cont.DBLabLocalUILabel,
+				cont.DBLabSatelliteLabel:  cont.DBLabLocalUILabel,
 				cont.DBLabInstanceIDLabel: instanceID,
 			},
 			Image: ui.cfg.DockerImage,

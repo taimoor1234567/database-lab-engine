@@ -260,13 +260,17 @@ func setShutdownListener() chan os.Signal {
 }
 
 func shutdownDatabaseLabEngine(ctx context.Context, dockerCLI *client.Client, global global.Config, fsp *resources.Pool) {
-	log.Msg("Stopping control containers")
+	log.Msg("Stopping auxiliary containers")
 
 	if err := cont.StopControlContainers(ctx, dockerCLI, global.InstanceID, fsp.DataDir()); err != nil {
 		log.Err("Failed to stop control containers", err)
 	}
 
-	log.Msg("Control containers have been stopped")
+	if err := cont.CleanUpSatelliteContainers(ctx, dockerCLI, global.InstanceID); err != nil {
+		log.Err("Failed to stop satellite containers", err)
+	}
+
+	log.Msg("Auxiliary containers have been stopped")
 }
 
 func removeObservingClones(obsCh chan string, obs *observer.Observer) {
