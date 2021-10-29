@@ -29,7 +29,7 @@ for i in {1..300}; do
   sleep 1
 done
 
-## Restart container after initdb.
+# Restart container explicitly after initdb to make sure that the server will not receive a shutdown request and queries will not be interrupted.
 sudo docker restart dblab_pg_initdb
 
 for i in {1..300}; do
@@ -90,7 +90,7 @@ sudo docker run \
   "${IMAGE2TEST}"
 
 # Check the Database Lab Engine logs
-# sudo docker logs dblab_server -f 2>&1 | awk '{print "[CONTAINER dblab_server]: "$0}' &
+sudo docker logs dblab_server -f 2>&1 | awk '{print "[CONTAINER dblab_server]: "$0}' &
 
 ### Waiting for the Database Lab Engine initialization.
 for i in {1..300}; do
