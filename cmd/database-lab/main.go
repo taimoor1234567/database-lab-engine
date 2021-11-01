@@ -149,7 +149,10 @@ func main() {
 		Restore:       retrievalSvc.CollectRestoreTelemetry(),
 	})
 
-	localUI := localui.New(cfg.LocalUI, runner, dockerCLI)
+	localUI := localui.New(cfg.LocalUI, localui.Properties{
+		EngineName: hostname,
+		InstanceID: cfg.Global.InstanceID,
+	}, runner, dockerCLI)
 	server := srv.NewServer(&cfg.Server, &cfg.Global, cloningSvc, retrievalSvc, platformSvc, dockerCLI, obs, est, pm, tm)
 	shutdownCh := setShutdownListener()
 
@@ -166,7 +169,7 @@ func main() {
 
 	if cfg.LocalUI.Enabled {
 		go func() {
-			if err := localUI.Run(ctx, cfg.Global.InstanceID); err != nil {
+			if err := localUI.Run(ctx); err != nil {
 				log.Err("Failed to start local UI container:", err.Error())
 				return
 			}
@@ -215,7 +218,7 @@ func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, tm *
 		return err
 	}
 
-	if err := localUI.Reload(ctx, cfg.LocalUI, cfg.Global.InstanceID); err != nil {
+	if err := localUI.Reload(ctx, cfg.LocalUI); err != nil {
 		return err
 	}
 

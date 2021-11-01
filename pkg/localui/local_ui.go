@@ -23,6 +23,9 @@ import (
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/util/networks"
 )
 
+// EnvEngineName defines the environment variable name to pass a DLE hostname to container.
+const EnvEngineName = "DLE_HOSTNAME"
+
 // Config defines configs for a local UI container.
 type Config struct {
 	Enabled     bool   `yaml:"enabled"`
@@ -35,15 +38,22 @@ type UIManager struct {
 	runner runners.Runner
 	docker *client.Client
 	cfg    Config
+	props  Properties
+}
+
+// Properties contains props related with a UI container.
+type Properties struct {
+	EngineName string
+	InstanceID string
 }
 
 // New creates a new UI Manager.
-func New(cfg Config, runner runners.Runner, docker *client.Client) *UIManager {
-	return &UIManager{runner: runner, docker: docker, cfg: cfg}
+func New(cfg Config, props Properties, runner runners.Runner, docker *client.Client) *UIManager {
+	return &UIManager{runner: runner, docker: docker, cfg: cfg, props: props}
 }
 
 // Reload reloads configuration of UI manager and adjusts a UI container according to it.
-func (ui *UIManager) Reload(ctx context.Context, cfg Config, instanceID string) error {
+func (ui *UIManager) Reload(ctx context.Context, cfg Config) error {
 	originalConfig := ui.cfg
 	ui.cfg = cfg
 
@@ -52,15 +62,15 @@ func (ui *UIManager) Reload(ctx context.Context, cfg Config, instanceID string) 
 	}
 
 	if !cfg.Enabled {
-		ui.Stop(ctx, instanceID)
+		ui.Stop(ctx)
 		return nil
 	}
 
 	if !originalConfig.Enabled {
-		return ui.Run(ctx, instanceID)
+		return ui.Run(ctx)
 	}
 
-	return ui.Restart(ctx, instanceID)
+	return ui.Restart(ctx)
 }
 
 func (ui *UIManager) isConfigChanged(cfg Config) bool {
@@ -70,7 +80,7 @@ func (ui *UIManager) isConfigChanged(cfg Config) bool {
 }
 
 // Run creates a new local UI container.
-func (ui *UIManager) Run(ctx context.Context, instanceID string) error {
+func (ui *UIManager) Run(ctx context.Context) error {
 	if err := docker.PrepareImage(ui.runner, ui.cfg.DockerImage); err != nil {
 		return fmt.Errorf("failed to prepare Docker image: %w", err)
 	}
@@ -80,13 +90,14 @@ func (ui *UIManager) Run(ctx context.Context, instanceID string) error {
 			ExposedPorts: nat.PortSet{nat.Port(strconv.Itoa(ui.cfg.Port)) + "/tcp": struct{}{}},
 			Labels: map[string]string{
 				cont.DBLabSatelliteLabel:  cont.DBLabLocalUILabel,
-				cont.DBLabInstanceIDLabel: instanceID,
+				cont.DBLabInstanceIDLabel: ui.props.InstanceID,
 			},
 			Image: ui.cfg.DockerImage,
+			Env:   []string{EnvEngineName + "=" + ui.props.EngineName},
 		},
 		&container.HostConfig{},
 		&network.NetworkingConfig{},
-		getLocalUIName(instanceID),
+		getLocalUIName(ui.props.InstanceID),
 	)
 
 	if err != nil {
@@ -97,7 +108,7 @@ func (ui *UIManager) Run(ctx context.Context, instanceID string) error {
 		return fmt.Errorf("failed to start container %q: %w", localUI.ID, err)
 	}
 
-	if err := networks.Connect(ctx, ui.docker, instanceID, localUI.ID); err != nil {
+	if err := networks.Connect(ctx, ui.docker, ui.props.InstanceID, localUI.ID); err != nil {
 		return fmt.Errorf("failed to connect UI container to the internal Docker network: %w", err)
 	}
 
@@ -105,10 +116,10 @@ func (ui *UIManager) Run(ctx context.Context, instanceID string) error {
 }
 
 // Restart destroys and creates a new local UI container.
-func (ui *UIManager) Restart(ctx context.Context, instanceID string) error {
-	ui.Stop(ctx, instanceID)
+func (ui *UIManager) Restart(ctx context.Context) error {
+	ui.Stop(ctx)
 
-	if err := ui.Run(ctx, instanceID); err != nil {
+	if err := ui.Run(ctx); err != nil {
 		return fmt.Errorf("failed to start UI container: %w", err)
 	}
 
@@ -116,8 +127,8 @@ func (ui *UIManager) Restart(ctx context.Context, instanceID string) error {
 }
 
 // Stop removes a local UI container.
-func (ui *UIManager) Stop(ctx context.Context, instanceID string) {
-	tools.RemoveContainer(ctx, ui.docker, getLocalUIName(instanceID), cont.StopTimeout)
+func (ui *UIManager) Stop(ctx context.Context) {
+	tools.RemoveContainer(ctx, ui.docker, getLocalUIName(ui.props.InstanceID), cont.StopTimeout)
 }
 
 func getLocalUIName(instanceID string) string {
