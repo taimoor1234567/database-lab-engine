@@ -881,12 +881,12 @@ func (p *PhysicalInitial) checkRecovery(ctx context.Context, containerID string)
 	time as the last resort would be misleading, especially in the case when the "sync" container
 	is running and users deal with multiple snapshots.
 
-    Current steps to determine DSA:
+	Current steps to determine DSA:
 
 	Step 1. Using `pg_last_xact_replay_timestamp()` (either in the "promote" or the "sync" Postgres).
 	It may be empty if there are no transactions recently committed on the source.
 
-    Step 2. Parsing available WALs using pg_waldump. We check WALs in reverse order and try to find
+	Step 2. Parsing available WALs using pg_waldump. We check WALs in reverse order and try to find
 	the latest available "Transaction" record. Again, this may be not working – for example, 
 	WALs may be empty of archive_timeout is non-zero and the source doesn't have enough activity.
 
