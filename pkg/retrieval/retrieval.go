@@ -100,7 +100,7 @@ func (r *Retrieval) Run(ctx context.Context) error {
 	runCtx, cancel := context.WithCancel(ctx)
 	r.ctxCancel = cancel
 
-	fsManager, err := r.getPoolToDataRefresh()
+	fsManager, err := r.getPoolToDataRetrieving()
 	if err != nil {
 		var skipError *SkipRefreshingError
 		if errors.As(err, &skipError) {
@@ -118,7 +118,7 @@ func (r *Retrieval) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to choose pool to refresh: %w", err)
 	}
 
-	log.Msg("Pool to perform a full refresh: ", fsManager.Pool().Name)
+	log.Msg("Pool to perform data retrieving: ", fsManager.Pool().Name)
 
 	if err := r.run(runCtx, fsManager); err != nil {
 		r.tm.SendEvent(ctx, telemetry.AlertEvent, telemetry.Alert{Level: models.RefreshFailed, Message: err.Error()})
@@ -130,7 +130,7 @@ func (r *Retrieval) Run(ctx context.Context) error {
 	return nil
 }
 
-func (r *Retrieval) getPoolToDataRefresh() (pool.FSManager, error) {
+func (r *Retrieval) getPoolToDataRetrieving() (pool.FSManager, error) {
 	firstPool := r.poolManager.First()
 	if firstPool == nil {
 		return nil, errors.New("no available pools")
@@ -140,6 +140,12 @@ func (r *Retrieval) getPoolToDataRefresh() (pool.FSManager, error) {
 		return firstPool, nil
 	}
 
+	// For physical mode changing the pool is possible only by the refresh timetable.
+	if r.State.Mode == models.Physical {
+		return firstPool, nil
+	}
+
+	// For logical mode try to find another pool to avoid rewriting prepared data.
 	elementToRefresh := r.poolManager.GetPoolToUpdate()
 
 	if elementToRefresh == nil || elementToRefresh.Value == nil {
