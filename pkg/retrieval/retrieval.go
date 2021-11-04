@@ -62,7 +62,7 @@ type Scheduler struct {
 
 // New creates a new data retrieval.
 func New(cfg *dblabCfg.Config, docker *client.Client, pm *pool.Manager, tm *telemetry.Agent, runner runners.Runner) *Retrieval {
-	return &Retrieval{
+	r := &Retrieval{
 		cfg:         &cfg.Retrieval,
 		global:      &cfg.Global,
 		docker:      docker,
@@ -74,6 +74,20 @@ func New(cfg *dblabCfg.Config, docker *client.Client, pm *pool.Manager, tm *tele
 			Status: models.Inactive,
 		},
 	}
+
+	for _, jobName := range r.cfg.Jobs {
+		jobSpec, ok := r.cfg.JobsSpec[jobName]
+		if !ok {
+			continue
+		}
+
+		jobSpec.Name = jobName
+		r.jobSpecs[jobName] = jobSpec
+	}
+
+	r.defineRetrievalMode()
+
+	return r
 }
 
 // Reload reloads retrieval configuration.
@@ -99,6 +113,8 @@ func (r *Retrieval) Reload(ctx context.Context, cfg *dblabCfg.Config) {
 func (r *Retrieval) Run(ctx context.Context) error {
 	runCtx, cancel := context.WithCancel(ctx)
 	r.ctxCancel = cancel
+
+	log.Msg("Retrieval mode:", r.State.Mode)
 
 	fsManager, err := r.getPoolToDataRetrieving()
 	if err != nil {
@@ -140,8 +156,8 @@ func (r *Retrieval) getPoolToDataRetrieving() (pool.FSManager, error) {
 		return firstPool, nil
 	}
 
-	// For physical mode changing the pool is possible only by the refresh timetable.
-	if r.State.Mode == models.Physical {
+	// For physical or unknown modes, changing the pool is possible only by the refresh timetable.
+	if r.State.Mode != models.Logical {
 		return firstPool, nil
 	}
 
@@ -226,8 +242,6 @@ func (r *Retrieval) configure(fsm pool.FSManager) error {
 		return errors.Wrap(err, "invalid data retrieval configuration")
 	}
 
-	r.defineRetrievalMode()
-
 	return nil
 }
 
@@ -243,13 +257,10 @@ func (r *Retrieval) parseJobs(fsm pool.FSManager) error {
 	r.jobs = make([]components.JobRunner, 0, len(r.cfg.Jobs))
 
 	for _, jobName := range r.cfg.Jobs {
-		jobSpec, ok := r.cfg.JobsSpec[jobName]
+		jobSpec, ok := r.jobSpecs[jobName]
 		if !ok {
 			return errors.Errorf("Job %q not found", jobName)
 		}
-
-		jobSpec.Name = jobName
-		r.jobSpecs[jobName] = jobSpec
 
 		jobCfg := config.JobConfig{
 			Spec:   jobSpec,
@@ -321,11 +332,15 @@ func (r *Retrieval) hasPhysicalJob() bool {
 func (r *Retrieval) defineRetrievalMode() {
 	if r.hasPhysicalJob() {
 		r.State.Mode = models.Physical
+		return
 	}
 
 	if r.hasLogicalJob() {
 		r.State.Mode = models.Logical
+		return
 	}
+
+	r.State.Mode = models.Unknown
 }
 
 func (r *Retrieval) prepareEnvironment(fsm pool.FSManager) error {
