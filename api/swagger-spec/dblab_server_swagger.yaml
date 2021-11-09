@@ -717,7 +717,7 @@ definitions:
 
   ResetClone:
     type: "object"
-    description: "Object to reset clone to a specific snapshot. Optional parameters `latest` and `snapshotID` must not be specified together"
+    description: "Object defining specific snapshot used when resetting clone. Optional parameters `latest` and `snapshotID` must not be specified together"
     properties:
       snapshotID:
         type: "string"
