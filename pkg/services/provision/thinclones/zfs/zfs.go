@@ -549,7 +549,7 @@ func (m *Manager) listSnapshots(pool string) ([]*ListEntry, error) {
 	return listEntries, err
 }
 func (m *Manager) calculateEntrySize(listEntries []*ListEntry) {
-	// The `go-libzfs` library might be useful to avoid a lot of parsing actions: https://github.com/bicomsystems/go-libzfs
+	// TODO: The `go-libzfs` library might be useful to avoid a lot of command actions: https://github.com/bicomsystems/go-libzfs
 	const preCloneParts = 2
 
 	for _, entry := range listEntries {
@@ -589,8 +589,8 @@ func (m *Manager) calculateEntrySize(listEntries []*ListEntry) {
 	}
 }
 
-func buildOriginCommand(filter string) string {
-	return "zfs get -H -o value origin " + filter
+func buildOriginCommand(clone string) string {
+	return "zfs get -H -o value origin " + clone
 }
 
 func buildSizeCommand(snapshot string) string {
