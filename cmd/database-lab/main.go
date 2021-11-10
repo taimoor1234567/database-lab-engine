@@ -103,10 +103,10 @@ func main() {
 		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), shutdownTimeout)
 		defer shutdownCancel()
 
-		shutdownDatabaseLabEngine(shutdownCtx, dockerCLI, cfg.Global, pm.First().Pool())
+		shutdownDatabaseLabEngine(shutdownCtx, dockerCLI, engProps, pm.First().Pool())
 	}
 
-	tm, err := telemetry.New(cfg.Global)
+	tm, err := telemetry.New(cfg.Global, engProps)
 	if err != nil {
 		log.Errf(errors.WithMessage(err, "failed to initialize a telemetry service").Error())
 		return
@@ -176,7 +176,7 @@ func main() {
 		log.Msg(err)
 	}
 
-	shutdownDatabaseLabEngine(shutdownCtx, dockerCLI, cfg.Global, pm.First().Pool())
+	shutdownDatabaseLabEngine(shutdownCtx, dockerCLI, engProps, pm.First().Pool())
 	cloningSvc.SaveClonesState()
 	tm.SendEvent(ctx, telemetry.EngineStoppedEvent, telemetry.EngineStopped{Uptime: server.Uptime()})
 }
@@ -263,10 +263,10 @@ func setShutdownListener() chan os.Signal {
 	return c
 }
 
-func shutdownDatabaseLabEngine(ctx context.Context, dockerCLI *client.Client, global global.Config, fsp *resources.Pool) {
+func shutdownDatabaseLabEngine(ctx context.Context, dockerCLI *client.Client, engProps global.EngineProps, fsp *resources.Pool) {
 	log.Msg("Stopping control containers")
 
-	if err := cont.StopControlContainers(ctx, dockerCLI, global.InstanceID, fsp.DataDir()); err != nil {
+	if err := cont.StopControlContainers(ctx, dockerCLI, engProps.InstanceID, fsp.DataDir()); err != nil {
 		log.Err("Failed to stop control containers", err)
 	}
 
