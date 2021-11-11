@@ -30,7 +30,7 @@ localUI:
   enabled: true
 
   # Docker image of the UI application.
-  dockerImage: "nginx:1.21" # TODO: change the image.
+  dockerImage: "postgresai/basic-ui:latest"
 
   # HTTP port of the UI application. Default: 2346.
   port: 2346
