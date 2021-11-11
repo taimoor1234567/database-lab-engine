@@ -151,6 +151,7 @@ func main() {
 
 	localUI := localui.New(cfg.LocalUI, localui.Properties{
 		EngineName: hostname,
+		EnginePort: cfg.Server.Port,
 		InstanceID: cfg.Global.InstanceID,
 	}, runner, dockerCLI)
 	server := srv.NewServer(&cfg.Server, &cfg.Global, cloningSvc, retrievalSvc, platformSvc, dockerCLI, obs, est, pm, tm)

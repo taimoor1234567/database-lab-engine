@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -23,8 +24,18 @@ import (
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/util/networks"
 )
 
-// EnvEngineName defines the environment variable name to pass a DLE hostname to container.
-const EnvEngineName = "DLE_HOSTNAME"
+const (
+	// EnvEngineName defines the environment variable name to pass a DLE hostname to container.
+	EnvEngineName = "DLE_HOST"
+
+	// EnvEnginePort defines the environment variable name to pass a DLE port to container.
+	EnvEnginePort = "DLE_PORT"
+
+	// Health check timeout parameters.
+	healthCheckInterval = 5 * time.Second
+	healthCheckTimeout  = 10 * time.Second
+	healthCheckRetries  = 5
+)
 
 // Config defines configs for a local UI container.
 type Config struct {
@@ -44,6 +55,7 @@ type UIManager struct {
 // Properties contains props related with a UI container.
 type Properties struct {
 	EngineName string
+	EnginePort uint
 	InstanceID string
 }
 
@@ -87,15 +99,31 @@ func (ui *UIManager) Run(ctx context.Context) error {
 
 	localUI, err := ui.docker.ContainerCreate(ctx,
 		&container.Config{
-			ExposedPorts: nat.PortSet{nat.Port(strconv.Itoa(ui.cfg.Port)) + "/tcp": struct{}{}},
 			Labels: map[string]string{
 				cont.DBLabSatelliteLabel:  cont.DBLabLocalUILabel,
 				cont.DBLabInstanceIDLabel: ui.props.InstanceID,
 			},
 			Image: ui.cfg.DockerImage,
-			Env:   []string{EnvEngineName + "=" + ui.props.EngineName},
+			Env: []string{
+				EnvEngineName + "=" + ui.props.EngineName,
+				EnvEnginePort + "=" + strconv.FormatUint(uint64(ui.props.EnginePort), 10),
+			},
+			Healthcheck: &container.HealthConfig{
+				Interval: healthCheckInterval,
+				Timeout:  healthCheckTimeout,
+				Retries:  healthCheckRetries,
+			},
 		},
-		&container.HostConfig{},
+		&container.HostConfig{
+			PortBindings: map[nat.Port][]nat.PortBinding{
+				"80/tcp": {
+					{
+						HostIP:   "127.0.0.1",
+						HostPort: strconv.Itoa(ui.cfg.Port),
+					},
+				},
+			},
+		},
 		&network.NetworkingConfig{},
 		getLocalUIName(ui.props.InstanceID),
 	)
@@ -104,12 +132,12 @@ func (ui *UIManager) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to prepare Docker image for LocalUI: %w", err)
 	}
 
-	if err := ui.docker.ContainerStart(ctx, localUI.ID, types.ContainerStartOptions{}); err != nil {
-		return fmt.Errorf("failed to start container %q: %w", localUI.ID, err)
-	}
-
 	if err := networks.Connect(ctx, ui.docker, ui.props.InstanceID, localUI.ID); err != nil {
 		return fmt.Errorf("failed to connect UI container to the internal Docker network: %w", err)
+	}
+
+	if err := ui.docker.ContainerStart(ctx, localUI.ID, types.ContainerStartOptions{}); err != nil {
+		return fmt.Errorf("failed to start container %q: %w", localUI.ID, err)
 	}
 
 	return nil

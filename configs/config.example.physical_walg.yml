@@ -32,8 +32,8 @@ localUI:
   # Docker image of the UI application.
   dockerImage: "nginx:1.21" # TODO: change the image.
 
-  # HTTP port of the UI application. Default: 2347.
-  port: 2347
+  # HTTP port of the UI application. Default: 2346.
+  port: 2346
 
 global:
   # Database engine. Currently, the only supported option: "postgres".
