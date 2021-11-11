@@ -825,6 +825,7 @@ func (p *PhysicalInitial) buildContainerConfig(clonePath, promoteImage, password
 		Labels: map[string]string{
 			cont.DBLabControlLabel:    cont.DBLabPromoteLabel,
 			cont.DBLabInstanceIDLabel: p.engineProps.InstanceID,
+			cont.DBLabEngineNameLabel: p.engineProps.ContainerName,
 		},
 		Env:   p.getEnvironmentVariables(clonePath, password),
 		Image: promoteImage,

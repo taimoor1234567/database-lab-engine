@@ -566,6 +566,7 @@ func (d *DumpJob) buildContainerConfig(password string) *container.Config {
 		Labels: map[string]string{
 			cont.DBLabControlLabel:    cont.DBLabDumpLabel,
 			cont.DBLabInstanceIDLabel: d.engineProps.InstanceID,
+			cont.DBLabEngineNameLabel: d.engineProps.ContainerName,
 		},
 		Env:         d.getEnvironmentVariables(password),
 		Image:       d.DockerImage,

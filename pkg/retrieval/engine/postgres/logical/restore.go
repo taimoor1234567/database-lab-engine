@@ -588,6 +588,7 @@ func (r *RestoreJob) buildContainerConfig(password string) *container.Config {
 		Labels: map[string]string{
 			cont.DBLabControlLabel:    cont.DBLabRestoreLabel,
 			cont.DBLabInstanceIDLabel: r.engineProps.InstanceID,
+			cont.DBLabEngineNameLabel: r.engineProps.ContainerName,
 		},
 		Env: append(os.Environ(), []string{
 			"PGDATA=" + r.fsPool.DataDir(),

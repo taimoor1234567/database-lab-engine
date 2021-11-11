@@ -240,6 +240,7 @@ func (s *LogicalInitial) buildContainerConfig(clonePath, patchImage, password st
 		Labels: map[string]string{
 			cont.DBLabControlLabel:    cont.DBLabPatchLabel,
 			cont.DBLabInstanceIDLabel: s.engineProps.InstanceID,
+			cont.DBLabEngineNameLabel: s.engineProps.ContainerName,
 		},
 		Env: []string{
 			"PGDATA=" + clonePath,
