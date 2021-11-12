@@ -58,7 +58,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	engProps, err := getEngineProperties(ctx, dockerCLI, cfg.PoolManager.MountDir)
+	engProps, err := getEngineProperties(ctx, dockerCLI, cfg)
 	if err != nil {
 		log.Err("failed to get Database Lab Engine properties:", err.Error())
 		return
@@ -153,12 +153,7 @@ func main() {
 		Restore:       retrievalSvc.CollectRestoreTelemetry(),
 	})
 
-	localUI := localui.New(cfg.LocalUI, localui.Properties{
-		EngineName: engProps.ContainerName,
-		EnginePort: cfg.Server.Port,
-		InstanceID: engProps.InstanceID,
-	}, runner, dockerCLI)
-
+	localUI := localui.New(cfg.LocalUI, engProps, runner, dockerCLI)
 	server := srv.NewServer(&cfg.Server, &cfg.Global, engProps, cloningSvc, retrievalSvc, platformSvc, dockerCLI, obs, est, pm, tm)
 	shutdownCh := setShutdownListener()
 
@@ -199,7 +194,7 @@ func main() {
 	tm.SendEvent(ctx, telemetry.EngineStoppedEvent, telemetry.EngineStopped{Uptime: server.Uptime()})
 }
 
-func getEngineProperties(ctx context.Context, dockerCLI *client.Client, mountDir string) (global.EngineProps, error) {
+func getEngineProperties(ctx context.Context, dockerCLI *client.Client, cfg *config.Config) (global.EngineProps, error) {
 	hostname := os.Getenv("HOSTNAME")
 	if hostname == "" {
 		return global.EngineProps{}, errors.New("hostname is empty")
@@ -210,7 +205,7 @@ func getEngineProperties(ctx context.Context, dockerCLI *client.Client, mountDir
 		return global.EngineProps{}, fmt.Errorf("failed to inspect DLE container: %w", err)
 	}
 
-	instanceID, err := config.LoadInstanceID(mountDir)
+	instanceID, err := config.LoadInstanceID(cfg.PoolManager.MountDir)
 	if err != nil {
 		return global.EngineProps{}, fmt.Errorf("failed to load instance ID: %w", err)
 	}
@@ -218,6 +213,7 @@ func getEngineProperties(ctx context.Context, dockerCLI *client.Client, mountDir
 	engProps := global.EngineProps{
 		InstanceID:    instanceID,
 		ContainerName: strings.Trim(dleContainer.Name, "/"),
+		EnginePort:    cfg.Server.Port,
 	}
 
 	return engProps, nil

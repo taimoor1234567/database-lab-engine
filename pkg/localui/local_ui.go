@@ -17,6 +17,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 
+	"gitlab.com/postgres-ai/database-lab/v2/pkg/config/global"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/engine/postgres/tools"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/retrieval/engine/postgres/tools/cont"
 	"gitlab.com/postgres-ai/database-lab/v2/pkg/services/provision/docker"
@@ -46,22 +47,15 @@ type Config struct {
 
 // UIManager manages local UI container.
 type UIManager struct {
-	runner runners.Runner
-	docker *client.Client
-	cfg    Config
-	props  Properties
-}
-
-// Properties contains props related with a UI container.
-type Properties struct {
-	EngineName string
-	EnginePort uint
-	InstanceID string
+	runner   runners.Runner
+	docker   *client.Client
+	cfg      Config
+	engProps global.EngineProps
 }
 
 // New creates a new UI Manager.
-func New(cfg Config, props Properties, runner runners.Runner, docker *client.Client) *UIManager {
-	return &UIManager{runner: runner, docker: docker, cfg: cfg, props: props}
+func New(cfg Config, engProps global.EngineProps, runner runners.Runner, docker *client.Client) *UIManager {
+	return &UIManager{runner: runner, docker: docker, cfg: cfg, engProps: engProps}
 }
 
 // Reload reloads configuration of UI manager and adjusts a UI container according to it.
@@ -101,12 +95,13 @@ func (ui *UIManager) Run(ctx context.Context) error {
 		&container.Config{
 			Labels: map[string]string{
 				cont.DBLabSatelliteLabel:  cont.DBLabLocalUILabel,
-				cont.DBLabInstanceIDLabel: ui.props.InstanceID,
+				cont.DBLabInstanceIDLabel: ui.engProps.InstanceID,
+				cont.DBLabEngineNameLabel: ui.engProps.ContainerName,
 			},
 			Image: ui.cfg.DockerImage,
 			Env: []string{
-				EnvEngineName + "=" + ui.props.EngineName,
-				EnvEnginePort + "=" + strconv.FormatUint(uint64(ui.props.EnginePort), 10),
+				EnvEngineName + "=" + ui.engProps.ContainerName,
+				EnvEnginePort + "=" + strconv.FormatUint(uint64(ui.engProps.EnginePort), 10),
 			},
 			Healthcheck: &container.HealthConfig{
 				Interval: healthCheckInterval,
@@ -125,14 +120,14 @@ func (ui *UIManager) Run(ctx context.Context) error {
 			},
 		},
 		&network.NetworkingConfig{},
-		getLocalUIName(ui.props.InstanceID),
+		getLocalUIName(ui.engProps.InstanceID),
 	)
 
 	if err != nil {
 		return fmt.Errorf("failed to prepare Docker image for LocalUI: %w", err)
 	}
 
-	if err := networks.Connect(ctx, ui.docker, ui.props.InstanceID, localUI.ID); err != nil {
+	if err := networks.Connect(ctx, ui.docker, ui.engProps.InstanceID, localUI.ID); err != nil {
 		return fmt.Errorf("failed to connect UI container to the internal Docker network: %w", err)
 	}
 
@@ -156,7 +151,7 @@ func (ui *UIManager) Restart(ctx context.Context) error {
 
 // Stop removes a local UI container.
 func (ui *UIManager) Stop(ctx context.Context) {
-	tools.RemoveContainer(ctx, ui.docker, getLocalUIName(ui.props.InstanceID), cont.StopTimeout)
+	tools.RemoveContainer(ctx, ui.docker, getLocalUIName(ui.engProps.InstanceID), cont.StopTimeout)
 }
 
 func getLocalUIName(instanceID string) string {

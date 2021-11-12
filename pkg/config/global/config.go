@@ -51,4 +51,5 @@ type Telemetry struct {
 type EngineProps struct {
 	InstanceID    string
 	ContainerName string
+	EnginePort    uint
 }
