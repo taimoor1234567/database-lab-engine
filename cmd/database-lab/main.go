@@ -50,7 +50,21 @@ func main() {
 		log.Fatal(errors.WithMessage(err, "failed to parse config"))
 	}
 
-	log.Msg("Database Lab Instance ID:", cfg.Global.InstanceID)
+	dockerCLI, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		log.Fatal("Failed to create a Docker client:", err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	engProps, err := getEngineProperties(ctx, dockerCLI, cfg.PoolManager.MountDir)
+	if err != nil {
+		log.Err("failed to get Database Lab Engine properties:", err.Error())
+		return
+	}
+
+	log.Msg("Database Lab Instance ID:", engProps.InstanceID)
 	log.Msg("Database Lab Engine version:", version.GetVersion())
 
 	if cfg.Server.VerificationToken == "" {
@@ -64,21 +78,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	dockerCLI, err := client.NewClientWithOpts(client.FromEnv)
-	if err != nil {
-		log.Fatal("Failed to create a Docker client:", err)
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	engProps, err := getEngineProperties(ctx, dockerCLI, cfg.Global.InstanceID)
-	if err != nil {
-		log.Err("failed to get Database Lab Engine properties:", err.Error())
-		return
-	}
-
-	internalNetworkID, err := networks.Setup(ctx, dockerCLI, cfg.Global.InstanceID, engProps.ContainerName)
+	internalNetworkID, err := networks.Setup(ctx, dockerCLI, engProps.InstanceID, engProps.ContainerName)
 	if err != nil {
 		log.Errf(err.Error())
 		return
@@ -156,7 +156,7 @@ func main() {
 	localUI := localui.New(cfg.LocalUI, localui.Properties{
 		EngineName: engProps.ContainerName,
 		EnginePort: cfg.Server.Port,
-		InstanceID: cfg.Global.InstanceID,
+		InstanceID: engProps.InstanceID,
 	}, runner, dockerCLI)
 
 	server := srv.NewServer(&cfg.Server, &cfg.Global, engProps, cloningSvc, retrievalSvc, platformSvc, dockerCLI, obs, est, pm, tm)
@@ -199,7 +199,7 @@ func main() {
 	tm.SendEvent(ctx, telemetry.EngineStoppedEvent, telemetry.EngineStopped{Uptime: server.Uptime()})
 }
 
-func getEngineProperties(ctx context.Context, dockerCLI *client.Client, instanceID string) (global.EngineProps, error) {
+func getEngineProperties(ctx context.Context, dockerCLI *client.Client, mountDir string) (global.EngineProps, error) {
 	hostname := os.Getenv("HOSTNAME")
 	if hostname == "" {
 		return global.EngineProps{}, errors.New("hostname is empty")
@@ -208,6 +208,11 @@ func getEngineProperties(ctx context.Context, dockerCLI *client.Client, instance
 	dleContainer, err := dockerCLI.ContainerInspect(ctx, hostname)
 	if err != nil {
 		return global.EngineProps{}, fmt.Errorf("failed to inspect DLE container: %w", err)
+	}
+
+	instanceID, err := config.LoadInstanceID(mountDir)
+	if err != nil {
+		return global.EngineProps{}, fmt.Errorf("failed to load instance ID: %w", err)
 	}
 
 	engProps := global.EngineProps{

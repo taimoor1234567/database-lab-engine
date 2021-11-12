@@ -57,28 +57,29 @@ func LoadConfiguration() (*Config, error) {
 	log.SetDebug(cfg.Global.Debug)
 	log.Dbg("Config loaded", cfg)
 
-	return cfg, cfg.loadInstanceID()
+	return cfg, nil
 }
 
-// loadInstanceID tries to make instance ID persistent across runs and load its value after restart
-func (cfg *Config) loadInstanceID() error {
-	idFilepath := filepath.Join(cfg.PoolManager.MountDir, instanceIDFile)
+// LoadInstanceID tries to make instance ID persistent across runs and load its value after restart
+func LoadInstanceID(mountDir string) (string, error) {
+	instanceID := ""
+	idFilepath := filepath.Join(mountDir, instanceIDFile)
 
 	data, err := os.ReadFile(idFilepath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			cfg.Global.InstanceID = xid.New().String()
-			log.Dbg("no instance_id file was found, generate new instance ID", cfg.Global.InstanceID)
+			instanceID = xid.New().String()
+			log.Dbg("no instance_id file was found, generate new instance ID", instanceID)
 
-			return os.WriteFile(idFilepath, []byte(cfg.Global.InstanceID), 0544)
+			return instanceID, os.WriteFile(idFilepath, []byte(instanceID), 0544)
 		}
 
-		return fmt.Errorf("failed to load instanceid, %w", err)
+		return instanceID, fmt.Errorf("failed to load instanceid, %w", err)
 	}
 
-	cfg.Global.InstanceID = string(data)
+	instanceID = string(data)
 
-	return nil
+	return instanceID, nil
 }
 
 // readConfig reads application configuration.
@@ -98,5 +99,5 @@ func readConfig() (*Config, error) {
 		return nil, errors.WithMessagef(err, "error parsing %s config", configPath)
 	}
 
-	return cfg, cfg.loadInstanceID()
+	return cfg, nil
 }

@@ -11,11 +11,10 @@ import (
 
 // Config contains global Database Lab configurations.
 type Config struct {
-	InstanceID string
-	Database   Database  `yaml:"database"`
-	Engine     string    `yaml:"engine"`
-	Debug      bool      `yaml:"debug"`
-	Telemetry  Telemetry `yaml:"telemetry"`
+	Database  Database  `yaml:"database"`
+	Engine    string    `yaml:"engine"`
+	Debug     bool      `yaml:"debug"`
+	Telemetry Telemetry `yaml:"telemetry"`
 }
 
 // Database contains default configurations of the managed database.
