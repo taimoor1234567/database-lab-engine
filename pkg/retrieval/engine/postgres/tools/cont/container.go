@@ -40,6 +40,8 @@ const (
 	DBLabSatelliteLabel = "dblab_satellite"
 	// DBLabInstanceIDLabel defines a label to mark service containers related to the current Database Lab instance.
 	DBLabInstanceIDLabel = "dblab_instance_id"
+	// DBLabEngineNameLabel defines the label value providing the container name of the current Database Lab instance.
+	DBLabEngineNameLabel = "dblab_engine_name"
 
 	// DBLabSyncLabel defines a label value for sync containers.
 	DBLabSyncLabel = "dblab_sync"
