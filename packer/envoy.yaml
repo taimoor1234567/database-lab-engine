@@ -49,12 +49,12 @@ static_resources:
     load_assignment:
       cluster_name: dle-ui-http
       endpoints:
-        - lb_endpoints:
-            - endpoint:
-                address:
-                  socket_address:
-                    address: 0.0.0.0
-                    port_value: 2346
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: 0.0.0.0
+                port_value: 2346
   - name: joe-api-http
     type: STRICT_DNS
     connect_timeout: 1s
