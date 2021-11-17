@@ -58,7 +58,7 @@ curl https://gitlab.com/postgres-ai/database-lab/-/raw/"${TAG}"/configs/config.e
  --output "${configDir}/server.yml"
 
 # Edit the following options
-yq e -i '
+yq eval -i '
   .global.debug = true |
   .global.telemetry.enabled = false |
   .localUI.enabled = false |
@@ -69,7 +69,7 @@ yq e -i '
 
 # logerrors is not supported in PostgreSQL 9.6
 if [ "${POSTGRES_VERSION}" = "9.6" ]; then
-  yq e -i '.databaseConfigs.configs.shared_preload_libraries = "pg_stat_statements, auto_explain"' "${configDir}/server.yml"
+  yq eval -i '.databaseConfigs.configs.shared_preload_libraries = "pg_stat_statements, auto_explain"' "${configDir}/server.yml"
 fi
 
 ## Launch Database Lab server
