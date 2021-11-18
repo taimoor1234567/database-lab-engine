@@ -4,7 +4,7 @@ set -euxo pipefail
 TAG="${TAG:-"master"}"
 IMAGE2TEST="registry.gitlab.com/postgres-ai/database-lab/dblab-server:${TAG}"
 
-# Replacement environment variables
+# Environment variables for replacement rules
 export POSTGRES_VERSION="${POSTGRES_VERSION:-13}"
 export SOURCE_DBNAME="${SOURCE_DBNAME:-"test"}"
 export SOURCE_USERNAME="${SOURCE_USERNAME:-"test_user"}"
@@ -30,7 +30,7 @@ metaDir="$HOME/.dblab/engine/meta"
 # Copy the contents of configuration example 
 mkdir -p "${configDir}"
 
-curl https://gitlab.com/postgres-ai/database-lab/-/raw/"${TAG}"/configs/config.example.logical_rds_iam.yml \
+curl https://gitlab.com/postgres-ai/database-lab/-/raw/"${CI_COMMIT_BRANCH:-master}"/configs/config.example.logical_rds_iam.yml \
  --output "${configDir}/server.yml"
 
 # Edit the following options

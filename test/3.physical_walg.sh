@@ -4,7 +4,7 @@ set -euxo pipefail
 TAG="${TAG:-"master"}"
 IMAGE2TEST="registry.gitlab.com/postgres-ai/database-lab/dblab-server:${TAG}"
 
-# Replacement environment variables
+# Environment variables for replacement rules
 export POSTGRES_VERSION="${POSTGRES_VERSION:-13}"
 export WALG_BACKUP_NAME="${WALG_BACKUP_NAME:-"LATEST"}"
 ## AWS
@@ -34,7 +34,7 @@ metaDir="$HOME/.dblab/engine/meta"
 # Copy the contents of configuration example
 mkdir -p "${configDir}"
 
-curl https://gitlab.com/postgres-ai/database-lab/-/raw/"${TAG}"/configs/config.example.physical_walg.yml \
+curl https://gitlab.com/postgres-ai/database-lab/-/raw/"${CI_COMMIT_BRANCH:-master}"/configs/config.example.physical_walg.yml \
  --output "${configDir}/server.yml"
 
 # Edit the following options

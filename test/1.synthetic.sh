@@ -3,7 +3,9 @@ set -euxo pipefail
 
 TAG=${TAG:-${CI_COMMIT_REF_SLUG}}
 IMAGE2TEST="registry.gitlab.com/postgres-ai/database-lab/dblab-server:${TAG}"
-POSTGRES_VERSION="${POSTGRES_VERSION:-13}"
+
+# Environment variables for replacement rules
+export POSTGRES_VERSION="${POSTGRES_VERSION:-13}"
 
 DIR=${0%/*}
 
