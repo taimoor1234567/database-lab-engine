@@ -31,7 +31,7 @@ sudo apt-get install -y \
   postgresql-client
 
 # Install yq
-if [[ ! command -v yq &> /dev/null ]]; then
+if ! command -v yq &> /dev/null; then
   sudo curl -L https://github.com/mikefarah/yq/releases/download/v4.14.2/yq_linux_amd64 -o /usr/bin/yq && sudo chmod +x /usr/bin/yq
 fi
 # TODO: Uncomment after upgrade the runner machine
