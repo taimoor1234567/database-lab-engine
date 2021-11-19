@@ -10,14 +10,14 @@ sudo docker ps -aq | xargs --no-run-if-empty sudo docker rm -f
 sudo docker images -q | xargs --no-run-if-empty sudo docker rmi
 
 # Clean up the data directory
-sudo rm -rf /var/lib/dblab/dblab_pool/data/*
+sudo rm -rf /var/lib/test/dblab/test_dblab_pool/data/*
 
 # Remove dump directory
-sudo umount /var/lib/dblab/dblab_pool/dump || true
-sudo rm -rf /var/lib/dblab/dblab_pool/dump || true
+sudo umount /var/lib/test/dblab/test_dblab_pool/dump || true
+sudo rm -rf /var/lib/test/dblab/test_dblab_pool/dump || true
 
 # Clean up the pool directory
-sudo rm -rf /var/lib/dblab/dblab_pool/*
+sudo rm -rf /var/lib/test/dblab/test_dblab_pool/*
 
 # To start from the very beginning: destroy ZFS storage pool
 sudo zpool destroy dblab_pool || true
@@ -29,5 +29,5 @@ sudo rm -f "${ZFS_FILE}"
 dblab config remove test || true
 
 # Remove Database Lab client CLI
-sudo rm -f  /usr/local/bin/dblab || true
+# sudo rm -f  /usr/local/bin/dblab || true
 

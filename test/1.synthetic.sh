@@ -22,7 +22,7 @@ sudo docker run \
   --label dblab_sync \
   --env PGDATA=/var/lib/postgresql/pgdata \
   --env POSTGRES_HOST_AUTH_METHOD=trust \
-  --volume /var/lib/dblab/dblab_pool/data:/var/lib/postgresql/pgdata \
+  --volume /var/lib/test/dblab/test_dblab_pool/data:/var/lib/postgresql/pgdata \
   --detach \
   postgres:"${POSTGRES_VERSION}"-alpine
 
@@ -81,8 +81,8 @@ sudo docker run \
   --privileged \
   --publish 2345:2345 \
   --volume /var/run/docker.sock:/var/run/docker.sock \
-  --volume /var/lib/dblab/dblab_pool/dump:/var/lib/dblab/dblab_pool/dump \
-  --volume /var/lib/dblab:/var/lib/dblab/:rshared \
+  --volume /var/lib/test/dblab/test_dblab_pool/dump:/var/lib/test/dblab/test_dblab_pool/dump \
+  --volume /var/lib/test/dblab:/var/lib/test/dblab/:rshared \
   --volume "${configDir}":/home/dblab/configs:ro \
   --volume "${metaDir}":/home/dblab/meta \
   --volume /sys/kernel/debug:/sys/kernel/debug:rw \

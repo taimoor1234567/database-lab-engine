@@ -10,8 +10,8 @@ sudo zpool create -f \
   -O atime=off \
   -O recordsize=128k \
   -O logbias=throughput \
-  -m /var/lib/dblab/dblab_pool \
-  dblab_pool \
+  -m /var/lib/test/dblab/test_dblab_pool \
+  test_dblab_pool \
   "${ZFS_FILE}"
 
 sudo zfs list
