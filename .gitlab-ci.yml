@@ -326,8 +326,8 @@ build-image-swagger-latest:
   variables:
     IMAGE_TAG: "${CI_COMMIT_REF_SLUG}"
   script:
-    - zfs list
     - bash test/1.synthetic.sh
+    - zfs list
   after_script:
     - bash test/_cleanup.sh
   tags:
