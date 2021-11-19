@@ -3,9 +3,13 @@ set -euxo pipefail
 
 TAG=${TAG:-${CI_COMMIT_REF_SLUG}}
 IMAGE2TEST="registry.gitlab.com/postgres-ai/database-lab/dblab-server:${TAG}"
+DLE_SERVER_NAME="dblab_server_test"
 
 # Environment variables for replacement rules
 export POSTGRES_VERSION="${POSTGRES_VERSION:-13}"
+export DLE_SERVER_PORT=${DLE_SERVER_PORT:-12345}
+export DLE_PORT_POOL_FROM=${DLE_PORT_POOL_FROM:-9000}
+export DLE_PORT_POOL_TO=${DLE_PORT_POOL_TO:-9100}
 
 DIR=${0%/*}
 
@@ -20,6 +24,7 @@ source "${DIR}/_zfs.file.sh"
 sudo docker run \
   --name dblab_pg_initdb \
   --label dblab_sync \
+  --label dblab_test \
   --env PGDATA=/var/lib/postgresql/pgdata \
   --env POSTGRES_HOST_AUTH_METHOD=trust \
   --volume /var/lib/test/dblab/test_dblab_pool/data:/var/lib/postgresql/pgdata \
@@ -64,6 +69,9 @@ yq eval -i '
   .global.debug = true |
   .global.telemetry.enabled = false |
   .localUI.enabled = false |
+  .server.port = env(DLE_SERVER_PORT) |
+  .provision.portPool.from = env(DLE_PORT_POOL_FROM) |
+  .provision.portPool.to = env(DLE_PORT_POOL_TO) |
   del(.retrieval.jobs[] | select(. == "logicalDump")) |
   del(.retrieval.jobs[] | select(. == "logicalRestore")) |
   .databaseContainer.dockerImage = "postgresai/extended-postgres:" + strenv(POSTGRES_VERSION)
@@ -76,10 +84,11 @@ fi
 
 ## Launch Database Lab server
 sudo docker run \
-  --name dblab_server \
+  --name ${DLE_SERVER_NAME} \
   --label dblab_control \
+  --label dblab_test \
   --privileged \
-  --publish 2345:2345 \
+  --publish ${DLE_SERVER_PORT}:${DLE_SERVER_PORT} \
   --volume /var/run/docker.sock:/var/run/docker.sock \
   --volume /var/lib/test/dblab/test_dblab_pool/dump:/var/lib/test/dblab/test_dblab_pool/dump \
   --volume /var/lib/test/dblab:/var/lib/test/dblab/:rshared \
@@ -93,11 +102,11 @@ sudo docker run \
   "${IMAGE2TEST}"
 
 # Check the Database Lab Engine logs
-sudo docker logs dblab_server -f 2>&1 | awk '{print "[CONTAINER dblab_server]: "$0}' &
+sudo docker logs ${DLE_SERVER_PORT} -f 2>&1 | awk '{print "[CONTAINER ${DLE_SERVER_PORT}]: "$0}' &
 
 ### Waiting for the Database Lab Engine initialization.
 for i in {1..300}; do
-  curl http://localhost:2345 > /dev/null 2>&1 && break || echo "dblab is not ready yet"
+  curl http://localhost:${DLE_SERVER_PORT} > /dev/null 2>&1 && break || echo "dblab is not ready yet"
   sleep 1
 done
 
@@ -113,7 +122,7 @@ dblab --version
 # Initialize CLI configuration
 dblab init \
   --environment-id=test \
-  --url=http://localhost:2345 \
+  --url=http://localhost:${DLE_SERVER_PORT} \
   --token=secret_token \
   --insecure
 
@@ -129,14 +138,14 @@ dblab clone create \
 
 # Connect to a clone and check the available table
 PGPASSWORD=secret_password psql \
-  "host=localhost port=6000 user=dblab_user_1 dbname=test" -c '\dt+'
+  "host=localhost port=${DLE_PORT_POOL_FROM} user=dblab_user_1 dbname=test" -c '\dt+'
 
 # Drop table
 PGPASSWORD=secret_password psql \
-  "host=localhost port=6000 user=dblab_user_1 dbname=test" -c 'drop table pgbench_accounts'
+  "host=localhost port=${DLE_PORT_POOL_FROM} user=dblab_user_1 dbname=test" -c 'drop table pgbench_accounts'
 
 PGPASSWORD=secret_password psql \
-  "host=localhost port=6000 user=dblab_user_1 dbname=test" -c '\dt+'
+  "host=localhost port=${DLE_PORT_POOL_FROM} user=dblab_user_1 dbname=test" -c '\dt+'
 
 ## Reset clone
 dblab clone reset testclone
@@ -146,17 +155,17 @@ dblab clone status testclone
 
 # Check the database objects (everything should be the same as when we started)
 PGPASSWORD=secret_password psql \
-  "host=localhost port=6000 user=dblab_user_1 dbname=test" -c '\dt+'
+  "host=localhost port=${DLE_PORT_POOL_FROM} user=dblab_user_1 dbname=test" -c '\dt+'
 
 
 ### Step 4. Check clone durability on DLE restart.
 
 ## Restart DLE.
-sudo docker restart dblab_server
+sudo docker restart ${DLE_SERVER_PORT}
 
 ### Waiting for the Database Lab Engine to start.
 for i in {1..300}; do
-  curl http://localhost:2345 > /dev/null 2>&1 && break || echo "dblab is not ready yet"
+  curl http://localhost:${DLE_SERVER_PORT} > /dev/null 2>&1 && break || echo "dblab is not ready yet"
   sleep 1
 done
 
@@ -168,7 +177,7 @@ dblab clone status testclone
 
 # Check the database objects (everything should be the same as when we started)
 PGPASSWORD=secret_password psql \
-  "host=localhost port=6000 user=dblab_user_1 dbname=test" -c '\dt+'
+  "host=localhost port=${DLE_PORT_POOL_FROM} user=dblab_user_1 dbname=test" -c '\dt+'
 
 
 ### Step 5. Destroy clone
@@ -176,7 +185,7 @@ dblab clone destroy testclone
 dblab clone list
 
 ## Stop DLE.
-sudo docker stop dblab_server
+sudo docker stop ${DLE_SERVER_NAME}
 
 ### Finish. clean up
 source "${DIR}/_cleanup.sh"
