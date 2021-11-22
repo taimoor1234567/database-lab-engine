@@ -31,7 +31,7 @@ sudo docker run \
   --label dblab_test \
   --env PGDATA=/var/lib/postgresql/pgdata \
   --env POSTGRES_HOST_AUTH_METHOD=trust \
-  --volume /var/lib/test/dblab/test_dblab_pool/data:/var/lib/postgresql/pgdata \
+  --volume ${DLE_TEST_MOUNT_DIR}/${DLE_TEST_POOL_NAME}/data:/var/lib/postgresql/pgdata \
   --detach \
   postgres:"${POSTGRES_VERSION}"-alpine
 

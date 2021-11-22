@@ -1,8 +1,7 @@
 image: golang:1.17
 
-# TODO: uncomment
-#include:
-#  - template: Security/SAST.gitlab-ci.yml
+include:
+  - template: Security/SAST.gitlab-ci.yml
 
 variables:
   SAST_EXCLUDED_ANALYZERS: "semgrep-sast"
@@ -13,14 +12,12 @@ stages:
   - build-image
   - integration-test
 
-# TODO: remove dot (.)
-.test:
+test:
   stage: test
   script:
     - make test
 
-# TODO: remove dot (.)
-.lint:
+lint:
   stage: test
   script:
     - make lint
@@ -47,8 +44,7 @@ stages:
       - $CI_COMMIT_REF_SLUG != "master"
   when: manual
 
-# TODO: remove dot (.)
-.build-binary-alpine:
+build-binary-alpine:
   image: golang:1.17-alpine
   stage: build-binary
   only:
@@ -119,8 +115,7 @@ build-binary-client-rc:
     - apk update && apk upgrade && apk add --no-cache bash # TODO(anatoly): Remove dependency.
     - bash ./scripts/ci_docker_build_push.sh
 
-# TODO: remove dot (.)
-.build-image-feature-server:
+build-image-feature-server:
   <<: *build_image_definition
   <<: *only_feature
   variables:
