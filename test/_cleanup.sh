@@ -4,6 +4,7 @@ set -euxo pipefail
 ZFS_FILE="$(pwd)/zfs_file"
 
 # Stop and remove all Docker containers
+sudo docker ps -aq --filter label="test_dblab_pool" | xargs --no-run-if-empty sudo docker rm -f
 sudo docker ps -aq --filter label="dblab_test" | xargs --no-run-if-empty sudo docker rm -f
 
 # Remove all Docker images
@@ -17,7 +18,7 @@ sudo umount /var/lib/test/dblab/test_dblab_pool/dump || true
 sudo rm -rf /var/lib/test/dblab/test_dblab_pool/dump || true
 
 # Clean up the pool directory
-sudo rm -rf /var/lib/test/dblab/test_dblab_pool/*
+sudo rm -rf /var/lib/test/dblab/test_dblab_pool/* || true
 
 # To start from the very beginning: destroy ZFS storage pool
 sudo zpool destroy test_dblab_pool || true

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-TAG=${TAG:-${CI_COMMIT_REF_SLUG}}
+TAG=${TAG:-${CI_COMMIT_REF_SLUG:-"master"}}
 IMAGE2TEST="registry.gitlab.com/postgres-ai/database-lab/dblab-server:${TAG}"
 DLE_SERVER_NAME="dblab_server_test"
 
@@ -72,6 +72,7 @@ yq eval -i '
   .server.port = env(DLE_SERVER_PORT) |
   .provision.portPool.from = env(DLE_PORT_POOL_FROM) |
   .provision.portPool.to = env(DLE_PORT_POOL_TO) |
+  .poolManager.mountDir = "/var/lib/test/dblab" |
   del(.retrieval.jobs[] | select(. == "logicalDump")) |
   del(.retrieval.jobs[] | select(. == "logicalRestore")) |
   .databaseContainer.dockerImage = "postgresai/extended-postgres:" + strenv(POSTGRES_VERSION)
@@ -102,7 +103,7 @@ sudo docker run \
   "${IMAGE2TEST}"
 
 # Check the Database Lab Engine logs
-sudo docker logs ${DLE_SERVER_PORT} -f 2>&1 | awk '{print "[CONTAINER ${DLE_SERVER_PORT}]: "$0}' &
+sudo docker logs ${DLE_SERVER_NAME} -f 2>&1 | awk '{print "[CONTAINER ${DLE_SERVER_PORT}]: "$0}' &
 
 ### Waiting for the Database Lab Engine initialization.
 for i in {1..300}; do
@@ -161,7 +162,7 @@ PGPASSWORD=secret_password psql \
 ### Step 4. Check clone durability on DLE restart.
 
 ## Restart DLE.
-sudo docker restart ${DLE_SERVER_PORT}
+sudo docker restart ${DLE_SERVER_NAME}
 
 ### Waiting for the Database Lab Engine to start.
 for i in {1..300}; do
