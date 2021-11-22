@@ -47,16 +47,16 @@ if [[ "${SOURCE_HOST}" = "172.17.0.1" ]]; then
     postgres:"${POSTGRES_VERSION}-alpine"
 
   for i in {1..300}; do
-    sudo docker exec -it postgres"${POSTGRES_VERSION}" psql -d "${SOURCE_DBNAME}" -U postgres -c 'select' > /dev/null 2>&1  && break || echo "test database is not ready yet"
+    sudo docker exec postgres"${POSTGRES_VERSION}" psql -d "${SOURCE_DBNAME}" -U postgres -c 'select' > /dev/null 2>&1  && break || echo "test database is not ready yet"
     sleep 1
   done
 
   # Generate data in the test database using pgbench
   # 1,000,000 accounts, ~0.14 GiB of data.
-  sudo docker exec -it postgres"${POSTGRES_VERSION}" pgbench -U postgres -i -s 10 "${SOURCE_DBNAME}"
+  sudo docker exec postgres"${POSTGRES_VERSION}" pgbench -U postgres -i -s 10 "${SOURCE_DBNAME}"
 
   # Database info
-  sudo docker exec -it postgres"${POSTGRES_VERSION}" psql -U postgres -c "\l+ ${SOURCE_DBNAME}"
+  sudo docker exec postgres"${POSTGRES_VERSION}" psql -U postgres -c "\l+ ${SOURCE_DBNAME}"
 fi
 
 ### Step 1. Prepare a machine with disk, Docker, and ZFS
