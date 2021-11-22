@@ -10,6 +10,8 @@ export POSTGRES_VERSION="${POSTGRES_VERSION:-13}"
 export DLE_SERVER_PORT=${DLE_SERVER_PORT:-12345}
 export DLE_PORT_POOL_FROM=${DLE_PORT_POOL_FROM:-9000}
 export DLE_PORT_POOL_TO=${DLE_PORT_POOL_TO:-9100}
+export DLE_TEST_MOUNT_DIR="/var/lib/test/dblab"
+export DLE_TEST_POOL_NAME="test_dblab_pool"
 
 DIR=${0%/*}
 
@@ -74,7 +76,7 @@ yq eval -i '
   .server.port = env(DLE_SERVER_PORT) |
   .provision.portPool.from = env(DLE_PORT_POOL_FROM) |
   .provision.portPool.to = env(DLE_PORT_POOL_TO) |
-  .poolManager.mountDir = "/var/lib/test/dblab" |
+  .poolManager.mountDir = env(DLE_TEST_MOUNT_DIR) |
   del(.retrieval.jobs[] | select(. == "logicalDump")) |
   del(.retrieval.jobs[] | select(. == "logicalRestore")) |
   .databaseContainer.dockerImage = "postgresai/extended-postgres:" + strenv(POSTGRES_VERSION)
@@ -93,8 +95,8 @@ sudo docker run \
   --privileged \
   --publish ${DLE_SERVER_PORT}:${DLE_SERVER_PORT} \
   --volume /var/run/docker.sock:/var/run/docker.sock \
-  --volume /var/lib/test/dblab/test_dblab_pool/dump:/var/lib/test/dblab/test_dblab_pool/dump \
-  --volume /var/lib/test/dblab:/var/lib/test/dblab/:rshared \
+  --volume ${DLE_TEST_MOUNT_DIR}/${DLE_TEST_POOL_NAME}/dump:${DLE_TEST_MOUNT_DIR}/${DLE_TEST_POOL_NAME}/dump \
+  --volume ${DLE_TEST_MOUNT_DIR}:${DLE_TEST_MOUNT_DIR}/:rshared \
   --volume "${configDir}":/home/dblab/configs:ro \
   --volume "${metaDir}":/home/dblab/meta \
   --volume /sys/kernel/debug:/sys/kernel/debug:rw \

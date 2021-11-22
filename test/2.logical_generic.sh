@@ -13,6 +13,7 @@ export SOURCE_USERNAME="${SOURCE_USERNAME:-postgres}"
 export SOURCE_PASSWORD="${SOURCE_PASSWORD:-secretpassword}"
 export POSTGRES_VERSION="${POSTGRES_VERSION:-13}"
 export DLE_TEST_MOUNT_DIR="/var/lib/test/dblab"
+export DLE_TEST_POOL_NAME="test_dblab_pool"
 export DLE_SERVER_PORT=${DLE_SERVER_PORT:-12345}
 export DLE_PORT_POOL_FROM=${DLE_PORT_POOL_FROM:-9000}
 export DLE_PORT_POOL_TO=${DLE_PORT_POOL_TO:-9100}
@@ -84,13 +85,13 @@ yq eval -i '
   .poolManager.mountDir = env(DLE_TEST_MOUNT_DIR) |
   .provision.portPool.from = env(DLE_PORT_POOL_FROM) |
   .provision.portPool.to = env(DLE_PORT_POOL_TO) |
-  .retrieval.spec.logicalDump.options.dumpLocation = env(DLE_TEST_MOUNT_DIR) + "/test_dblab_pool/dump" |
+  .retrieval.spec.logicalDump.options.dumpLocation = env(DLE_TEST_MOUNT_DIR) + "/" + env(DLE_TEST_POOL_NAME) + "/dump" |
   .retrieval.spec.logicalDump.options.source.connection.dbname = strenv(SOURCE_DBNAME) |
   .retrieval.spec.logicalDump.options.source.connection.host = strenv(SOURCE_HOST) |
   .retrieval.spec.logicalDump.options.source.connection.port = env(SOURCE_PORT) |
   .retrieval.spec.logicalDump.options.source.connection.username = strenv(SOURCE_USERNAME) |
   .retrieval.spec.logicalDump.options.source.connection.password = strenv(SOURCE_PASSWORD) |
-  .retrieval.spec.logicalRestore.options.dumpLocation = env(DLE_TEST_MOUNT_DIR) + "/test_dblab_pool/dump" |
+  .retrieval.spec.logicalRestore.options.dumpLocation = env(DLE_TEST_MOUNT_DIR) + "/" + env(DLE_TEST_POOL_NAME) + "/dump" |
   .databaseContainer.dockerImage = "postgresai/extended-postgres:" + strenv(POSTGRES_VERSION)
 ' "${configDir}/server.yml"
 
@@ -102,7 +103,7 @@ sudo docker run \
   --privileged \
   --publish ${DLE_SERVER_PORT}:${DLE_SERVER_PORT} \
   --volume /var/run/docker.sock:/var/run/docker.sock \
-  --volume ${DLE_TEST_MOUNT_DIR}/test_dblab_pool/dump:${DLE_TEST_MOUNT_DIR}/test_dblab_pool/dump \
+  --volume ${DLE_TEST_MOUNT_DIR}/${DLE_TEST_POOL_NAME}/dump:${DLE_TEST_MOUNT_DIR}/${DLE_TEST_POOL_NAME}/dump \
   --volume ${DLE_TEST_MOUNT_DIR}:${DLE_TEST_MOUNT_DIR}/:rshared \
   --volume "${configDir}":/home/dblab/configs:ro \
   --volume "${metaDir}":/home/dblab/meta \
