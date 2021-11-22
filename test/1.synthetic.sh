@@ -21,6 +21,8 @@ source "${DIR}/_zfs.file.sh"
 ### Step 2. Configure and launch the Database Lab Engine
 
 ## Prepare database data directory.
+sudo docker rm dblab_pg_initdb || true
+
 sudo docker run \
   --name dblab_pg_initdb \
   --label dblab_sync \
