@@ -56,6 +56,17 @@ if [[ "${SOURCE_HOST}" = "172.17.0.1" ]]; then
   # reload conf
   sudo docker exec postgres"${POSTGRES_VERSION}" psql -U postgres -c 'select pg_reload_conf()'
 
+  # avoid the number of requested standby connections exceeding max_wal_senders
+  sudo docker exec postgres"${POSTGRES_VERSION}" bash -c "echo 'max_wal_senders = 10' >> /var/lib/postgresql/pgdata/postgresql.conf"
+  sudo docker exec postgres"${POSTGRES_VERSION}" bash -c "echo 'wal_level = logical' >> /var/lib/postgresql/pgdata/postgresql.conf"
+
+  sudo docker restart postgres"${POSTGRES_VERSION}"
+
+  for i in {1..300}; do
+    sudo docker exec postgres"${POSTGRES_VERSION}" psql -d test -U postgres -c 'select' > /dev/null 2>&1  && break || echo "test database is not ready yet"
+    sleep 1
+  done
+
   # Generate data in the test database using pgbench
   # 1,000,000 accounts, ~0.14 GiB of data.
   sudo docker exec postgres"${POSTGRES_VERSION}" pgbench -U postgres -i -s 10 test
@@ -124,6 +135,12 @@ sudo docker run \
   --detach \
   "${IMAGE2TEST}"
 
+cleanup_service_containers() {
+  sudo docker ps -aq --filter label="dblab_engine_name=${DLE_SERVER_NAME}" | xargs --no-run-if-empty sudo docker rm -f
+}
+
+trap cleanup_service_containers EXIT
+
 # Check the Database Lab Engine logs
 sudo docker logs ${DLE_SERVER_NAME} -f 2>&1 | awk '{print "[CONTAINER dblab_server]: "$0}' &
 
@@ -132,7 +149,6 @@ for i in {1..30}; do
   curl http://localhost:${DLE_SERVER_PORT} > /dev/null 2>&1 && break || echo "dblab is not ready yet"
   sleep 10
 done
-
 
 ### Step 3. Start cloning
 
@@ -186,6 +202,9 @@ dblab clone list
 
 ## Stop DLE.
 sudo docker stop ${DLE_SERVER_NAME}
+
+## Stop control containers.
+cleanup_service_containers
 
 ### Finish. clean up
 source "${DIR}/_cleanup.sh"
