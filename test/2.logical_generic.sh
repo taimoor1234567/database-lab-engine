@@ -95,6 +95,11 @@ yq eval -i '
   .databaseContainer.dockerImage = "postgresai/extended-postgres:" + strenv(POSTGRES_VERSION)
 ' "${configDir}/server.yml"
 
+# logerrors is not supported in PostgreSQL 9.6
+if [ "${POSTGRES_VERSION}" = "9.6" ]; then
+  yq eval -i '.databaseConfigs.configs.shared_preload_libraries = "pg_stat_statements, auto_explain"' "${configDir}/server.yml"
+fi
+
 ## Launch Database Lab server
 sudo docker run \
   --name ${DLE_SERVER_NAME} \

@@ -57,6 +57,11 @@ yq eval -i '
   .retrieval.spec.logicalRestore.options.dumpLocation = env(DLE_TEST_MOUNT_DIR) + "/" + env(DLE_TEST_POOL_NAME) + "/dump"
 ' "${configDir}/server.yml"
 
+# logerrors is not supported in PostgreSQL 9.6
+if [ "${POSTGRES_VERSION}" = "9.6" ]; then
+  yq eval -i '.databaseConfigs.configs.shared_preload_libraries = "pg_stat_statements, auto_explain"' "${configDir}/server.yml"
+fi
+
 # Download AWS RDS certificate
 curl https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem \
   --output ~/.dblab/rds-combined-ca-bundle.pem

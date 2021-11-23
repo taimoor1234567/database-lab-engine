@@ -58,6 +58,11 @@ yq eval -i '
   .retrieval.spec.physicalSnapshot.options.skipStartSnapshot = true
 ' "${configDir}/server.yml"
 
+# logerrors is not supported in PostgreSQL 9.6
+if [ "${POSTGRES_VERSION}" = "9.6" ]; then
+  yq eval -i '.databaseConfigs.configs.shared_preload_libraries = "pg_stat_statements, auto_explain"' "${configDir}/server.yml"
+fi
+
 set +euxo pipefail # ---- do not display secrets
 if [ -n "${WALG_S3_PREFIX}" ] ; then
   yq eval -i '
