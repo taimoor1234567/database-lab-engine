@@ -32,6 +32,11 @@ localUI:
   # Docker image of the UI application.
   dockerImage: "postgresai/basic-ui:latest"
 
+  # The host which the Local UI container accepts HTTP connections from.
+  # By default uses a loop-back to accept only local connections.
+  # Use an empty string to allow all IP addresses.
+  host: "127.0.0.1"
+
   # HTTP port of the UI application. Default: 2346.
   port: 2346
 
