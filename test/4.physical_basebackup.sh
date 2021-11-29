@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-TAG="${TAG:-"master"}"
+TAG=${TAG:-${CI_COMMIT_REF_SLUG:-"master"}}
 IMAGE2TEST="registry.gitlab.com/postgres-ai/database-lab/dblab-server:${TAG}"
 DLE_SERVER_NAME="dblab_server_test"
 
