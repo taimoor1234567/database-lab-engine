@@ -76,7 +76,7 @@ if [[ "${SOURCE_HOST}" = "172.17.0.1" ]]; then
 fi
 
 ### Step 1. Prepare a machine with disk, Docker, and ZFS
-#source "${DIR}/_prerequisites.ubuntu.sh"
+source "${DIR}/_prerequisites.ubuntu.sh"
 source "${DIR}/_zfs.file.sh"
 
 
