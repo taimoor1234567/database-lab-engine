@@ -56,16 +56,16 @@ if [[ "${SOURCE_HOST}" = "172.17.0.1" ]]; then
   # reload conf
   sudo docker exec postgres"${POSTGRES_VERSION}" psql -U postgres -c 'select pg_reload_conf()'
 
-  # avoid the number of requested standby connections exceeding max_wal_senders
-  sudo docker exec postgres"${POSTGRES_VERSION}" bash -c "echo 'max_wal_senders = 10' >> /var/lib/postgresql/pgdata/postgresql.conf"
-  sudo docker exec postgres"${POSTGRES_VERSION}" bash -c "echo 'wal_level = logical' >> /var/lib/postgresql/pgdata/postgresql.conf"
-
-  sudo docker restart postgres"${POSTGRES_VERSION}"
-
-  for i in {1..300}; do
-    sudo docker exec postgres"${POSTGRES_VERSION}" psql -d test -U postgres -c 'select' > /dev/null 2>&1  && break || echo "test database is not ready yet"
-    sleep 1
-  done
+  # Change wal_level and max_wal_senders parameters for PostgreSQL 9.6
+  if [[ "${POSTGRES_VERSION}" = "9.6" ]]; then
+    sudo docker exec postgres"${POSTGRES_VERSION}" psql -U postgres -c 'ALTER SYSTEM SET wal_level = replica'
+    sudo docker exec postgres"${POSTGRES_VERSION}" psql -U postgres -c 'ALTER SYSTEM SET max_wal_senders = 10'
+    sudo docker restart postgres"${POSTGRES_VERSION}"
+    for i in {1..300}; do
+      sudo docker exec postgres"${POSTGRES_VERSION}" psql -U postgres -c 'select' > /dev/null 2>&1  && break || echo "test database is not ready yet"
+      sleep 1
+    done
+  fi
 
   # Generate data in the test database using pgbench
   # 1,000,000 accounts, ~0.14 GiB of data.
