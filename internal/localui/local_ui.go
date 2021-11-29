@@ -17,12 +17,12 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 
-	"gitlab.com/postgres-ai/database-lab/v2/internal/provision/docker"
-	"gitlab.com/postgres-ai/database-lab/v2/internal/provision/runners"
-	"gitlab.com/postgres-ai/database-lab/v2/internal/retrieval/engine/postgres/tools"
-	"gitlab.com/postgres-ai/database-lab/v2/internal/retrieval/engine/postgres/tools/cont"
-	"gitlab.com/postgres-ai/database-lab/v2/pkg/config/global"
-	"gitlab.com/postgres-ai/database-lab/v2/pkg/util/networks"
+	"gitlab.com/postgres-ai/database-lab/v3/internal/provision/docker"
+	"gitlab.com/postgres-ai/database-lab/v3/internal/provision/runners"
+	"gitlab.com/postgres-ai/database-lab/v3/internal/retrieval/engine/postgres/tools"
+	"gitlab.com/postgres-ai/database-lab/v3/internal/retrieval/engine/postgres/tools/cont"
+	"gitlab.com/postgres-ai/database-lab/v3/pkg/config/global"
+	"gitlab.com/postgres-ai/database-lab/v3/pkg/util/networks"
 )
 
 const (
@@ -42,6 +42,7 @@ const (
 type Config struct {
 	Enabled     bool   `yaml:"enabled"`
 	DockerImage string `yaml:"dockerImage"`
+	Host        string `yaml:"host"`
 	Port        int    `yaml:"port"`
 }
 
@@ -82,6 +83,7 @@ func (ui *UIManager) Reload(ctx context.Context, cfg Config) error {
 func (ui *UIManager) isConfigChanged(cfg Config) bool {
 	return ui.cfg.Enabled != cfg.Enabled ||
 		ui.cfg.DockerImage != cfg.DockerImage ||
+		ui.cfg.Host != cfg.Host ||
 		ui.cfg.Port != cfg.Port
 }
 
@@ -113,7 +115,7 @@ func (ui *UIManager) Run(ctx context.Context) error {
 			PortBindings: map[nat.Port][]nat.PortBinding{
 				"80/tcp": {
 					{
-						HostIP:   "127.0.0.1",
+						HostIP:   ui.cfg.Host,
 						HostPort: strconv.Itoa(ui.cfg.Port),
 					},
 				},

@@ -6,6 +6,7 @@ package pool
 
 import (
 	"container/list"
+	"fmt"
 	"os"
 	"path"
 	"sync"
@@ -13,14 +14,14 @@ import (
 
 	"github.com/pkg/errors"
 
-	"gitlab.com/postgres-ai/database-lab/v2/internal/provision/resources"
-	"gitlab.com/postgres-ai/database-lab/v2/internal/provision/runners"
-	"gitlab.com/postgres-ai/database-lab/v2/internal/provision/thinclones/lvm"
-	"gitlab.com/postgres-ai/database-lab/v2/internal/provision/thinclones/zfs"
-	"gitlab.com/postgres-ai/database-lab/v2/internal/retrieval/dbmarker"
-	"gitlab.com/postgres-ai/database-lab/v2/internal/retrieval/engine/postgres/tools"
-	"gitlab.com/postgres-ai/database-lab/v2/internal/telemetry"
-	"gitlab.com/postgres-ai/database-lab/v2/pkg/log"
+	"gitlab.com/postgres-ai/database-lab/v3/internal/provision/resources"
+	"gitlab.com/postgres-ai/database-lab/v3/internal/provision/runners"
+	"gitlab.com/postgres-ai/database-lab/v3/internal/provision/thinclones/lvm"
+	"gitlab.com/postgres-ai/database-lab/v3/internal/provision/thinclones/zfs"
+	"gitlab.com/postgres-ai/database-lab/v3/internal/retrieval/dbmarker"
+	"gitlab.com/postgres-ai/database-lab/v3/internal/retrieval/engine/postgres/tools"
+	"gitlab.com/postgres-ai/database-lab/v3/internal/telemetry"
+	"gitlab.com/postgres-ai/database-lab/v3/pkg/log"
 )
 
 const (
@@ -46,6 +47,7 @@ type Config struct {
 	SocketSubDir      string `yaml:"socketSubDir"`
 	ObserverSubDir    string `yaml:"observerSubDir"`
 	PreSnapshotSuffix string `yaml:"preSnapshotSuffix"`
+	SelectedPool      string `yaml:"selectedPool"`
 }
 
 // NewPoolManager creates a new pool manager.
@@ -265,6 +267,11 @@ func (pm *Manager) examineEntries(entries []os.DirEntry) (map[string]FSManager, 
 		dataPath := path.Join(pm.cfg.MountDir, entry.Name())
 
 		log.Msg("Discovering: ", dataPath)
+
+		if pm.cfg.SelectedPool != "" && pm.cfg.SelectedPool != entry.Name() {
+			log.Msg(fmt.Sprintf("Skip the entry %q as it doesn't match with the selected pool %s", entry.Name(), pm.cfg.SelectedPool))
+			continue
+		}
 
 		fsType, err := pm.getFSInfo(dataPath)
 		if err != nil {
