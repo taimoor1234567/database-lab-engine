@@ -3,7 +3,7 @@ set -euxo pipefail
 
 ZFS_FILE="$(pwd)/zfs_file"
 
-# Stop and remove all Docker containers
+# Stop and remove test Docker containers
 sudo docker ps -aq --filter label="test_dblab_pool" | xargs --no-run-if-empty sudo docker rm -f
 sudo docker ps -aq --filter label="dblab_test" | xargs --no-run-if-empty sudo docker rm -f
 
