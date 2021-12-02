@@ -93,7 +93,10 @@ sudo docker logs ${DLE_SERVER_NAME} -f 2>&1 | awk '{print "[CONTAINER dblab_serv
 
 ### Waiting for the Database Lab Engine initialization.
 for i in {1..30}; do
-  curl http://localhost:${DLE_SERVER_PORT} > /dev/null 2>&1 && break || echo "dblab is not ready yet"
+  if [[ $(curl --silent --header 'Verification-Token: secret_token' --header 'Content-Type: application/json' http://localhost:${DLE_SERVER_PORT}/status | jq -r .retrieving.status) ==  "finished" ]] ; then
+      break
+  fi
+  echo "dblab is not ready yet"
   sleep 10
 done
 
