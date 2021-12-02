@@ -173,7 +173,7 @@ sudo docker restart ${DLE_SERVER_NAME}
 
 ### Waiting for the Database Lab Engine to start.
 for i in {1..300}; do
-  if [[ $(curl --silent --header 'Verification-Token: secret_token' --header 'Content-Type: application/json' http://localhost:${DLE_SERVER_PORT}/status | jq -r .retrieving.status) ==  "finished" ]] ; then
+  if [[ $(curl --silent --header 'Verification-Token: secret_token' --header 'Content-Type: application/json' http://localhost:${DLE_SERVER_PORT}/status | jq -r .status.code) ==  "OK" ]] ; then
       break
   fi
 
