@@ -59,8 +59,13 @@ sudo docker exec dblab_pg_initdb pgbench -U postgres -i -s 10 test
 sudo docker stop dblab_pg_initdb
 sudo docker rm dblab_pg_initdb
 
-configDir="$HOME/.dblab/engine/configs"
-metaDir="$HOME/.dblab/engine/meta"
+echo $HOME
+
+# configDir="$HOME/.dblab/engine/configs"
+# metaDir="$HOME/.dblab/engine/meta"
+
+configDir="/home/gitlab-runner/.dblab/engine/configs"
+metaDir="/home/gitlab-runner/.dblab/engine/meta"
 
 # Copy the contents of configuration example
 mkdir -p "${configDir}"
