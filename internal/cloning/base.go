@@ -105,10 +105,6 @@ func (c *Base) Run(ctx context.Context) error {
 		log.Err("Failed to load stored sessions:", err)
 	}
 
-	for _, clone := range c.clones {
-		log.Dbg("Restored Clone:", clone.Clone.ID)
-	}
-
 	c.filterRunningClones(ctx)
 
 	if err := c.cleanupInvalidClones(); err != nil {

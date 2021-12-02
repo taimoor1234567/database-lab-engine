@@ -32,8 +32,6 @@ func (c *Base) loadSessionState(sessionsPath string) error {
 	c.cloneMutex.Lock()
 	defer c.cloneMutex.Unlock()
 
-	log.Dbg("Session path:", sessionsPath)
-
 	c.clones = make(map[string]*CloneWrapper)
 
 	data, err := os.ReadFile(sessionsPath)
@@ -45,8 +43,6 @@ func (c *Base) loadSessionState(sessionsPath string) error {
 
 		return fmt.Errorf("failed to read sessions data: %w", err)
 	}
-
-	log.Dbg("Data:", string(data))
 
 	return json.Unmarshal(data, &c.clones)
 }
@@ -60,8 +56,6 @@ func (c *Base) filterRunningClones(ctx context.Context) {
 	for cloneID, wrapper := range c.clones {
 		if wrapper.Clone == nil || wrapper.Session == nil || wrapper.Clone.Status.Code == models.StatusFatal {
 			delete(c.clones, cloneID)
-			log.Dbg("Clone nil", wrapper)
-
 			continue
 		}
 
@@ -73,9 +67,6 @@ func (c *Base) filterRunningClones(ctx context.Context) {
 				}
 
 				delete(c.clones, cloneID)
-
-				log.Dbg("No snapshot", wrapper.Clone.Snapshot.ID)
-				log.Dbg("Snapshots", c.snapshotBox.items)
 
 				continue
 			}

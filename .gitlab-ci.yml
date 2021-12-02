@@ -327,8 +327,8 @@ build-image-swagger-latest:
     IMAGE_TAG: "${CI_COMMIT_REF_SLUG}"
   script:
     - bash test/1.synthetic.sh
-#    - bash test/2.logical_generic.sh
-#    - bash test/4.physical_basebackup.sh
+    - bash test/2.logical_generic.sh
+    - bash test/4.physical_basebackup.sh
   after_script:
     - bash test/_cleanup.sh
   tags:
