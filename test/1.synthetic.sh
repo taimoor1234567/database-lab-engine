@@ -179,6 +179,9 @@ for i in {1..300}; do
   sleep 1
 done
 
+# Check the Database Lab Engine logs
+sudo docker logs ${DLE_SERVER_NAME} -f 2>&1 | awk '{print "[CONTAINER ${DLE_SERVER_PORT}]: "$0}' &
+
 ## Reset clone.
 dblab clone reset testclone
 
