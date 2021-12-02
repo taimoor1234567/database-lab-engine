@@ -179,8 +179,6 @@ for i in {1..300}; do
   sleep 1
 done
 
-sleep 10
-
 ## Reset clone.
 dblab clone reset testclone
 
