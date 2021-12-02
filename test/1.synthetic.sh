@@ -59,13 +59,8 @@ sudo docker exec dblab_pg_initdb pgbench -U postgres -i -s 10 test
 sudo docker stop dblab_pg_initdb
 sudo docker rm dblab_pg_initdb
 
-echo $HOME
-
-# configDir="$HOME/.dblab/engine/configs"
-# metaDir="$HOME/.dblab/engine/meta"
-
-configDir="/home/gitlab-runner/.dblab/engine/configs"
-metaDir="/home/gitlab-runner/.dblab/engine/meta"
+ configDir="$HOME/.dblab/engine/configs"
+ metaDir="$HOME/.dblab/engine/meta"
 
 # Copy the contents of configuration example
 mkdir -p "${configDir}"
@@ -116,7 +111,10 @@ sudo docker logs ${DLE_SERVER_NAME} -f 2>&1 | awk '{print "[CONTAINER ${DLE_SERV
 
 ### Waiting for the Database Lab Engine initialization.
 for i in {1..300}; do
-  curl http://localhost:${DLE_SERVER_PORT} > /dev/null 2>&1 && break || echo "dblab is not ready yet"
+  if [[ $(curl --silent --header 'Verification-Token: secret_token' --header 'Content-Type: application/json' http://localhost:${DLE_SERVER_PORT}/status | jq -r .retrieving.status) ==  "finished" ]] ; then
+      break
+  fi
+  echo "dblab is not ready yet"
   sleep 1
 done
 
@@ -175,12 +173,13 @@ sudo docker restart ${DLE_SERVER_NAME}
 
 ### Waiting for the Database Lab Engine to start.
 for i in {1..300}; do
-  curl http://localhost:${DLE_SERVER_PORT} > /dev/null 2>&1 && break || echo "dblab is not ready yet"
+  if [[ $(curl --silent --header 'Verification-Token: secret_token' --header 'Content-Type: application/json' http://localhost:${DLE_SERVER_PORT}/status | jq -r .retrieving.status) ==  "finished" ]] ; then
+      break
+  fi
+
+  echo "dblab is not ready yet"
   sleep 1
 done
-
-# Check the Database Lab Engine logs
-sudo docker logs ${DLE_SERVER_NAME} -f 2>&1 | awk '{print "[CONTAINER ${DLE_SERVER_PORT}]: "$0}' &
 
 ## Reset clone.
 dblab clone reset testclone

@@ -210,31 +210,29 @@ func (r *Retrieval) run(ctx context.Context, fsm pool.FSManager) (err error) {
 		return errors.Errorf("pool %s not found", fsm.Pool().Name)
 	}
 
-	if len(r.jobs) == 0 {
-		return nil
-	}
+	if len(r.jobs) > 0 {
+		fsm.Pool().SetStatus(resources.RefreshingPool)
 
-	fsm.Pool().SetStatus(resources.RefreshingPool)
+		r.retrieveMutex.Lock()
+		r.State.Status = models.Refreshing
+		r.State.LastRefresh = pointer.ToTimeOrNil(time.Now().Truncate(time.Second))
 
-	r.retrieveMutex.Lock()
-	r.State.Status = models.Refreshing
-	r.State.LastRefresh = pointer.ToTimeOrNil(time.Now().Truncate(time.Second))
+		defer func() {
+			r.State.Status = models.Finished
 
-	defer func() {
-		r.State.Status = models.Finished
+			if err != nil {
+				r.State.Status = models.Failed
 
-		if err != nil {
-			r.State.Status = models.Failed
+				fsm.Pool().SetStatus(resources.EmptyPool)
+			}
 
-			fsm.Pool().SetStatus(resources.EmptyPool)
-		}
+			r.retrieveMutex.Unlock()
+		}()
 
-		r.retrieveMutex.Unlock()
-	}()
-
-	for _, j := range r.jobs {
-		if err := j.Run(ctx); err != nil {
-			return err
+		for _, j := range r.jobs {
+			if err := j.Run(ctx); err != nil {
+				return err
+			}
 		}
 	}
 
