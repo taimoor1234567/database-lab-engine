@@ -178,8 +178,9 @@ func main() {
 		}()
 	}
 
-	if err = retrievalSvc.Run(ctx); err != nil {
+	if err := retrievalSvc.Run(ctx); err != nil {
 		log.Err("Failed to run the data retrieval service:", err)
+		log.Msg(contactSupport)
 	}
 
 	defer retrievalSvc.Stop()
