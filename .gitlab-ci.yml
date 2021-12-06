@@ -58,13 +58,14 @@ build-binary-alpine:
     - apk add --update --no-cache make git
     - make build
 
-build-binary-client-linux:
+build-binary-client-dev:
   <<: *only_feature
   stage: build-binary
   artifacts:
     paths:
       - bin
   script:
+    - make build-client
     - go build -o bin/dblab-linux-amd64 ./cmd/cli/main.go
 
 build-binary-client:
@@ -159,7 +160,7 @@ build-image-feature-client-extended:
     DOCKER_NAME: "registry.gitlab.com/postgres-ai/database-lab/dblab-extended"
     TAGS: "${DOCKER_NAME}:${CI_COMMIT_REF_SLUG}"
   before_script:
-    - cp ./bin/dblab-linux-amd64 ./bin/dblab
+    - cp ./bin/cli/dblab-linux-amd64 ./bin/dblab
 
 build-image-master-server:
   <<: *build_image_definition
