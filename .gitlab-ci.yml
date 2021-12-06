@@ -42,7 +42,6 @@ lint:
       - branches
     variables:
       - $CI_COMMIT_REF_SLUG != "master"
-  when: manual
 
 build-binary-alpine:
   image: golang:1.17-alpine
@@ -66,7 +65,6 @@ build-binary-client-dev:
       - bin
   script:
     - make build-client
-    - go build -o bin/dblab-linux-amd64 ./cmd/cli/main.go
 
 build-binary-client:
   <<: *only_tag_release
@@ -89,7 +87,6 @@ build-binary-client:
 build-binary-client-rc:
   <<: *only_tag_rc
   stage: build-binary
-  when: manual
   script:
     - make build-client
 
