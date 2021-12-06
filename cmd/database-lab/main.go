@@ -175,14 +175,6 @@ func main() {
 				log.Err("Failed to start local UI container:", err.Error())
 				return
 			}
-
-			defaultHost := "0.0.0.0"
-
-			if cfg.LocalUI.Host != "" {
-				defaultHost = cfg.LocalUI.Host
-			}
-
-			log.Msg(fmt.Sprintf("Local UI has started successfully on %s:%d.", defaultHost, cfg.LocalUI.Port))
 		}()
 	}
 
