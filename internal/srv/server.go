@@ -161,5 +161,5 @@ func (s *Server) Uptime() float64 {
 
 // reportLaunching reports the launch of the HTTP server.
 func reportLaunching(cfg *srvCfg.Config) {
-	log.Msg(fmt.Sprintf("Server started listening on %s:%d.", cfg.Host, cfg.Port))
+	log.Msg(fmt.Sprintf("API server started listening on %s:%d.", cfg.Host, cfg.Port))
 }
