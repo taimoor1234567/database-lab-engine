@@ -117,7 +117,7 @@ func Connect(ctx context.Context, dockerCLI *client.Client, instanceID, containe
 	return nil
 }
 
-// Reconnect connects a container to an internal Docker network.
+// Reconnect connects a container to internal Docker network.
 func Reconnect(ctx context.Context, dockerCLI *client.Client, instanceID, containerID string) error {
 	log.Dbg(fmt.Sprintf("Reconnect container %s to internal network", containerID))
 
