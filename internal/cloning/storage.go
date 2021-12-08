@@ -65,7 +65,7 @@ func (c *Base) restartCloneContainers(ctx context.Context) {
 		}
 
 		if err := c.provision.StartCloneContainer(ctx, cloneName); err != nil {
-			log.Err(fmt.Sprintf("Clone container %s cannot be running: %s", cloneName, err))
+			log.Err(fmt.Sprintf("Clone container %s cannot start: %s", cloneName, err))
 		}
 
 		log.Msg(fmt.Sprintf("Clone container %s is running", cloneName))
