@@ -136,7 +136,7 @@ check_dle_readiness(){
 
 ### Waiting for the Database Lab Engine initialization.
 for i in {1..300}; do
-  check_dle_readiness && break || echo "dblab is not ready yet"
+  check_dle_readiness && break || echo "Database Lab Engine is not ready yet"
   sleep 1
 done
 

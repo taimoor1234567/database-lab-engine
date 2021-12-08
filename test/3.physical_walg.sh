@@ -121,7 +121,7 @@ check_dle_readiness(){
 
 ### Waiting for the Database Lab Engine initialization.
 for i in {1..30}; do
-  check_dle_readiness && break || echo "dblab is not ready yet"
+  check_dle_readiness && break || echo "Database Lab Engine is not ready yet"
   sleep 10
 done
 
@@ -145,7 +145,7 @@ sudo docker logs ${DLE_SERVER_NAME} -f 2>&1 | awk '{print "[CONTAINER dblab_serv
 
 ### Waiting for the Database Lab Engine initialization.
 for i in {1..30}; do
-  check_dle_readiness && break || echo "dblab is not ready yet"
+  check_dle_readiness && break || echo "Database Lab Engine is not ready yet"
   sleep 10
 done
 
