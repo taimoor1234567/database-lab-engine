@@ -126,7 +126,7 @@ func main() {
 	retrievalSvc := retrieval.New(cfg, engProps, docker, pm, tm, runner)
 
 	// Create a cloning service to provision new clones.
-	provisioner, err := provision.New(ctx, &cfg.Provision, dbCfg, docker, pm, internalNetworkID)
+	provisioner, err := provision.New(ctx, &cfg.Provision, dbCfg, docker, pm, engProps.InstanceID, internalNetworkID)
 	if err != nil {
 		log.Errf(errors.WithMessage(err, `error in the "provision" section of the config`).Error())
 	}
