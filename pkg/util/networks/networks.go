@@ -130,7 +130,7 @@ func Reconnect(ctx context.Context, dockerCLI *client.Client, instanceID, contai
 		return fmt.Errorf("internal network not found: %w", err)
 	}
 
-	log.Dbg(fmt.Sprintf("Disconnecting container %s from the internal network", containerID))
+	log.Dbg(fmt.Sprintf("Disconnecting container %s from internal network", containerID))
 
 	if err := dockerCLI.NetworkDisconnect(context.Background(), networkName, containerID, true); err != nil {
 		return err
