@@ -202,7 +202,7 @@ func (s *Server) InitHandlers() {
 
 // Run starts HTTP server on specified port in configuration.
 func (s *Server) Run() error {
-	log.Msg(fmt.Sprintf("Server started listening on %s:%d.", s.Config.Host, s.Config.Port))
+	reportLaunching(s.Config)
 	return s.httpSrv.ListenAndServe()
 }
 
@@ -220,4 +220,9 @@ func (s *Server) Uptime() float64 {
 	}
 
 	return 0
+}
+
+// reportLaunching reports the launch of the HTTP server.
+func reportLaunching(cfg *srvCfg.Config) {
+	log.Msg(fmt.Sprintf("API server started listening on %s:%d.", cfg.Host, cfg.Port))
 }

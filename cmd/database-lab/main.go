@@ -173,8 +173,6 @@ func main() {
 				log.Err("Failed to start local UI container:", err.Error())
 				return
 			}
-
-			log.Msg("Local UI has started successfully")
 		}()
 	}
 

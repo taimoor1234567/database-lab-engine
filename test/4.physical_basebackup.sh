@@ -46,10 +46,17 @@ if [[ "${SOURCE_HOST}" = "172.17.0.1" ]]; then
     --detach \
     postgres:"${POSTGRES_VERSION}-alpine"
 
+  check_database_readiness(){
+    sudo docker exec postgres"${POSTGRES_VERSION}" psql -d test -U postgres -c 'select' > /dev/null 2>&1
+    return $?
+  }
+
   for i in {1..300}; do
-    sudo docker exec postgres"${POSTGRES_VERSION}" psql -d test -U postgres -c 'select' > /dev/null 2>&1  && break || echo "test database is not ready yet"
+    check_database_readiness && break || echo "test database is not ready yet"
     sleep 1
   done
+
+  check_database_readiness || (echo "test database is not ready" && exit 1)
 
   # add "host replication" to pg_hba.conf
   sudo docker exec postgres"${POSTGRES_VERSION}" bash -c 'echo "host replication all 0.0.0.0/0 md5" >> $PGDATA/pg_hba.conf'
@@ -144,14 +151,20 @@ trap cleanup_service_containers EXIT
 # Check the Database Lab Engine logs
 sudo docker logs ${DLE_SERVER_NAME} -f 2>&1 | awk '{print "[CONTAINER dblab_server]: "$0}' &
 
+check_dle_readiness(){
+  if [[ $(curl --silent --header 'Verification-Token: secret_token' --header 'Content-Type: application/json' http://localhost:${DLE_SERVER_PORT}/status | jq -r .retrieving.status) ==  "finished" ]] ; then
+      return 0
+  fi
+  return 1
+}
+
 ### Waiting for the Database Lab Engine initialization.
 for i in {1..30}; do
-  if [[ $(curl --silent --header 'Verification-Token: secret_token' --header 'Content-Type: application/json' http://localhost:${DLE_SERVER_PORT}/status | jq -r .retrieving.status) ==  "finished" ]] ; then
-      break
-  fi
-  echo "dblab is not ready yet"
+  check_dle_readiness && break || echo "Database Lab Engine is not ready yet"
   sleep 10
 done
+
+check_dle_readiness || (echo "Database Lab Engine is not ready" && exit 1)
 
 ### Step 3. Start cloning
 
