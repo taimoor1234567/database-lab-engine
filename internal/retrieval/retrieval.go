@@ -125,6 +125,7 @@ func (r *Retrieval) Run(ctx context.Context) error {
 	if err != nil {
 		var skipError *SkipRefreshingError
 		if errors.As(err, &skipError) {
+			r.State.Status = models.Finished
 			log.Msg("Continue without performing a full refresh:", skipError.Error())
 			r.setupScheduler(ctx)
 
