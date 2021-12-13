@@ -16,7 +16,7 @@ import (
 
 	"gitlab.com/postgres-ai/database-lab/v3/internal/cloning"
 	"gitlab.com/postgres-ai/database-lab/v3/internal/estimator"
-	"gitlab.com/postgres-ai/database-lab/v3/internal/coreui"
+	"gitlab.com/postgres-ai/database-lab/v3/internal/embedui"
 	"gitlab.com/postgres-ai/database-lab/v3/internal/observer"
 	"gitlab.com/postgres-ai/database-lab/v3/internal/platform"
 	"gitlab.com/postgres-ai/database-lab/v3/internal/provision"
@@ -44,7 +44,7 @@ type Config struct {
 	Observer    observer.Config  `yaml:"observer"`
 	Estimator   estimator.Config `yaml:"estimator"`
 	PoolManager pool.Config      `yaml:"poolManager"`
-	CoreUI      coreui.Config    `yaml:"coreUI"`
+	EmbedUI     embedui.Config   `yaml:"embedUI"`
 }
 
 // LoadConfiguration instances a new application configuration.

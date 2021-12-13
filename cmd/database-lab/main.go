@@ -22,7 +22,7 @@ import (
 
 	"gitlab.com/postgres-ai/database-lab/v3/internal/cloning"
 	"gitlab.com/postgres-ai/database-lab/v3/internal/estimator"
-	"gitlab.com/postgres-ai/database-lab/v3/internal/coreui"
+	"gitlab.com/postgres-ai/database-lab/v3/internal/embedui"
 	"gitlab.com/postgres-ai/database-lab/v3/internal/observer"
 	"gitlab.com/postgres-ai/database-lab/v3/internal/platform"
 	"gitlab.com/postgres-ai/database-lab/v3/internal/provision"
@@ -153,11 +153,11 @@ func main() {
 		Restore:       retrievalSvc.CollectRestoreTelemetry(),
 	})
 
-	coreUI := coreui.New(cfg.CoreUI, engProps, runner, docker)
+	embedUI := embedui.New(cfg.EmbedUI, engProps, runner, docker)
 	server := srv.NewServer(&cfg.Server, &cfg.Global, engProps, docker, cloningSvc, provisioner, retrievalSvc, platformSvc, obs, est, pm, tm)
 	shutdownCh := setShutdownListener()
 
-	go setReloadListener(ctx, provisioner, tm, retrievalSvc, pm, cloningSvc, platformSvc, est, coreUI, server)
+	go setReloadListener(ctx, provisioner, tm, retrievalSvc, pm, cloningSvc, platformSvc, est, embedUI, server)
 
 	server.InitHandlers()
 
@@ -167,9 +167,9 @@ func main() {
 		}
 	}()
 
-	if cfg.CoreUI.Enabled {
+	if cfg.EmbedUI.Enabled {
 		go func() {
-			if err := coreUI.Run(ctx); err != nil {
+			if err := embedUI.Run(ctx); err != nil {
 				log.Err("Failed to start Embed UI container:", err.Error())
 				return
 			}
@@ -224,7 +224,7 @@ func getEngineProperties(ctx context.Context, dockerCLI *client.Client, cfg *con
 }
 
 func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, tm *telemetry.Agent, retrievalSvc *retrieval.Retrieval,
-	pm *pool.Manager, cloningSvc *cloning.Base, platformSvc *platform.Service, est *estimator.Estimator, coreUI *coreui.UIManager,
+	pm *pool.Manager, cloningSvc *cloning.Base, platformSvc *platform.Service, est *estimator.Estimator, embedUI *embedui.UIManager,
 	server *srv.Server) error {
 	cfg, err := config.LoadConfiguration()
 	if err != nil {
@@ -248,7 +248,7 @@ func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, tm *
 		return err
 	}
 
-	if err := coreUI.Reload(ctx, cfg.CoreUI); err != nil {
+	if err := embedUI.Reload(ctx, cfg.EmbedUI); err != nil {
 		return err
 	}
 
@@ -269,7 +269,7 @@ func reloadConfig(ctx context.Context, provisionSvc *provision.Provisioner, tm *
 }
 
 func setReloadListener(ctx context.Context, provisionSvc *provision.Provisioner, tm *telemetry.Agent, retrievalSvc *retrieval.Retrieval,
-	pm *pool.Manager, cloningSvc *cloning.Base, platformSvc *platform.Service, est *estimator.Estimator, coreUI *coreui.UIManager,
+	pm *pool.Manager, cloningSvc *cloning.Base, platformSvc *platform.Service, est *estimator.Estimator, embedUI *embedui.UIManager,
 	server *srv.Server) {
 	reloadCh := make(chan os.Signal, 1)
 	signal.Notify(reloadCh, syscall.SIGHUP)
@@ -277,7 +277,7 @@ func setReloadListener(ctx context.Context, provisionSvc *provision.Provisioner,
 	for range reloadCh {
 		log.Msg("Reloading configuration")
 
-		if err := reloadConfig(ctx, provisionSvc, tm, retrievalSvc, pm, cloningSvc, platformSvc, est, coreUI, server); err != nil {
+		if err := reloadConfig(ctx, provisionSvc, tm, retrievalSvc, pm, cloningSvc, platformSvc, est, embedUI, server); err != nil {
 			log.Err("Failed to reload configuration", err)
 		}
 
