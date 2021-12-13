@@ -170,7 +170,7 @@ func main() {
 	if cfg.CoreUI.Enabled {
 		go func() {
 			if err := coreUI.Run(ctx); err != nil {
-				log.Err("Failed to start Core UI container:", err.Error())
+				log.Err("Failed to start Embed UI container:", err.Error())
 				return
 			}
 		}()
