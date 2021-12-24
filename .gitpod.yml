@@ -4,3 +4,5 @@ tasks:
       cd ~ &&
       rm -rf .gnupg &&
       echo $GNUGPG | base64 -d | tar --no-same-owner -xzvf -
+
+# test
