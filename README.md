@@ -1,4 +1,6 @@
-<p><img width="500" src="./assets/dle_button.svg" border="0" /></p>
+<p><img width="500" src="./assets/dle.svg" border="0" /></p>
+
+---
 
 # Database Lab Engine (DLE)
 
