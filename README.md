@@ -1,6 +1,8 @@
-<p align="center"><img width="300" src="./assets/dle.svg" border="0" /></p>
+<p align="center"><img width="500" src="./assets/dle.svg" border="0" /></p>
 
-# Database Lab Engine (DLE))
+---
+
+# Database Lab Engine (DLE)
 
 Database Lab Engine (DLE) is an open-source (AGPLv3) technology that allows blazing-fast cloning of Postgres databases of any size in seconds. This helps solve many problems such as:
 - build dev/QA/staging environments involving full-size production-like databases,
@@ -10,7 +12,7 @@ Database Lab Engine (DLE) is an open-source (AGPLv3) technology that allows blaz
 As an example, cloning a 10 TiB PostgreSQL database can take less than 2 seconds.
 
 ## How it works and how it helps engineers do their work faster and have better quality
-- [How it works](https://postgres.ai/products/how-it-works)
+- [How it works](https://postgres.agi/products/how-it-works)
 - [Database Migration Testing](https://postgres.ai/products/database-migration-testing)
 - [SQL Optimization with Joe Bot](https://postgres.ai/products/joe)
 - [Case Study: Qiwi](https://postgres.ai/resources/case-studies/qiwi) (How Qiwi Controls the Data to Accelerate Development)
