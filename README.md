@@ -3,21 +3,33 @@
 ---
 
 # Database Lab Engine (DLE)
-
 Database Lab Engine (DLE) is an open source technology that allows blazing-fast cloning of Postgres databases:
 
 - Build dev/QA/staging environments based on full-size production-like databases.
 - Provide temporary full-size database clones for SQL query analysis and optimization (see also: [SQL optimization chatbot Joe](https://gitlab.com/postgres-ai/joe)).
 - Automatically test database changes in CI/CD pipelines to avoid incidents in production.
 
-For example, cloning a 10 TiB PostgreSQL database can take less than 2 seconds and dozens of such clones can run on a single machine without extra costs, supporting many development and testing activities.
+For example, cloning a 1 TiB PostgreSQL database can take less than 2 seconds and dozens of independent clones can run on a single machine without extra costs, supporting lots of development and testing activities.
 
-## How it works and how it helps engineers do their work faster and have better quality
-- [How it works](https://postgres.agi/products/how-it-works)
+## How it works
+Thin cloning is fast because it is based on the [CoW (Copy-on-Write)](https://en.wikipedia.org/wiki/Copy-on-write#In_computer_storage). DLE supports two technologies to enable CoW and thin cloning: [ZFS](https://en.wikipedia.org/wiki/ZFS) (default) and [LVM](https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)).
+
+With ZFS, Database Lab Engine periodically creates a new snapshot of the data directory, and maintains a set of snapshots, periodically deleting the old ones. When requesting a new clone, users choose which snapshot to use. For example, one can request to create two clones, one with a very fresh database state, and another corresponding to yesterday morning. In a few seconds, clones are created, and it immediately becomes possible to compare two database versions: data, SQL query plans, and so on.
+
+Read more:
+- [How it works](https://postgres.ai/products/how-it-works)
 - [Database Migration Testing](https://postgres.ai/products/database-migration-testing)
 - [SQL Optimization with Joe Bot](https://postgres.ai/products/joe)
-- [Case Study: Qiwi](https://postgres.ai/resources/case-studies/qiwi) (How Qiwi Controls the Data to Accelerate Development)
-- [Case Study: GitLab](https://postgres.ai/resources/case-studies/gitlab) (How GitLab iterates on SQL performance optimization workflow to reduce downtime risks)
+- [Questions and answers](https://postgres.ai/docs/questions-and-answers)
+
+## Where to start
+- [Database Lab tutorial for any PostgreSQL database](https://postgres.ai/docs/tutorials/database-lab-tutorial)
+- [Database Lab tutorial for Amazon RDS](https://postgres.ai/docs/tutorials/database-lab-tutorial-amazon-rds)
+- [Terraform module template (AWS)](https://postgres.ai/docs/how-to-guides/administration/install-database-lab-with-terraform)
+
+## Case studies
+- Qiwi: [How Qiwi Controls the Data to Accelerate Development](https://postgres.ai/resources/case-studies/qiwi)
+- GitLab: [How GitLab iterates on SQL performance optimization workflow to reduce downtime risks](https://postgres.ai/resources/case-studies/gitlab)
 
 > Please support the project giving a GitLab star! It's on [the main page](https://gitlab.com/postgres-ai/database-lab), at the upper right corner:
 >
@@ -26,9 +38,7 @@ For example, cloning a 10 TiB PostgreSQL database can take less than 2 seconds a
 ## Useful links
 - [Database Lab documentation](https://postgres.ai/docs)
 - [Questions & answers](https://postgres.ai/docs/questions-and-answers)
-### Tutorials
-- [Database Lab tutorial for any PostgreSQL database](https://postgres.ai/docs/tutorials/database-lab-tutorial)
-- [Database Lab tutorial for Amazon RDS](https://postgres.ai/docs/tutorials/database-lab-tutorial-amazon-rds)
+
 ### Reference guides
 - [DLE components](https://postgres.ai/docs/reference-guides/database-lab-engine-components)
 - [DLE configuration reference](https://postgres.ai/docs/database-lab/config-reference)
