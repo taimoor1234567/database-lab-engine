@@ -82,6 +82,6 @@ DLE is developed on GitLab, so MRs (merge requests) there is a way to propose a 
 Please follow these steps to have your contribution considered by the maintainers:
 1. Follow the [styleguides](#styleguides).
 2. Provide detailed description of your MR/PR following the same rules as you would use for opening an issue (see [Reporting Bugs](#reporting-bugs) and [Proposing Enhancements](#proposing-enhancements) above).
-3. To get your MR/PR merged, you will need to sign Postgres.ai Database Lab Engine Contributor Agreement and ensure that the Postgres.ai team has received it. The template can be found here: [DLE-CA](https://bit.ly/dle-ca). Download it and send to contribute@postgres.ai.
+3. To get your MR/PR merged, you will need to sign Postgres.ai Database Lab Engine Contributor Agreement and ensure that the Postgres.ai team has received it. The template can be found here: [DLE-CA](https://bit.ly/dle-ca). Download it, fill out the fields, sign, and send to contribute@postgres.ai.
 
 While the prerequisites above must be satisfied prior to having your pull request reviewed, the reviewer(s) may ask you to complete additional design work, tests, or other changes before your pull request can be ultimately accepted.
