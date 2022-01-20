@@ -75,7 +75,7 @@ We appreciate first time contributors and we are happy to assist you in getting 
 
 You find some issues that are considered as good for first time contributors looking at [the issues with the `good-first-issue` label](https://gitlab.com/postgres-ai/database-lab/-/issues?label_name%5B%5D=good+first+issue).
 
-### Pull Requests
+### Merge Requests / Pull Requests
 DLE is developed on GitLab, so MRs (merge requests) there is a way to propose a contribution. GitHub PRs (pull requests) is an option too but note that eventually the proposal will need to be moved to GitLab, so it will take more time to review and process.
 
 
