@@ -85,6 +85,9 @@ Additional materials that are worth checking out:
 - [Git-related guidelines in the PostgreSQL project](https://wiki.postgresql.org/wiki/Working_with_Git)
 - [GitLab flow](https://docs.gitlab.com/ee/topics/gitlab_flow.html)
 
+## Repo overview
+TBD
+
 ## Styleguides
 ### Git commit messages
 - Think about other people, how likely they will understand you?
