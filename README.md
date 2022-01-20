@@ -42,17 +42,25 @@ Read more:
 > ![Add a star](./assets/star.gif)
 
 Lighter backgrounds:
-<p><img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-light-background.svg" /></p>
+<p>
+  <img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-light-background.svg" />
+</p>
 
 ```html
-<a href="http://databaselab.io"><img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-light-background.svg" /></a>
+<a href="http://databaselab.io">
+  <img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-light-background.svg" />
+</a>
 ```
 
 Darker backgrounds:
-<p><img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-dark-background.svg" /></p>
+<p style="background-color: #bbb">
+  <img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-dark-background.svg" />
+</p>
 
 ```html
-<a href="http://databaselab.io"><img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-dark-background.sgv" /></a>
+<a href="http://databaselab.io">
+  <img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-dark-background.sgv" />
+</a>
 ```
 
 Open [an Issue](https://gitlab.com/postgres-ai/database-lab/-/issues) to discuss ideas, open [a Merge Request](https://gitlab.com/postgres-ai/database-lab/-/merge_requests) to propose a change.
