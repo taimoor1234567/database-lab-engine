@@ -74,3 +74,14 @@ Enhancement suggestions are tracked on [GitLab](https://gitlab.com/postgres-ai/d
 We appreciate first time contributors and we are happy to assist you in getting started. In case of questions, just reach out to us!
 
 You find some issues that are considered as good for first time contributors looking at [the issues with the `good-first-issue` label](https://gitlab.com/postgres-ai/database-lab/-/issues?label_name%5B%5D=good+first+issue).
+
+### Pull Requests
+DLE is developed on GitLab, so MRs (merge requests) there is a way to propose a contribution. GitHub PRs (pull requests) is an option too but note that eventually the proposal will need to be moved to GitLab, so it will take more time to review and process.
+
+
+Please follow these steps to have your contribution considered by the maintainers:
+1. Follow the [styleguides](#styleguides).
+2. Provide detailed description of your MR/PR following the same rules as you would use for opening an issue (see [Reporting Bugs](#reporting-bugs) and [Proposing Enhancements](#proposing-enhancements) above).
+3. To get your MR/PR merged, you will need to sign Postgres.ai Database Lab Engine Contributor Agreement and ensure that the Postgres.ai team has received it. The template can be found here: [DLE-CA](https://bit.ly/dle-ca). Download it and send to contribute@postgres.ai.
+
+While the prerequisites above must be satisfied prior to having your pull request reviewed, the reviewer(s) may ask you to complete additional design work, tests, or other changes before your pull request can be ultimately accepted.
