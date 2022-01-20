@@ -18,7 +18,7 @@ These are mostly guidelines, not rules. Use your best judgment, and feel free to
   * [Reporting Bugs](#reporting-bugs)
   * [Proposing Enhancements](#proposing-enhancements)
   * [Your First Code Contribution](#your-first-code-contribution)
-  * [Merge Requests / Pull Requests](#xxx)
+  * [Merge Requests / Pull Requests](#merge-requests-pull-requests)
 
 [Repo Overview](#repo-overview)
 
