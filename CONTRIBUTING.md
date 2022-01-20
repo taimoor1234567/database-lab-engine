@@ -54,7 +54,6 @@ This project and everyone participating in it is governed by the [Database Lab E
 - If you believe that there is an urgency related to the reported bug, feel free to reach out to the project maintainers additionally, using one of [the channels described above](#tldr-i-just-have-a-question-where-to-ask-it).
 
 ### Proposing Enhancements
-
 This section guides you through submitting an enhancement suggestion for DLE, including completely new features and minor improvements to existing functionality. Following these guidelines helps maintainers and the community understand your suggestion and find related proposals.
 
 When you are creating an enhancement suggestion, please include as many details as possible. Include the steps that you imagine you would take if the feature you're requesting existed.
@@ -70,3 +69,8 @@ Enhancement suggestions are tracked on [GitLab](https://gitlab.com/postgres-ai/d
 - Explain why this proposal would be useful to most DLE users.
 - Specify which version of DLE you're using. If it makes sense, specify Postgres versions too.
 - Specify the name and version of the OS you're using.
+
+### Your First Code Contribution
+We appreciate first time contributors and we are happy to assist you in getting started. In case of questions, just reach out to us!
+
+You find some issues that are considered as good for first time contributors looking at [the issues with the `good-first-issue` label](https://gitlab.com/postgres-ai/database-lab/-/issues?label_name%5B%5D=good+first+issue).
