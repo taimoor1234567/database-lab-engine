@@ -37,11 +37,15 @@ Read more:
 ...
 
 ## How to contribute
-> Please support the project giving a GitLab star! It's on [the main page](https://gitlab.com/postgres-ai/database-lab), at the upper right corner:
->
-> ![Add a star](./assets/star.gif)
+### Give the project a star
+Please support the project giving a GitHub/GitLab star:
 
-Lighter backgrounds:
+![Add a star](./assets/star.gif)
+
+### Mention that you use DLE
+Brand assets can be found in the `./assets` folder. Feel free to put them to your documents, slide decks, application and website interfaces to show that you use DLE.
+
+HTML snippet for lighter backgrounds:
 <p>
   <img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-light-background.svg" />
 </p>
@@ -52,7 +56,7 @@ Lighter backgrounds:
 </a>
 ```
 
-Darker backgrounds:
+Fro darker backgrounds:
 <p style="background-color: #bbb">
   <img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-dark-background.svg" />
 </p>
@@ -63,15 +67,18 @@ Darker backgrounds:
 </a>
 ```
 
+### Propose an idea or report a bug
 Open [an Issue](https://gitlab.com/postgres-ai/database-lab/-/issues) to discuss ideas, open [a Merge Request](https://gitlab.com/postgres-ai/database-lab/-/merge_requests) to propose a change.
 
-... tbd ...
+### Participate in development
 See our [GitLab Container Registry](https://gitlab.com/postgres-ai/database-lab/container_registry) to find the images built for development branches.
 <!-- TODO: SDK docs -->
 <!-- TODO: Contribution guideline -->
+<!-- TODO: Community contributions, dev and non-dev -->
+<!-- TODO: Code of conduct for community -->
 
 Development requirements:
-1. Install `golangci-lint`: https://github.com/golangci/golangci-lint#install
+- Install `golangci-lint`: https://github.com/golangci/golangci-lint#install
 
 ### Reference guides
 - [DLE components](https://postgres.ai/docs/reference-guides/database-lab-engine-components)
