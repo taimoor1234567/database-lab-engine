@@ -8,28 +8,24 @@ These are mostly guidelines, not rules. Use your best judgment, and feel free to
 
 ---
 
-#### Table Of Contents
+#### Table of contents
 
-[Code of Conduct](#code-of-conduct)
-
-[TL;DR – I just have a question, where to ask it?](#tldr-i-just-have-a-question-where-to-ask-it)
-
-[How Can I Contribute?](#how-can-i-contribute)
-  * [Reporting Bugs](#reporting-bugs)
-  * [Proposing Enhancements](#proposing-enhancements)
-  * [Your First Code Contribution](#your-first-code-contribution)
-  * [Merge Requests / Pull Requests](#merge-requests-pull-requests)
-
-[Repo Overview](#repo-overview)
-
-[Styleguides](#styleguides)
-  * [Git Commit Messages](#git-commit-messages)
-  * [Go Styleguide](#go-styleguide)
-  * [Documentation Styleguide](#documentation-styleguide)
+- [Code of conduct](#code-of-conduct)
+- [TL;DR – I just have a question, where to ask it?](#tldr-i-just-have-a-question-where-to-ask-it)
+- [How can I contribute?](#how-can-i-contribute)
+    - [Reporting bugs](#reporting-bugs)
+    - [Proposing enhancements](#proposing-enhancements)
+    - [Your first code contribution](#your-first-code-contribution)
+    - [Merge Requests / Pull Requests](#merge-requests-pull-requests)
+- [Repo overview](#repo-overview)
+- [Styleguides](#styleguides)
+    - [Git commit messages](#git-commit-messages)
+    - [Go styleguide](#go-styleguide)
+    - [Documentation styleguide](#documentation-styleguide)
 
 ---
 
-## Code of Conduct
+## Code of conduct
 This project and everyone participating in it is governed by the [Database Lab Engine Community Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [community@postgres.ai](mailto:community@postgres.ai).
 
 ## TL;DR – I just have a question, where to ask it?
@@ -40,8 +36,8 @@ This project and everyone participating in it is governed by the [Database Lab E
 - [Database Lab Community Slack](https://slack.postgres.ai) (English)
 - [Telegram](https://t.me/databaselabru) (Russian)
 
-## How Can I Contribute?
-### Reporting Bugs
+## How can I contribute?
+### Reporting bugs
 - Use a clear and descriptive title for the issue to identify the problem.
 - Make sure you test against the latest released version. It is possible that we may have already fixed the bug you're experiencing.
 - Provide steps to reproduce the issue, including DLE version, PostgreSQL version, and the platform you are running on (some examples: RDS, self-managed Postgres on an EC2 instance, self-managed Postgres on-prem).
@@ -53,7 +49,7 @@ This project and everyone participating in it is governed by the [Database Lab E
 - You can submit a bug report in either [GitLab Issues](https://gitlab.com/postgres-ai/database-lab) or [GitHub Issues](https://github.com/postgres-ai/database-lab-engine) sections – both places are monitored.
 - If you believe that there is an urgency related to the reported bug, feel free to reach out to the project maintainers additionally, using one of [the channels described above](#tldr-i-just-have-a-question-where-to-ask-it).
 
-### Proposing Enhancements
+### Proposing enhancements
 This section guides you through submitting an enhancement suggestion for DLE, including completely new features and minor improvements to existing functionality. Following these guidelines helps maintainers and the community understand your suggestion and find related proposals.
 
 When you are creating an enhancement suggestion, please include as many details as possible. Include the steps that you imagine you would take if the feature you're requesting existed.
@@ -70,7 +66,7 @@ Enhancement suggestions are tracked on [GitLab](https://gitlab.com/postgres-ai/d
 - Specify which version of DLE you're using. If it makes sense, specify Postgres versions too.
 - Specify the name and version of the OS you're using.
 
-### Your First Code Contribution
+### Your first code contribution
 We appreciate first time contributors and we are happy to assist you in getting started. In case of questions, just reach out to us!
 
 You find some issues that are considered as good for first time contributors looking at [the issues with the `good-first-issue` label](https://gitlab.com/postgres-ai/database-lab/-/issues?label_name%5B%5D=good+first+issue).
@@ -78,10 +74,42 @@ You find some issues that are considered as good for first time contributors loo
 ### Merge Requests / Pull Requests
 DLE is developed on GitLab, so MRs (merge requests) there is a way to propose a contribution. GitHub PRs (pull requests) is an option too but note that eventually the proposal will need to be moved to GitLab, so it will take more time to review and process.
 
-
 Please follow these steps to have your contribution considered by the maintainers:
 1. Follow the [styleguides](#styleguides).
 2. Provide detailed description of your MR/PR following the same rules as you would use for opening an issue (see [Reporting Bugs](#reporting-bugs) and [Proposing Enhancements](#proposing-enhancements) above).
 3. To get your MR/PR merged, you will need to sign Postgres.ai Database Lab Engine Contributor Agreement and ensure that the Postgres.ai team has received it. The template can be found here: [DLE-CA](https://bit.ly/dle-ca). Download it, fill out the fields, sign, and send to contribute@postgres.ai.
 
-While the prerequisites above must be satisfied prior to having your pull request reviewed, the reviewer(s) may ask you to complete additional design work, tests, or other changes before your pull request can be ultimately accepted.
+While the prerequisites above must be satisfied prior to having your MR/PR reviewed, the reviewer(s) may ask you to complete additional design work, tests, or other changes before your MR/PR can be ultimately accepted.
+
+Additional materials that are worth checking out:
+- [Git-related guidelines in the PostgreSQL project](https://wiki.postgresql.org/wiki/Working_with_Git)
+- [GitLab flow](https://docs.gitlab.com/ee/topics/gitlab_flow.html)
+
+## Styleguides
+### Git commit messages
+- Think about other people, how likely they will understand you?
+- Use the present tense ("Add feature" not "Added feature")
+- Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
+- Limit the first line to 72 characters or less
+- Reference issues and MRs/PRs liberally after the first line
+- Below the first line, add detailed description of the commit. The more details the commit message has, the better. PostgreSQL project has good culture of writing very informative commit messages – [check out a few of them](https://git.postgresql.org/gitweb/?p=postgresql.git;a=summary) to get inspired.
+- Read this: ["How to write a good commit message"](https://docs.gitlab.com/ee/topics/gitlab_flow.html#how-to-write-a-good-commit-message)
+- All Git commits must be signed. This is a requirement and you will find that the majority of repositories are configured to reject unsigned commits.
+    - [How to sign a commit](https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work)
+    - [How to sign what already committed (but not yet pushed)](https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work)
+    - [GitLab-specific guidelines](https://docs.gitlab.com/ee/user/project/repository/gpg_signed_commits/)
+
+### Go styleguide
+Please read [Effective Go](https://go.dev/doc/effective_go) and follow the principles described there.
+
+### Documentation styleguide
+Documentation for Database Lab Engine and additional component is hosted at https://postgres.ai/docs and is maintained in this GitLab repo: https://gitlab.com/postgres-ai/docs.
+
+#### Documentation principles
+We're building documentation following the principles described at https://documentation.divio.com/:
+
+> There is a secret that needs to be understood in order to write good software documentation: there isn’t one thing called documentation, there are four.
+> 
+> They are: tutorials, how-to guides, technical reference and explanation. They represent four different purposes or functions, and require four different approaches to their creation. Understanding the implications of this will help improve most documentation - often immensely.
+
+Learn more: https://documentation.divio.com/.
