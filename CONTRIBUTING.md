@@ -16,7 +16,7 @@ These are mostly guidelines, not rules. Use your best judgment, and feel free to
 
 [How Can I Contribute?](#how-can-i-contribute)
   * [Reporting Bugs](#reporting-bugs)
-  * [Proposing Enhancements](#suggesting-enhancements)
+  * [Proposing Enhancements](#proposing-enhancements)
   * [Your First Code Contribution](#your-first-code-contribution)
   * [Merge Requests / Pull Requests](#xxx)
 
