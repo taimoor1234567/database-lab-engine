@@ -30,7 +30,7 @@
     <span> | </span>
     <a href="https://postgres.ai/blog/tags/database-lab-engine">Blog</a>
     <span> | </span>
-    <a href="#community-support">Community</a>
+    <a href="#community-support">Community & support</a>
     <span> | </span>
     <a href="./CONTRIBUTING.md">Contributing</a>
   </h3>
