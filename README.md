@@ -50,7 +50,7 @@ For example, cloning a 1 TiB PostgreSQL database can take less than 2 seconds an
 <p><img src="./assets/dle-demo-animated.gif" border="0" /></p>
 
 ## How it works
-Thin cloning is fast because it is based on the [CoW (Copy-on-Write)](https://en.wikipedia.org/wiki/Copy-on-write#In_computer_storage). DLE supports two technologies to enable CoW and thin cloning: [ZFS](https://en.wikipedia.org/wiki/ZFS) (default) and [LVM](https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)).
+Thin cloning is fast because it uses [Copy-on-Write (CoW)](https://en.wikipedia.org/wiki/Copy-on-write#In_computer_storage). DLE supports two technologies to enable CoW and thin cloning: [ZFS](https://en.wikipedia.org/wiki/ZFS) (default) and [LVM](https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)).
 
 With ZFS, Database Lab Engine periodically creates a new snapshot of the data directory, and maintains a set of snapshots, cleaning up the old and unused ones. When requesting a new clone, users can choose which snapshot to use.
 
