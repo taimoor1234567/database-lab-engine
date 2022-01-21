@@ -95,7 +95,7 @@ Additional materials that are worth checking out:
 ### Git commit messages
 - Think about other people, how likely they will understand you?
 - Use the present tense ("Add feature" not "Added feature")
-- Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
+- Use the imperative mood ("Create clone..." not "Creates clone...")
 - Limit the first line to 72 characters or less
 - Reference issues and MRs/PRs liberally after the first line
 - Below the first line, add detailed description of the commit. The more details the commit message has, the better. PostgreSQL project has good culture of writing very informative commit messages – [check out a few of them](https://git.postgresql.org/gitweb/?p=postgresql.git;a=summary) to get inspired.
