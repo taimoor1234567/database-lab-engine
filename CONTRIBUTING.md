@@ -67,7 +67,7 @@ Enhancement suggestions are tracked on [GitLab](https://gitlab.com/postgres-ai/d
 - Use a clear and descriptive title for the issue to identify the suggestion.
 - Provide a step-by-step description of the proposed enhancement in as many details as possible.
 - Provide specific examples to demonstrate the steps. Include copy/pasteable snippets which you use in those examples
-- Use Markdown to format code snippets and improve the overall look of your ussues (Markdown docs: [GitLab](https://docs.gitlab.com/ee/user/markdown.html), [GitHub](https://github.github.com/gfm/)).
+- Use Markdown to format code snippets and improve the overall look of your issues (Markdown docs: [GitLab](https://docs.gitlab.com/ee/user/markdown.html), [GitHub](https://github.github.com/gfm/)).
 - Describe the current behavior and explain which behavior you expected to see instead and why.
 - If your proposal is related to UI, include screenshots and animated GIFs which help you demonstrate the steps or point out the part of DLE which the suggestion is related to. Please, do NOT use screenshots for console output, logs, configs.
 - Explain why this proposal would be useful to most DLE users.
@@ -77,7 +77,7 @@ Enhancement suggestions are tracked on [GitLab](https://gitlab.com/postgres-ai/d
 ### Your first code contribution
 We appreciate first time contributors and we are happy to assist you in getting started. In case of questions, just reach out to us!
 
-You find some issues that are considered as good for first time contributors looking at [the issues with the `good-first-issue` label](https://gitlab.com/postgres-ai/database-lab/-/issues?label_name%5B%5D=good+first+issue).
+You find some issues that are considered as good for first-time contributors looking at [the issues with the `good-first-issue` label](https://gitlab.com/postgres-ai/database-lab/-/issues?label_name%5B%5D=good+first+issue). Assign yourself to an issue and start discussing a possible solution. It is always a good idea to discuss and collaborate before you propose an MR/PR.
 
 ### Roadmap
 There is [the Roadmap section](https://postgres.ai/docs/roadmap) in the docs. It has some big items that can be considered as a goal for the team of developers and the DLE community. However, these items cannot be considered a strict plan, so there are no guarantees that everything from the list will be necessarily implemented.
@@ -111,7 +111,9 @@ Additional materials that are worth checking out:
     - [GitLab-specific guidelines](https://docs.gitlab.com/ee/user/project/repository/gpg_signed_commits/)
 
 ### Go styleguide
-Please read [Effective Go](https://go.dev/doc/effective_go) and follow the principles described there.
+We encourage you to follow the principles described in the following documents:
+- [Effective Go](https://go.dev/doc/effective_go)
+- [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
 
 ### Documentation styleguide
 Documentation for Database Lab Engine and additional component is hosted at https://postgres.ai/docs and is maintained in this GitLab repo: https://gitlab.com/postgres-ai/docs.
