@@ -24,7 +24,7 @@ These are mostly guidelines, not rules. Use your best judgment, and feel free to
 <!--
 - [Repo overview](#repo-overview)
 -->
-- [Development setup](#development-setup)
+    - [Development setup](#development-setup)
 <!--
 - [Building from source](#building-from-source)
 -->
