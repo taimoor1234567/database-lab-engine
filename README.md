@@ -82,7 +82,7 @@ Read more:
 - PostgreSQL containers can be customized ([docs](https://postgres.ai/docs/database-lab/supported-databases#how-to-add-more-extensions)).
 - Source database can be located anywhere (self-managed Postgres, AWS RDS, GCP CloudSQL, Azure, Timescale Cloud, and so on) and does NOT require any adjustments. There are NO requirements to install ZFS or Docker to the source (production) databases.
 - Initial data provisioning can be at both physical (pg_basebackup, backup / archiving tools such as WAL-G or pgBackRest), or logical (dump/restore directly from the source or from files stored at AWS S3) levels.
-- For the logical mode, partial data retrieval supported (specific databases, specific tables).
+- For the logical mode, partial data retrieval is supported (specific databases, specific tables).
 - For the physical level, continuously updated state is supported ("sync container") making DLE a specialized version of standby Postgres.
 - For the logical level, full periodical refresh is supported, automated and controlled by DLE. To avoid downtime, it is possible to use multiple disks containing different versions of database.
 - Fast PITR to the points available in DLE snapshots.
