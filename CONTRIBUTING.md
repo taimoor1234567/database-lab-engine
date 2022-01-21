@@ -111,7 +111,9 @@ Additional materials that are worth checking out:
     - [GitLab-specific guidelines](https://docs.gitlab.com/ee/user/project/repository/gpg_signed_commits/)
 
 ### Go styleguide
-Please read [Effective Go](https://go.dev/doc/effective_go) and follow the principles described there.
+We encourage you to follow the principles described in the following documents:
+- [Effective Go](https://go.dev/doc/effective_go)
+- [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
 
 ### Documentation styleguide
 Documentation for Database Lab Engine and additional component is hosted at https://postgres.ai/docs and is maintained in this GitLab repo: https://gitlab.com/postgres-ai/docs.
