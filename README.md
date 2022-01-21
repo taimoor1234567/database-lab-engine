@@ -70,19 +70,10 @@ Fro darker backgrounds:
 ```
 
 ### Propose an idea or report a bug
-Open [an Issue](https://gitlab.com/postgres-ai/database-lab/-/issues) to discuss ideas, open [a Merge Request](https://gitlab.com/postgres-ai/database-lab/-/merge_requests) to propose a change.
+Check out our [contributing guide](./CONTRIBUTING.md) for more details.
 
 ### Participate in development
-See our [GitLab Container Registry](https://gitlab.com/postgres-ai/database-lab/container_registry) to find the images built for development branches.
-<!-- TODO: SDK docs -->
-<!-- TODO: Contribution guideline -->
-<!-- TODO: Community contributions, dev and non-dev -->
-<!-- TODO: Code of conduct for community -->
-
-
-
-Development requirements:
-- Install `golangci-lint`: https://github.com/golangci/golangci-lint#install
+Check out our [contributing guide](./CONTRIBUTING.md) for more details.
 
 ### Reference guides
 - [DLE components](https://postgres.ai/docs/reference-guides/database-lab-engine-components)
@@ -95,6 +86,8 @@ Development requirements:
 - [How to install and initialize Database Lab CLI](https://postgres.ai/docs/guides/cli/cli-install-init)
 - [How to manage DLE](https://postgres.ai/docs/how-to-guides/administration)
 - [How to work with clones](https://postgres.ai/docs/how-to-guides/cloning)
+
+More you can found in [the "How-to guides" section](https://postgres.ai/docs/how-to-guides) of the docs. 
 
 ### Miscellaneous
 - [DLE Docker images](https://hub.docker.com/r/postgresai/dblab-server)

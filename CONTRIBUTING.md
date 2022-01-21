@@ -169,4 +169,7 @@ TBD
 <!--
 ### Building from source
 TBD – separately for Linux and MacOS
+
+
+mention dev images: See our [GitLab Container Registry](https://gitlab.com/postgres-ai/database-lab/container_registry) to find the images built for development branches.
 -->
