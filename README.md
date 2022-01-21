@@ -22,6 +22,32 @@
 
 <br />
 
+<div align="center">
+  <h3>
+    <a href="#features">
+      Features
+    </a>
+    <span> | </span>
+    <a href="https://postgres.ai/docs">
+      Documentation
+    </a>
+    <a href="https://postgres.ai/blog/tags/database-lab-engine">
+      Blog
+    </a>
+    <span> | </span>
+    <span> | </span>
+    <a href="#community-support">
+      Community
+    </a>
+    <span> | </span>
+    <a href="./CONTRIBUTING.md">
+      Contributing
+    </a>
+  </h3>
+</div>
+
+<br /><br />
+
 - Build dev/QA/staging environments based on full-size production-like databases.
 - Provide temporary full-size database clones for SQL query analysis and optimization (see also: [SQL optimization chatbot Joe](https://gitlab.com/postgres-ai/joe)).
 - Automatically test database changes in CI/CD pipelines to avoid incidents in production.
