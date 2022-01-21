@@ -77,7 +77,7 @@ Enhancement suggestions are tracked on [GitLab](https://gitlab.com/postgres-ai/d
 ### Your first code contribution
 We appreciate first time contributors and we are happy to assist you in getting started. In case of questions, just reach out to us!
 
-You find some issues that are considered as good for first time contributors looking at [the issues with the `good-first-issue` label](https://gitlab.com/postgres-ai/database-lab/-/issues?label_name%5B%5D=good+first+issue).
+You find some issues that are considered as good for first-time contributors looking at [the issues with the `good-first-issue` label](https://gitlab.com/postgres-ai/database-lab/-/issues?label_name%5B%5D=good+first+issue). Assign yourself to an issue and start discussing a possible solution. It is always a good idea to discuss and collaborate before you propose an MR/PR.
 
 ### Roadmap
 There is [the Roadmap section](https://postgres.ai/docs/roadmap) in the docs. It has some big items that can be considered as a goal for the team of developers and the DLE community. However, these items cannot be considered a strict plan, so there are no guarantees that everything from the list will be necessarily implemented.
