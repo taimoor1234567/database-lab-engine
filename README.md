@@ -85,7 +85,7 @@ Read more:
 - For the logical mode, partial data retrieval is supported (specific databases, specific tables).
 - For the physical level, continuously updated state is supported ("sync container") making DLE a specialized version of standby Postgres.
 - For the logical level, full periodical refresh is supported, automated and controlled by DLE. To avoid downtime, it is possible to use multiple disks containing different versions of database.
-- Fast PITR to the points available in DLE snapshots.
+- Fast Point in Time Recovery (PITR) to the points available in DLE snapshots.
 - Unused clones are automatically deleted.
 - "Deletion protection" flag can be used to block automatic or manual deletion of clones.
 - Snapshot retention policies supported in DLE configuration.
