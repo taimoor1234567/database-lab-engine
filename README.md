@@ -38,12 +38,14 @@ Read more:
 
 ## How to contribute
 ### Give the project a star
-Please support the project giving a GitHub/GitLab star:
+The easiest way to contribute is to give the project a GitHub/GitLab star:
 
 ![Add a star](./assets/star.gif)
 
 ### Mention that you use DLE
-Brand assets can be found in the `./assets` folder. Feel free to put them to your documents, slide decks, application and website interfaces to show that you use DLE.
+Please post a tweet mentioning [@Database_Lab](https://twitter.com/Database_Lab) or share the link to this repo in your favorite social network.
+
+If you are actively using DLE at work, think where could you mention it. The best way of mentioning is using graphics with a link. Brand assets can be found in the `./assets` folder. Feel free to put them to your documents, slide decks, application and website interfaces to show that you use DLE.
 
 HTML snippet for lighter backgrounds:
 <p>
@@ -76,6 +78,8 @@ See our [GitLab Container Registry](https://gitlab.com/postgres-ai/database-lab/
 <!-- TODO: Contribution guideline -->
 <!-- TODO: Community contributions, dev and non-dev -->
 <!-- TODO: Code of conduct for community -->
+
+
 
 Development requirements:
 - Install `golangci-lint`: https://github.com/golangci/golangci-lint#install
