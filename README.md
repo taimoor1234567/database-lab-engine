@@ -34,7 +34,9 @@ Read more:
 - GitLab: [How GitLab iterates on SQL performance optimization workflow to reduce downtime risks](https://postgres.ai/resources/case-studies/gitlab)
 
 ## Features
-...
+- Blazing-fast cloning of Postgres databases – a few seconds to create a new clone ready to accept connections and queries, regardless of the database size
+- The theoretical maximum number of snapshots and clones is 2<sup>64</sup> (if ZFS is used).
+- Maximum size of PostgreSQL data directory: 256 quadrillion zebibytes (2<sup>128</sup> bytes)
 
 ## How to contribute
 ### Give the project a star
