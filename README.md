@@ -24,25 +24,15 @@
 
 <div align="center">
   <h3>
-    <a href="#features">
-      Features
-    </a>
+    <a href="#features">Features</a>
     <span> | </span>
-    <a href="https://postgres.ai/docs">
-      Documentation
-    </a>
+    <a href="https://postgres.ai/docs">Documentation</a>
     <span> | </span>
-    <a href="https://postgres.ai/blog/tags/database-lab-engine">
-      Blog
-    </a>
+    <a href="https://postgres.ai/blog/tags/database-lab-engine">Blog</a>
     <span> | </span>
-    <a href="#community-support">
-      Community
-    </a>
+    <a href="#community-support">Community</a>
     <span> | </span>
-    <a href="./CONTRIBUTING.md">
-      Contributing
-    </a>
+    <a href="./CONTRIBUTING.md">Contributing</a>
   </h3>
 </div>
 
