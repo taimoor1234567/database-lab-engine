@@ -1,4 +1,4 @@
-<p><img width="500" src="./assets/dle.svg" border="0" /></p>
+<p align="center"><img width="500" src="./assets/dle.svg" border="0" /></p>
 
 ---
 
