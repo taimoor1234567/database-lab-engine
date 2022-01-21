@@ -52,7 +52,7 @@ For example, cloning a 1 TiB PostgreSQL database takes ~10 seconds. Dozens of in
 ## How it works
 Thin cloning is fast because it uses [Copy-on-Write (CoW)](https://en.wikipedia.org/wiki/Copy-on-write#In_computer_storage). DLE supports two technologies to enable CoW and thin cloning: [ZFS](https://en.wikipedia.org/wiki/ZFS) (default) and [LVM](https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)).
 
-With ZFS, Database Lab Engine periodically creates a new snapshot of the data directory, and maintains a set of snapshots, cleaning up the old and unused ones. When requesting a new clone, users can choose which snapshot to use.
+With ZFS, Database Lab Engine periodically creates a new snapshot of the data directory and maintains a set of snapshots, cleaning up the old and unused ones. When requesting a new clone, users can choose which snapshot to use.
 
 Read more:
 - [How it works](https://postgres.ai/products/how-it-works)
@@ -74,7 +74,7 @@ Read more:
 - The theoretical maximum number of snapshots and clones is 2<sup>64</sup> ([ZFS](https://en.wikipedia.org/wiki/ZFS), default).
 - The theoretical maximum size of PostgreSQL data directory: 256 quadrillion zebibytes, or 2<sup>128</sup> bytes ([ZFS](https://en.wikipedia.org/wiki/ZFS), default).
 - PostgreSQL major versions supported: 9.6–14.
-- Two technologies supported to enable thin cloning ([CoW](https://en.wikipedia.org/wiki/Copy-on-write)): [ZFS](https://en.wikipedia.org/wiki/ZFS) and [LVM](https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)).
+- Two technologies are supported to enable thin cloning ([CoW](https://en.wikipedia.org/wiki/Copy-on-write)): [ZFS](https://en.wikipedia.org/wiki/ZFS) and [LVM](https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)).
 - All components are packaged in Docker containers.
 - UI to make manual work more convenient.
 - API and CLI to automate the work with DLE snapshots and clones.
@@ -83,15 +83,15 @@ Read more:
 - Source database can be located anywhere (self-managed Postgres, AWS RDS, GCP CloudSQL, Azure, Timescale Cloud, and so on) and does NOT require any adjustments. There are NO requirements to install ZFS or Docker to the source (production) databases.
 - Initial data provisioning can be at both physical (pg_basebackup, backup / archiving tools such as WAL-G or pgBackRest), or logical (dump/restore directly from the source or from files stored at AWS S3) levels.
 - For the logical mode, partial data retrieval is supported (specific databases, specific tables).
-- For the physical level, continuously updated state is supported ("sync container") making DLE a specialized version of standby Postgres.
-- For the logical level, full periodical refresh is supported, automated and controlled by DLE. To avoid downtime, it is possible to use multiple disks containing different versions of database.
+- For the physical mode, a continuously updated state is supported ("sync container"), making DLE a specialized version of standby Postgres.
+- For the logical mode, periodical full refresh is supported, automated, and controlled by DLE. It is possible to use multiple disks containing different versions of the database, so full refresh won't require downtime.
 - Fast Point in Time Recovery (PITR) to the points available in DLE snapshots.
 - Unused clones are automatically deleted.
 - "Deletion protection" flag can be used to block automatic or manual deletion of clones.
 - Snapshot retention policies supported in DLE configuration.
-- Peristent clones: clones survive DLE restarts (including full VM reboots).
+- Persistent clones: clones survive DLE restarts (including full VM reboots).
 - The "reset" command can be used to switch to a different version of data.
-- DB Migration Checker component collects various artefacts useful for DB testing in CI ([docs](https://postgres.ai/docs/db-migration-checker)).
+- DB Migration Checker component collects various artifacts useful for DB testing in CI ([docs](https://postgres.ai/docs/db-migration-checker)).
 - SSH port forwarding for API and Postgres connections.
 - Docker container config parameters can be specified in the DLE config.
 - Resource usage quotas for clones: CPU, RAM (container quotas, supported by Docker)
@@ -107,7 +107,7 @@ The easiest way to contribute is to give the project a GitHub/GitLab star:
 ### Mention that you use DLE
 Please post a tweet mentioning [@Database_Lab](https://twitter.com/Database_Lab) or share the link to this repo in your favorite social network.
 
-If you are actively using DLE at work, think about where could you mention it. The best way of mentioning is using graphics with a link. Brand assets can be found in the `./assets` folder. Feel free to put them in your documents, slide decks, application and website interfaces to show that you use DLE.
+If you are actively using DLE at work, think about where you could mention it. The best way of mentioning it is using graphics with a link. Brand assets can be found in the `./assets` folder. Feel free to put them in your documents, slide decks, application, and website interfaces to show that you use DLE.
 
 HTML snippet for lighter backgrounds:
 <p>
