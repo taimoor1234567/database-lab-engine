@@ -45,7 +45,7 @@
 - Provide temporary full-size database clones for SQL query analysis and optimization (see also: [SQL optimization chatbot Joe](https://gitlab.com/postgres-ai/joe)).
 - Automatically test database changes in CI/CD pipelines to avoid incidents in production.
 
-For example, cloning a 1 TiB PostgreSQL database can take less than 2 seconds and dozens of independent clones can run on a single machine without extra costs, supporting lots of development and testing activities.
+For example, cloning a 1 TiB PostgreSQL database takes ~10 seconds. Dozens of independent clones are up and running on a single machine, supporting lots of development and testing activities, not increasing costs for hardware.
 
 <p><img src="./assets/dle-demo-animated.gif" border="0" /></p>
 
