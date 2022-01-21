@@ -107,7 +107,7 @@ The easiest way to contribute is to give the project a GitHub/GitLab star:
 ### Mention that you use DLE
 Please post a tweet mentioning [@Database_Lab](https://twitter.com/Database_Lab) or share the link to this repo in your favorite social network.
 
-If you are actively using DLE at work, think where could you mention it. The best way of mentioning is using graphics with a link. Brand assets can be found in the `./assets` folder. Feel free to put them to your documents, slide decks, application and website interfaces to show that you use DLE.
+If you are actively using DLE at work, think about where could you mention it. The best way of mentioning is using graphics with a link. Brand assets can be found in the `./assets` folder. Feel free to put them in your documents, slide decks, application and website interfaces to show that you use DLE.
 
 HTML snippet for lighter backgrounds:
 <p>
