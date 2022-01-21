@@ -111,23 +111,23 @@ If you are actively using DLE at work, think about where could you mention it. T
 
 HTML snippet for lighter backgrounds:
 <p>
-  <img width="400" src="https://postgres.ai/assets/powered_by_dblab_light.svg" />
+  <img width="400" src="https://postgres.ai/assets/powered-by-dle-for-light-background.svg" />
 </p>
 
 ```html
 <a href="http://databaselab.io">
-  <img width="400" src="https://postgres.ai/assets/powered_by_dblab_light.svg" />
+  <img width="400" src="https://postgres.ai/assets/powered-by-dle-for-light-background.svg" />
 </a>
 ```
 
 Fro darker backgrounds:
 <p style="background-color: #bbb">
-  <img width="400" src="https://postgres.ai/assets/powered_by_dblab_dark.svg" />
+  <img width="400" src="https://postgres.ai/assets/powered-by-dle-for-dark-background.svg" />
 </p>
 
 ```html
 <a href="http://databaselab.io">
-  <img width="400" src="https://postgres.ai/assets/powered_by_dblab_dark.svg" />
+  <img width="400" src="https://postgres.ai/assets/powered-by-dle-for-dark-background.svg" />
 </a>
 ```
 
