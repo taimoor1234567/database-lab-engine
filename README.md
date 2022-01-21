@@ -45,14 +45,14 @@
 - Provide temporary full-size database clones for SQL query analysis and optimization (see also: [SQL optimization chatbot Joe](https://gitlab.com/postgres-ai/joe)).
 - Automatically test database changes in CI/CD pipelines to avoid incidents in production.
 
-For example, cloning a 1 TiB PostgreSQL database can take less than 2 seconds and dozens of independent clones can run on a single machine without extra costs, supporting lots of development and testing activities.
+For example, cloning a 1 TiB PostgreSQL database takes ~10 seconds. Dozens of independent clones are up and running on a single machine, supporting lots of development and testing activities, not increasing costs for hardware.
 
 <p><img src="./assets/dle-demo-animated.gif" border="0" /></p>
 
 ## How it works
-Thin cloning is fast because it is based on the [CoW (Copy-on-Write)](https://en.wikipedia.org/wiki/Copy-on-write#In_computer_storage). DLE supports two technologies to enable CoW and thin cloning: [ZFS](https://en.wikipedia.org/wiki/ZFS) (default) and [LVM](https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)).
+Thin cloning is fast because it uses [Copy-on-Write (CoW)](https://en.wikipedia.org/wiki/Copy-on-write#In_computer_storage). DLE supports two technologies to enable CoW and thin cloning: [ZFS](https://en.wikipedia.org/wiki/ZFS) (default) and [LVM](https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)).
 
-With ZFS, Database Lab Engine periodically creates a new snapshot of the data directory, and maintains a set of snapshots, periodically deleting the old ones. When requesting a new clone, users choose which snapshot to use. For example, one can request to create two clones, one with a very fresh database state, and another corresponding to yesterday morning. In a few seconds, clones are created, and it immediately becomes possible to compare two database versions: data, SQL query plans, and so on.
+With ZFS, Database Lab Engine periodically creates a new snapshot of the data directory, and maintains a set of snapshots, cleaning up the old and unused ones. When requesting a new clone, users can choose which snapshot to use.
 
 Read more:
 - [How it works](https://postgres.ai/products/how-it-works)
@@ -85,7 +85,7 @@ Read more:
 - For the logical mode, partial data retrieval is supported (specific databases, specific tables).
 - For the physical level, continuously updated state is supported ("sync container") making DLE a specialized version of standby Postgres.
 - For the logical level, full periodical refresh is supported, automated and controlled by DLE. To avoid downtime, it is possible to use multiple disks containing different versions of database.
-- Fast PITR to the points available in DLE snapshots.
+- Fast Point in Time Recovery (PITR) to the points available in DLE snapshots.
 - Unused clones are automatically deleted.
 - "Deletion protection" flag can be used to block automatic or manual deletion of clones.
 - Snapshot retention policies supported in DLE configuration.
@@ -111,23 +111,23 @@ If you are actively using DLE at work, think about where could you mention it. T
 
 HTML snippet for lighter backgrounds:
 <p>
-  <img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-light-background.svg" />
+  <img width="400" src="https://postgres.ai/assets/powered_by_dblab_light.svg" />
 </p>
 
 ```html
 <a href="http://databaselab.io">
-  <img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-light-background.svg" />
+  <img width="400" src="https://postgres.ai/assets/powered_by_dblab_light.svg" />
 </a>
 ```
 
 Fro darker backgrounds:
 <p style="background-color: #bbb">
-  <img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-dark-background.svg" />
+  <img width="400" src="https://postgres.ai/assets/powered_by_dblab_dark.svg" />
 </p>
 
 ```html
 <a href="http://databaselab.io">
-  <img width="400" src="https://gitlab.com/postgres-ai/database-lab/-/raw/rework-readme/assets/powered-by-dle-for-dark-background.sgv" />
+  <img width="400" src="https://postgres.ai/assets/powered_by_dblab_dark.svg" />
 </a>
 ```
 
