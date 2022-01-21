@@ -80,13 +80,13 @@ Read more:
 - API and CLI to automate the work with DLE snapshots and clones.
 - By default, PostgreSQL containers include many popular extensions ([docs](https://postgres.ai/docs/database-lab/supported-databases#extensions-included-by-default)).
 - PostgreSQL containers can be customized ([docs](https://postgres.ai/docs/database-lab/supported-databases#how-to-add-more-extensions)).
-- Source database can be located anywhere (self-managed Postgres, AWS RDS, GCP CloudSQL, Azure, Timescale Cloud, and so on) and does NOT require any adjustments. There is NO requirements to install ZFS or Docker to the source (production) databases.
+- Source database can be located anywhere (self-managed Postgres, AWS RDS, GCP CloudSQL, Azure, Timescale Cloud, and so on) and does NOT require any adjustments. There are NO requirements to install ZFS or Docker to the source (production) databases.
 - Initial data provisioning can be at both physical (pg_basebackup, backup / archiving tools such as WAL-G or pgBackRest), or logical (dump/restore directly from the source or from files stored at AWS S3) levels.
-- For the logical mode, partial data retrieval supported (specific databases, specific tables).
+- For the logical mode, partial data retrieval is supported (specific databases, specific tables).
 - For the physical level, continuously updated state is supported ("sync container") making DLE a specialized version of standby Postgres.
 - For the logical level, full periodical refresh is supported, automated and controlled by DLE. To avoid downtime, it is possible to use multiple disks containing different versions of database.
 - Fast PITR to the points available in DLE snapshots.
-- Unuzed clones are automatically deleted.
+- Unused clones are automatically deleted.
 - "Deletion protection" flag can be used to block automatic or manual deletion of clones.
 - Snapshot retention policies supported in DLE configuration.
 - Peristent clones: clones survive DLE restarts (including full VM reboots).
@@ -107,7 +107,7 @@ The easiest way to contribute is to give the project a GitHub/GitLab star:
 ### Mention that you use DLE
 Please post a tweet mentioning [@Database_Lab](https://twitter.com/Database_Lab) or share the link to this repo in your favorite social network.
 
-If you are actively using DLE at work, think where could you mention it. The best way of mentioning is using graphics with a link. Brand assets can be found in the `./assets` folder. Feel free to put them to your documents, slide decks, application and website interfaces to show that you use DLE.
+If you are actively using DLE at work, think about where could you mention it. The best way of mentioning is using graphics with a link. Brand assets can be found in the `./assets` folder. Feel free to put them in your documents, slide decks, application and website interfaces to show that you use DLE.
 
 HTML snippet for lighter backgrounds:
 <p>
