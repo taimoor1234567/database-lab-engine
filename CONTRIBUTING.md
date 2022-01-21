@@ -33,6 +33,8 @@ These are mostly guidelines, not rules. Use your best judgment, and feel free to
 ## Code of conduct
 This project and everyone participating in it is governed by the [Database Lab Engine Community Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [community@postgres.ai](mailto:community@postgres.ai).
 
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+
 ## TL;DR – I just have a question, where to ask it?
 
 > **Note:** Please don't open an issue to just ask a question. You will get faster results by using the channels below.
