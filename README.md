@@ -46,6 +46,7 @@ Read more:
 - PostgreSQL containers can be customized ([docs](https://postgres.ai/docs/database-lab/supported-databases#how-to-add-more-extensions)).
 - Source database can be located anywhere (self-managed Postgres, AWS RDS, GCP CloudSQL, Azure, Timescale Cloud, and so on) and does NOT require any adjustments. There is NO requirements to install ZFS or Docker to the source (production) databases.
 - Initial data provisioning can be at both physical (pg_basebackup, backup / archiving tools such as WAL-G or pgBackRest), or logical (dump/restore directly from the source or from files stored at AWS S3) levels.
+- For the logical mode, partial data retrieval supported (specific databases, specific tables).
 - For the physical level, continuously updated state is supported ("sync container") making DLE a specialized version of standby Postgres.
 - For the logical level, full periodical refresh is supported, automated and controlled by DLE. To avoid downtime, it is possible to use multiple disks containing different versions of database.
 - Fast PITR to the points available in DLE snapshots.
@@ -54,11 +55,12 @@ Read more:
 - Snapshot retention policies supported in DLE configuration.
 - Peristent clones: clones survive DLE restarts (including full VM reboots).
 - The "reset" command can be used to switch to a different version of data.
-- DB Migration Checker component collects various artefacts useful for DB testing in CI ([docs](https://postgres.ai/docs/db-migration-checker))
-- SSH port forwarding for API and Postgres connections
-- Docker container config parameters can be specified in the DLE config
-- Postgres config parameters can be specified in the DLE config (separately for clones, the "sync" container, and the "promote" container)
-- 
+- DB Migration Checker component collects various artefacts useful for DB testing in CI ([docs](https://postgres.ai/docs/db-migration-checker)).
+- SSH port forwarding for API and Postgres connections.
+- Docker container config parameters can be specified in the DLE config.
+- Resource usage quotas for clones: CPU, RAM (container quotas, supported by Docker)
+- Postgres config parameters can be specified in the DLE config (separately for clones, the "sync" container, and the "promote" container).
+- Monitoring: auth-free `/healthz` API endpoint, extended `/status` (requires auth), [Netdata module](https://gitlab.com/postgres-ai/netdata_for_dle).
 
 ## How to contribute
 ### Give the project a star
