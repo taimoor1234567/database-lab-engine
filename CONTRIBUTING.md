@@ -17,11 +17,17 @@ These are mostly guidelines, not rules. Use your best judgment, and feel free to
     - [Proposing enhancements](#proposing-enhancements)
     - [Your first code contribution](#your-first-code-contribution)
     - [Merge Requests / Pull Requests](#merge-requests-pull-requests)
-- [Repo overview](#repo-overview)
-- [Styleguides](#styleguides)
+- [Development guides](#repo-overview)
     - [Git commit messages](#git-commit-messages)
     - [Go styleguide](#go-styleguide)
     - [Documentation styleguide](#documentation-styleguide)
+<!--
+- [Repo overview](#repo-overview)
+-->
+- [Development setup](#development-setup)
+<!--
+- [Building from source](#building-from-source)
+-->
 
 ---
 
@@ -85,9 +91,6 @@ Additional materials that are worth checking out:
 - [Git-related guidelines in the PostgreSQL project](https://wiki.postgresql.org/wiki/Working_with_Git)
 - [GitLab flow](https://docs.gitlab.com/ee/topics/gitlab_flow.html)
 
-## Repo overview
-TBD
-
 ## Styleguides
 ### Git commit messages
 - Think about other people, how likely they will understand you?
@@ -108,7 +111,6 @@ Please read [Effective Go](https://go.dev/doc/effective_go) and follow the princ
 ### Documentation styleguide
 Documentation for Database Lab Engine and additional component is hosted at https://postgres.ai/docs and is maintained in this GitLab repo: https://gitlab.com/postgres-ai/docs.
 
-#### Documentation principles
 We're building documentation following the principles described at https://documentation.divio.com/:
 
 > There is a secret that needs to be understood in order to write good software documentation: there isn’t one thing called documentation, there are four.
@@ -116,3 +118,55 @@ We're building documentation following the principles described at https://docum
 > They are: tutorials, how-to guides, technical reference and explanation. They represent four different purposes or functions, and require four different approaches to their creation. Understanding the implications of this will help improve most documentation - often immensely.
 
 Learn more: https://documentation.divio.com/.
+
+<!--
+### Repo overview
+TBD
+-->
+
+### Development setup
+- Install Docker. Example for Linux:
+    ```bash
+    # Install dependencies
+    sudo apt-get update && sudo apt-get install -y \
+      apt-transport-https \
+      ca-certificates \
+      curl \
+      gnupg-agent \
+      software-properties-common
+    # Install Docker
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+    sudo add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+      $(lsb_release -cs) \
+      stable"
+
+    sudo apt-get update && sudo apt-get install -y \
+      docker-ce \
+      docker-ce-cli \
+      containerd.io
+    ```
+- Install ZFS and create zpool. Example for Linux:
+    ```bash
+    # Install ZFS
+    sudo apt-get install -y zfsutils-linux
+
+    sudo zpool create -f \
+      -O compression=on \
+      -O atime=off \
+      -O recordsize=128k \
+      -O logbias=throughput \
+      -m /var/lib/dblab/dblab_pool \
+      dblab_pool \
+      "/dev/nvme1n1" # ! check your device or use an empty file here;
+                     # empty file creation example: truncate --size 10GB ./pseudo-disk-for-zfs
+    ```
+- Install `golangci-lint`: https://github.com/golangci/golangci-lint#install
+
+<!-- TODO: Linux specific requirements? MacOS specific? -->
+
+<!--
+### Building from source
+TBD – separately for Linux and MacOS
+-->
