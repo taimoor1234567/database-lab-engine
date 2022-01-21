@@ -16,6 +16,7 @@ These are mostly guidelines, not rules. Use your best judgment, and feel free to
     - [Reporting bugs](#reporting-bugs)
     - [Proposing enhancements](#proposing-enhancements)
     - [Your first code contribution](#your-first-code-contribution)
+    - [Roadmap](#roadmap)
     - [Merge Requests / Pull Requests](#merge-requests-pull-requests)
 - [Development guides](#repo-overview)
     - [Git commit messages](#git-commit-messages)
