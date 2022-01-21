@@ -9,8 +9,8 @@
 </div>
 
 <div align="center">
-  <strong>:zap: Open source technology for blazing-fast cloning of PostgreSQL databases :elephant:</strong><br>
-  DLE provides an easy way to work with thin clones of PostgreSQL to build powerful development, test, QA, staging environments.<br>
+  <strong>:zap: Blazing-fast cloning of PostgreSQL databases :elephant:</strong><br>
+  Thin clones of PostgreSQL to build powerful development, test, QA, staging environments.<br>
   <sub>Available for any PostgreSQL, including AWS RDS, GCP CloudSQL, Heroku, Digital Ocean, and self-managed instances.</sub>
 </div>
 
