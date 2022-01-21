@@ -38,6 +38,7 @@
 
 <br />
 
+## Why DLE?
 - Build dev/QA/staging environments based on full-size production-like databases.
 - Provide temporary full-size database clones for SQL query analysis and optimization (see also: [SQL optimization chatbot Joe](https://gitlab.com/postgres-ai/joe)).
 - Automatically test database changes in CI/CD pipelines to avoid incidents in production.
