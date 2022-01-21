@@ -31,9 +31,9 @@ These are mostly guidelines, not rules. Use your best judgment, and feel free to
 ---
 
 ## Code of conduct
-This project and everyone participating in it is governed by the [Database Lab Engine Community Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [community@postgres.ai](mailto:community@postgres.ai).
+This project and everyone participating in it is governed by the [Database Lab Engine Community Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [community@postgres.ai](mailto:community@postgres.ai).
 
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](./CODE_OF_CONDUCT.md)
 
 ## TL;DR – I just have a question, where to ask it?
 
@@ -55,6 +55,7 @@ This project and everyone participating in it is governed by the [Database Lab E
 - Check if you have some sensitive information in the logs and configs and remove, if any.
 - You can submit a bug report in either [GitLab Issues](https://gitlab.com/postgres-ai/database-lab) or [GitHub Issues](https://github.com/postgres-ai/database-lab-engine) sections – both places are monitored.
 - If you believe that there is an urgency related to the reported bug, feel free to reach out to the project maintainers additionally, using one of [the channels described above](#tldr-i-just-have-a-question-where-to-ask-it).
+- If you need to report a security issue, follow instructions in ["Database Lab Engine security guidelines"](./SECURITY.md).
 
 ### Proposing enhancements
 This section guides you through submitting an enhancement suggestion for DLE, including completely new features and minor improvements to existing functionality. Following these guidelines helps maintainers and the community understand your suggestion and find related proposals.

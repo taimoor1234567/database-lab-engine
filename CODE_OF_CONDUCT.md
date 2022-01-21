@@ -1,4 +1,4 @@
-# Database Lab Community Covenant Code of Conduct
+# Database Lab Engine Community Covenant Code of Conduct
 
 ## Our Pledge
 

@@ -100,9 +100,13 @@ DLE source code is licensed under the OSI-approved open source license GNU Affer
 
 Reach out to the Postgres.ai team if you want a trial or commercial license that does not contain the GPL clauses: [Contact page](https://postgres.ai/contact).
 
-## Where to get help
-- [Contact page](https://postgres.ai/contact)
+## Community & Support
+- ["Database Lab Engine Community Covenant Code of Conduct"](./CODE_OF_CONDUCT.md)
+- Where to get help: [Contact page](https://postgres.ai/contact)
 - [Community Slack](https://slack.postgres.ai)
+- If you need to report a security issue, follow instructions in ["Database Lab Engine security guidelines"](./SECURITY.md).
+
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](./CODE_OF_CONDUCT.md)
 
 <!-- 
 ## Translations
