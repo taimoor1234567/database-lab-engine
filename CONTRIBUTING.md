@@ -67,7 +67,7 @@ Enhancement suggestions are tracked on [GitLab](https://gitlab.com/postgres-ai/d
 - Use a clear and descriptive title for the issue to identify the suggestion.
 - Provide a step-by-step description of the proposed enhancement in as many details as possible.
 - Provide specific examples to demonstrate the steps. Include copy/pasteable snippets which you use in those examples
-- Use Markdown to format code snippets and improve the overall look of your ussues (Markdown docs: [GitLab](https://docs.gitlab.com/ee/user/markdown.html), [GitHub](https://github.github.com/gfm/)).
+- Use Markdown to format code snippets and improve the overall look of your issues (Markdown docs: [GitLab](https://docs.gitlab.com/ee/user/markdown.html), [GitHub](https://github.github.com/gfm/)).
 - Describe the current behavior and explain which behavior you expected to see instead and why.
 - If your proposal is related to UI, include screenshots and animated GIFs which help you demonstrate the steps or point out the part of DLE which the suggestion is related to. Please, do NOT use screenshots for console output, logs, configs.
 - Explain why this proposal would be useful to most DLE users.
