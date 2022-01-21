@@ -34,9 +34,31 @@ Read more:
 - GitLab: [How GitLab iterates on SQL performance optimization workflow to reduce downtime risks](https://postgres.ai/resources/case-studies/gitlab)
 
 ## Features
-- Blazing-fast cloning of Postgres databases – a few seconds to create a new clone ready to accept connections and queries, regardless of the database size
-- The theoretical maximum number of snapshots and clones is 2<sup>64</sup> (if ZFS is used).
-- Maximum size of PostgreSQL data directory: 256 quadrillion zebibytes (2<sup>128</sup> bytes)
+- Blazing-fast cloning of Postgres databases – a few seconds to create a new clone ready to accept connections and queries, regardless of the database size.
+- The theoretical maximum number of snapshots and clones is 2<sup>64</sup> ([ZFS](https://en.wikipedia.org/wiki/ZFS), default).
+- Maximum size of PostgreSQL data directory: 256 quadrillion zebibytes, or 2<sup>128</sup> bytes ([ZFS](https://en.wikipedia.org/wiki/ZFS), default).
+- PostgreSQL major versions supported: 9.6–14.
+- Two technologies supported to enable thin cloning ([CoW](https://en.wikipedia.org/wiki/Copy-on-write)): [ZFS](https://en.wikipedia.org/wiki/ZFS) and [LVM](https://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)).
+- All components are packaged in Docker containers.
+- UI to make manual work more convenient.
+- API and CLI to automate the work with DLE snapshots and clones.
+- By default, PostgreSQL containers include many popular extensions ([docs](https://postgres.ai/docs/database-lab/supported-databases#extensions-included-by-default)).
+- PostgreSQL containers can be customized ([docs](https://postgres.ai/docs/database-lab/supported-databases#how-to-add-more-extensions)).
+- Source database can be located anywhere (self-managed Postgres, AWS RDS, GCP CloudSQL, Azure, Timescale Cloud, and so on) and does NOT require any adjustments. There is NO requirements to install ZFS or Docker to the source (production) databases.
+- Initial data provisioning can be at both physical (pg_basebackup, backup / archiving tools such as WAL-G or pgBackRest), or logical (dump/restore directly from the source or from files stored at AWS S3) levels.
+- For the physical level, continuously updated state is supported ("sync container") making DLE a specialized version of standby Postgres.
+- For the logical level, full periodical refresh is supported, automated and controlled by DLE. To avoid downtime, it is possible to use multiple disks containing different versions of database.
+- Fast PITR to the points available in DLE snapshots.
+- Unuzed clones are automatically deleted.
+- "Deletion protection" flag can be used to block automatic or manual deletion of clones.
+- Snapshot retention policies supported in DLE configuration.
+- Peristent clones: clones survive DLE restarts (including full VM reboots).
+- The "reset" command can be used to switch to a different version of data.
+- DB Migration Checker component collects various artefacts useful for DB testing in CI ([docs](https://postgres.ai/docs/db-migration-checker))
+- SSH port forwarding for API and Postgres connections
+- Docker container config parameters can be specified in the DLE config
+- Postgres config parameters can be specified in the DLE config (separately for clones, the "sync" container, and the "promote" container)
+- 
 
 ## How to contribute
 ### Give the project a star
