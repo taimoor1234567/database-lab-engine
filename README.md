@@ -3,6 +3,13 @@
 ---
 
 # Database Lab Engine (DLE)
+
+<a href="https://postgres.ai"><img src="https://img.shields.io/badge/Postgres-AI-orange.svg?style=flat"></a>
+
+[![Latest release](https://img.shields.io/github/v/release/postgres-ai/database-lab-engine)](https://github.com/postgres-ai/database-lab-engine/releases/latest)
+
+<a href="https://slack.postgres.ai"><img src="https://img.shields.io/badge/chat-slack-blue.svg?logo=slack&style=flat"></a>
+
 Database Lab Engine (DLE) is an open source technology that allows blazing-fast cloning of Postgres databases:
 
 - Build dev/QA/staging environments based on full-size production-like databases.
@@ -133,6 +140,8 @@ Reach out to the Postgres.ai team if you want a trial or commercial license that
 - If you need to report a security issue, follow instructions in ["Database Lab Engine security guidelines"](./SECURITY.md).
 
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](./CODE_OF_CONDUCT.md)
+
+
 
 <!-- 
 ## Translations
