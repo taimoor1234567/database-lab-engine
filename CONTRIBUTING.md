@@ -21,12 +21,10 @@ These are mostly guidelines, not rules. Use your best judgment, and feel free to
     - [Git commit messages](#git-commit-messages)
     - [Go styleguide](#go-styleguide)
     - [Documentation styleguide](#documentation-styleguide)
-<!--
-- [Repo overview](#repo-overview)
--->
     - [Development setup](#development-setup)
 <!--
-- [Building from source](#building-from-source)
+    - [Repo overview](#repo-overview)
+    - [Building from source](#building-from-source)
 -->
 
 ---
