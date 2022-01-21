@@ -31,10 +31,10 @@
     <a href="https://postgres.ai/docs">
       Documentation
     </a>
+    <span> | </span>
     <a href="https://postgres.ai/blog/tags/database-lab-engine">
       Blog
     </a>
-    <span> | </span>
     <span> | </span>
     <a href="#community-support">
       Community
