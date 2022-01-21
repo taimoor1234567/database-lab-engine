@@ -1,4 +1,4 @@
-<p align="center"><img width="500" src="./assets/dle.svg" border="0" /></p>
+<div align="center"><img width="500" src="./assets/dle.svg" border="0" /></div>
 
 <h1 align="center">Database Lab Engine (DLE)</h1>
 
