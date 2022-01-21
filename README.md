@@ -4,9 +4,9 @@
 
 # Database Lab Engine (DLE)
 
-<a href="https://postgres.ai"><img src="https://img.shields.io/badge/Postgres-AI-orange.svg?style=flat"></a>&nbsp;&nbsp;&nbsp;&nbsp;[![Latest release](https://img.shields.io/github/v/release/postgres-ai/database-lab-engine?color=orange)](https://github.com/postgres-ai/database-lab-engine/releases/latest)
+<a href="https://postgres.ai"><img src="https://img.shields.io/badge/Postgres-AI-orange.svg?style=flat"></a>&nbsp;&nbsp;[![Latest release](https://img.shields.io/github/v/release/postgres-ai/database-lab-engine?color=orange)](https://github.com/postgres-ai/database-lab-engine/releases/latest)
 
-<a href="https://slack.postgres.ai"><img src="https://img.shields.io/badge/chat-slack-blue.svg?logo=slack&style=flat"></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://twitter.com/intent/follow?screen_name=Database_lab"><img src="https://img.shields.io/badge/Follow-Database_Lab-blue.svg?style=flat&logo=twitter&logoColor=white"></a>
+<a href="https://slack.postgres.ai"><img src="https://img.shields.io/badge/chat-slack-blue.svg?logo=slack&style=flat"></a>&nbsp;&nbsp;<a href="https://twitter.com/intent/follow?screen_name=Database_lab"><img src="https://img.shields.io/badge/Follow-Database_Lab-blue.svg?style=flat&logo=twitter&logoColor=white"></a>
 
 
 Database Lab Engine (DLE) is an open source technology that allows blazing-fast cloning of Postgres databases:
