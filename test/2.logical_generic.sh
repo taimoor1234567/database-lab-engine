@@ -12,7 +12,7 @@ export SOURCE_PORT="${SOURCE_PORT:-7432}"
 export SOURCE_USERNAME="${SOURCE_USERNAME:-postgres}"
 export SOURCE_PASSWORD="${SOURCE_PASSWORD:-secretpassword}"
 export POSTGRES_VERSION="${POSTGRES_VERSION:-13}"
-export DLE_TEST_MOUNT_DIR="/var/lib/test/dblab"
+export DLE_TEST_MOUNT_DIR="/var/lib/test/dblab_mount"
 export DLE_TEST_POOL_NAME="test_dblab_pool"
 export DLE_SERVER_PORT=${DLE_SERVER_PORT:-12345}
 export DLE_PORT_POOL_FROM=${DLE_PORT_POOL_FROM:-9000}
@@ -23,13 +23,13 @@ DIR=${0%/*}
 if [[ "${SOURCE_HOST}" = "172.17.0.1" ]]; then
 ### Step 0. Create source database
   TMP_DATA_DIR="/tmp/dle_test/logical_generic"
-  cleanup_testdata_dir() {
-    sudo rm -rf "${TMP_DATA_DIR}"/postgresql/"${POSTGRES_VERSION}"/test || true
-  }
-
-  trap cleanup_testdata_dir EXIT
-
-  cleanup_testdata_dir
+#  cleanup_testdata_dir() {
+#    sudo rm -rf "${TMP_DATA_DIR}"/postgresql/"${POSTGRES_VERSION}"/test || true
+#  }
+#
+#  trap cleanup_testdata_dir EXIT
+#
+#  cleanup_testdata_dir
   sudo docker rm postgres"${POSTGRES_VERSION}" || true
 
   sudo docker run \
