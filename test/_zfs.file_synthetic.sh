@@ -3,7 +3,7 @@ set -euxo pipefail
 
 DLE_TEST_MOUNT_DIR="/var/lib/test/dblab_synthetic"
 DLE_TEST_POOL_NAME="test_dblab_pool_synthetic"
-ZFS_FILE="$(pwd)/zfs_file"
+ZFS_FILE="$(pwd)/zfs_file_synth"
 
 # If previous run was interrupted without cleanup,
 # test_dblab_pool and $ZFS_FILE are still here. Cleanup.
