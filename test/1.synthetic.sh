@@ -109,7 +109,6 @@ sudo docker run \
   --privileged \
   --publish ${DLE_SERVER_PORT}:${DLE_SERVER_PORT} \
   --volume /var/run/docker.sock:/var/run/docker.sock \
-#  --volume ${SYNTHETIC_DATA_DIR}/${DLE_TEST_POOL_NAME}/dump:${SYNTHETIC_DATA_DIR}/${DLE_TEST_POOL_NAME}/dump \
   --volume ${SYNTHETIC_DATA_DIR}:${SYNTHETIC_DATA_DIR}/:rshared \
   --volume "${configDir}":/home/dblab/configs:ro \
   --volume "${metaDir}":/home/dblab/meta \
