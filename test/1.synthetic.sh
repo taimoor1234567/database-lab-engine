@@ -10,14 +10,14 @@ export POSTGRES_VERSION="${POSTGRES_VERSION:-13}"
 export DLE_SERVER_PORT=${DLE_SERVER_PORT:-12345}
 export DLE_PORT_POOL_FROM=${DLE_PORT_POOL_FROM:-9000}
 export DLE_PORT_POOL_TO=${DLE_PORT_POOL_TO:-9100}
-export DLE_TEST_MOUNT_DIR="/var/lib/test/dblab"
+export DLE_TEST_MOUNT_DIR="/var/lib/test/dblab_synthetic"
 export DLE_TEST_POOL_NAME="test_dblab_pool"
 
 DIR=${0%/*}
 
 ### Step 1. Prepare a machine with disk, Docker, and ZFS
 source "${DIR}/_prerequisites.ubuntu.sh"
-source "${DIR}/_zfs.file.sh"
+source "${DIR}/_zfs.file_synthetic.sh"
 
 
 ### Step 2. Configure and launch the Database Lab Engine
@@ -216,4 +216,4 @@ dblab clone list
 sudo docker stop ${DLE_SERVER_NAME}
 
 ### Finish. clean up
-source "${DIR}/_cleanup.sh"
+source "${DIR}/_cleanup_synthetic.sh"
